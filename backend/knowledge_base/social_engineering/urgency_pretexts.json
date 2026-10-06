@@ -1,0 +1,12 @@
+{
+  "id": "KB-SOC-01",
+  "technique": "T1566",
+  "name": "Coercive Psychological Urgency Pretexts",
+  "category": "Social Engineering",
+  "description": "Exploitation of acute fear, authority, or financial panic to compel rushed compliance without verifying authenticity.",
+  "detection_signals": [
+    "Phrases: '24 hours remaining', 'immediate suspension', 'data scheduled for deletion'",
+    "Penalties threatened for failure to act immediately",
+    "Artificial countdown clocks in email bodies"
+  ]
+}

@@ -1,0 +1,36 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# SQLite databases
+*.db
+*.sqlite3
+
+# Environment variables & secrets
+.env
+.env.local
+.env.*.local
+
+# Vector database storage
+chroma_db/
+.chroma/
+
+# Logs & test caches
+*.log
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo

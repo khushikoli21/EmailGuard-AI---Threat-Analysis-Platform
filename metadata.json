@@ -1,0 +1,6 @@
+{
+  "name": "EmailGuard AI - Threat Analysis Platform",
+  "description": "AI-Powered Intelligent Email Threat Detection & Security Analysis Platform with evidence-grounded threat reports and SOC dashboard.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

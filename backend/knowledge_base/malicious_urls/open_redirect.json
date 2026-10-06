@@ -1,0 +1,12 @@
+{
+  "id": "KB-URL-01",
+  "technique": "T1204.001",
+  "name": "Open Redirect Abuse and Multi-Stage Forwarders",
+  "category": "Malicious URLs",
+  "description": "Adversaries abuse legitimate domain redirection endpoints (?url=, ?redirect=) to bypass gateway link analysis before victims land on weaponized phishing portals.",
+  "detection_signals": [
+    "URL parameters embedding secondary external target domains",
+    "URL shortener chains hiding destination endpoints",
+    "Anchor text discrepancy between visible text and actual href destination"
+  ]
+}

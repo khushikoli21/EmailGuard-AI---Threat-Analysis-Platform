@@ -1,0 +1,13 @@
+{
+  "id": "KB-BEC-01",
+  "technique": "T1566.001",
+  "name": "Executive Pretext & Wire Fraud (CEO Fraud)",
+  "category": "Business Email Compromise",
+  "description": "Adversaries impersonate C-level executives or legal counsel requesting immediate wire transfers or payroll account changes while suppressing telephone verification.",
+  "detection_signals": [
+    "Authority pressure tone",
+    "Pretext of airborne transit or urgent conference",
+    "Specific financial sums with rigid intraday cutoffs",
+    "External lookalike or freemail origin"
+  ]
+}

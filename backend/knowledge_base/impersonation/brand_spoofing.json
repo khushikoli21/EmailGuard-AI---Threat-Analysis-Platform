@@ -1,0 +1,12 @@
+{
+  "id": "KB-IMP-01",
+  "technique": "T1566",
+  "name": "Brand Spoofing and Display Name Manipulation",
+  "category": "Impersonation",
+  "description": "Adversaries craft display names matching trusted organizations (QuickBooks, Bank of America, GitHub) while SMTP envelope addresses originate from unrelated domains.",
+  "detection_signals": [
+    "From display name claims authoritative brand",
+    "SMTP envelope RFC 5322 address does not match brand MX records",
+    "Generic freemail or newly purchased TLD (.biz, .xyz)"
+  ]
+}
