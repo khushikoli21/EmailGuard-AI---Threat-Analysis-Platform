@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 import {
   ArrowLeft,
   Star,
@@ -18,6 +19,11 @@ import {
   Info,
   Clock,
   Terminal,
+  Activity,
+  ChevronDown,
+  ChevronUp,
+  Globe2,
+  Database,
 } from 'lucide-react';
 import { EmailRecord, ThreatReportPayload, analyzeEmail, fetchReport } from '../../services/api';
 
@@ -40,6 +46,7 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [loadingReport, setLoadingReport] = useState(false);
   const [analysisStep, setAnalysisStep] = useState(0);
+  const [showAuditTrail, setShowAuditTrail] = useState(false);
 
   // Load existing report if email has one
   useEffect(() => {
@@ -153,9 +160,16 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
         {/* Email Header */}
         <div className="space-y-4 pb-4 border-b border-slate-200">
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-              {email.subject}
-            </h1>
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                {email.subject}
+              </h1>
+              {email.isDevelopmentSample && (
+                <span className="text-[10px] font-mono font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded uppercase tracking-wider">
+                  Development Sample Data
+                </span>
+              )}
+            </div>
             <span className="text-xs font-mono text-slate-500 shrink-0">
               {new Date(email.receivedAt).toLocaleString()}
             </span>
@@ -337,28 +351,147 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
               </div>
             )}
 
-            {/* Evidence List */}
+            {/* Threat Intelligence (VirusTotal & urlscan.io) */}
+            {reportData.threatIntel && reportData.threatIntel.length > 0 && (
+              <div className="space-y-2 pt-1">
+                <div className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Globe2 className="w-4 h-4 text-blue-600" />
+                    <span>External Threat Intelligence ({reportData.threatIntel.length})</span>
+                  </span>
+                  <span className="text-[11px] font-mono text-slate-400">VirusTotal · urlscan.io</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {reportData.threatIntel.map((ti) => (
+                    <div
+                      key={ti.id}
+                      className="p-3 rounded-lg border border-slate-200 bg-white space-y-1.5 text-xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-slate-800">{ti.provider}</span>
+                        <span
+                          className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded border ${
+                            ti.malicious
+                              ? 'bg-rose-50 text-rose-700 border-rose-300'
+                              : ti.suspicious
+                              ? 'bg-amber-50 text-amber-700 border-amber-300'
+                              : ti.status === 'completed'
+                              ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
+                              : 'bg-slate-100 text-slate-600 border-slate-200'
+                          }`}
+                        >
+                          {ti.malicious ? 'MALICIOUS' : ti.status.toUpperCase()}
+                        </span>
+                      </div>
+                      <div className="font-mono text-[11px] text-slate-500 truncate" title={ti.url}>
+                        {ti.url}
+                      </div>
+                      <p className="text-[11px] text-slate-700 leading-normal">
+                        {ti.reputation || 'No reputation data'}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Evidence & Grounding List */}
             {reportData.evidence && reportData.evidence.length > 0 && (
               <div className="space-y-2 pt-1">
-                <div className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  Evidence & Traceability Grounding
+                <div className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <Database className="w-4 h-4 text-purple-600" />
+                    <span>Traceable Knowledge Base Grounding ({reportData.evidence.length})</span>
+                  </span>
+                  <span className="text-[11px] font-mono text-purple-600">MITRE ATT&CK · OWASP</span>
                 </div>
                 <div className="space-y-1.5">
                   {reportData.evidence.map((ev) => (
                     <div
                       key={ev.id}
-                      className="p-2.5 rounded-lg border border-slate-200 bg-slate-50 text-xs flex items-start justify-between gap-3"
+                      className="p-3 rounded-lg border border-slate-200 bg-slate-50 text-xs flex items-start justify-between gap-3"
                     >
-                      <div className="space-y-0.5">
-                        <span className="font-semibold text-slate-800 block">{ev.title}</span>
-                        <p className="text-[11px] text-slate-600">{ev.description}</p>
+                      <div className="space-y-0.5 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-slate-800">{ev.title}</span>
+                          {ev.relevanceScore !== undefined && (
+                            <span className="text-[10px] font-mono text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200 shrink-0">
+                              {Math.round(ev.relevanceScore * 100)}% match
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-slate-600 leading-relaxed">{ev.description}</p>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200 shrink-0">
-                        {ev.source}
-                      </span>
+                      <div className="shrink-0 text-right space-y-1">
+                        <span className="text-[10px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200 block">
+                          {ev.source}
+                        </span>
+                        {ev.sourceUrl && (
+                          <a
+                            href={ev.sourceUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-800 font-semibold"
+                          >
+                            <span>Reference</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {/* Analysis Pipeline Audit Trail (Collapsible) */}
+            {reportData.pipelineLogs && reportData.pipelineLogs.length > 0 && (
+              <div className="pt-2 border-t border-slate-100 space-y-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAuditTrail(!showAuditTrail)}
+                  className="w-full flex items-center justify-between text-xs font-bold text-slate-700 hover:text-slate-900 cursor-pointer py-1"
+                >
+                  <span className="flex items-center gap-1.5">
+                    <Activity className="w-4 h-4 text-blue-600" />
+                    <span>Analysis Pipeline Audit Trail ({reportData.pipelineLogs.length} stages)</span>
+                  </span>
+                  <span className="flex items-center gap-1 text-slate-500 text-[11px]">
+                    <span>{showAuditTrail ? 'Hide Log' : 'Show Execution Log'}</span>
+                    {showAuditTrail ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                  </span>
+                </button>
+
+                {showAuditTrail && (
+                  <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100 text-xs bg-slate-50">
+                    {reportData.pipelineLogs.map((log) => (
+                      <div key={log.id} className="p-2.5 flex items-start justify-between gap-2">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-slate-800 text-[11px]">
+                              {log.component}
+                            </span>
+                            <span
+                              className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded ${
+                                log.status === 'completed'
+                                  ? 'bg-emerald-100 text-emerald-800'
+                                  : log.status === 'unavailable'
+                                  ? 'bg-amber-100 text-amber-800'
+                                  : 'bg-rose-100 text-rose-800'
+                              }`}
+                            >
+                              {log.status}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-600">{log.message || log.error || 'Done'}</p>
+                        </div>
+                        <span className="font-mono text-[10px] text-slate-400 shrink-0">
+                          {log.durationMs} ms
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -368,11 +501,26 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
         <div className="space-y-2 pt-2">
           <div className="flex items-center justify-between text-xs text-slate-500">
             <span className="font-bold uppercase tracking-wider text-slate-400">Message Body</span>
-            <span className="font-mono text-[11px]">Sanitized Plaintext Viewport</span>
+            <span className="font-mono text-[11px] text-emerald-600 flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Sanitized HTML & Plaintext Viewport (DOMPurify XSS-Protected)</span>
+            </span>
           </div>
 
-          <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-sans text-slate-800 whitespace-pre-wrap leading-relaxed select-text">
-            {email.body}
+          <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-sans text-slate-800 select-text leading-relaxed">
+            {/<[a-z][\s\S]*>/i.test(email.body) ? (
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(email.body, {
+                    FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
+                    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
+                  }),
+                }}
+                className="prose prose-sm max-w-none text-slate-800 font-sans"
+              />
+            ) : (
+              <div className="whitespace-pre-wrap">{email.body}</div>
+            )}
           </div>
         </div>
 

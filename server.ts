@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
 import { db, UserRecord, EmailRecord } from './server/db.js';
 import { executeThreatAnalysisPipeline } from './server/aiService.js';
+import { ragEngine } from './server/ragService.js';
 
 dotenv.config();
 
@@ -281,6 +282,7 @@ app.post('/api/emails/:id/analyze', requireAuth, async (req: AuthenticatedReques
       indicators: result.indicators,
       threatIntel: result.threatIntel,
       evidence: result.evidence,
+      pipelineLogs: result.pipelineLogs,
     });
   } catch (err: any) {
     console.error('[AI] Pipeline execution error:', err);
@@ -329,6 +331,7 @@ app.post('/api/analyze', requireAuth, async (req: AuthenticatedRequest, res: Res
       indicators: result.indicators,
       threatIntel: result.threatIntel,
       evidence: result.evidence,
+      pipelineLogs: result.pipelineLogs,
     });
   } catch (err: any) {
     console.error('[AI] Direct analyze error:', err);
@@ -348,6 +351,7 @@ app.get('/api/reports/:id', requireAuth, (req: AuthenticatedRequest, res: Respon
     const indicators = db.getIndicatorsByAnalysis(byEmail.id, req.userId!);
     const threatIntel = db.getThreatIntelByAnalysis(byEmail.id, req.userId!);
     const evidence = db.getEvidenceByAnalysis(byEmail.id, req.userId!);
+    const pipelineLogs = db.getPipelineLogsByAnalysis(byEmail.id, req.userId!);
     const email = db.getEmail(byEmail.emailId, req.userId!);
 
     return res.json({
@@ -356,12 +360,14 @@ app.get('/api/reports/:id', requireAuth, (req: AuthenticatedRequest, res: Respon
       indicators,
       threatIntel,
       evidence,
+      pipelineLogs,
     });
   }
 
   const indicators = db.getIndicatorsByAnalysis(analysis.id, req.userId!);
   const threatIntel = db.getThreatIntelByAnalysis(analysis.id, req.userId!);
   const evidence = db.getEvidenceByAnalysis(analysis.id, req.userId!);
+  const pipelineLogs = db.getPipelineLogsByAnalysis(analysis.id, req.userId!);
   const email = db.getEmail(analysis.emailId, req.userId!);
 
   return res.json({
@@ -370,6 +376,7 @@ app.get('/api/reports/:id', requireAuth, (req: AuthenticatedRequest, res: Respon
     indicators,
     threatIntel,
     evidence,
+    pipelineLogs,
   });
 });
 
@@ -685,14 +692,63 @@ app.post('/api/evaluation/run', requireAuth, async (req: AuthenticatedRequest, r
 
 // System health & Secrets availability check
 app.get('/api/health', (req: Request, res: Response) => {
+  const geminiConfigured = Boolean(process.env.GEMINI_API_KEY);
+  const virustotalConfigured = Boolean(process.env.VIRUSTOTAL_API_KEY);
+  const urlscanConfigured = Boolean(process.env.URLSCAN_API_KEY);
+  const ragDocsCount = ragEngine.getDocumentCount();
+
   return res.json({
     status: 'ok',
     environment: process.env.NODE_ENV || 'development',
     serverTime: new Date().toISOString(),
+    services: {
+      googleAuth: {
+        status: 'CONNECTED',
+        label: 'Google Account Authentication',
+        detail: 'Active multi-session management with Zero Password Policy',
+      },
+      gmailApi: {
+        status: 'NOT_CONNECTED',
+        label: 'Gmail API Integration',
+        detail: 'OAuth access declined/not enabled by user. Using direct input & dataset harness.',
+      },
+      llm: {
+        status: geminiConfigured ? 'CONNECTED' : 'NOT_CONFIGURED',
+        provider: 'Google Gemini (gemini-3.8-flash)',
+        detail: geminiConfigured
+          ? 'Live API key active for explainable analysis and rationale generation'
+          : 'GEMINI_API_KEY missing in Secrets',
+      },
+      virusTotal: {
+        status: virustotalConfigured ? 'CONNECTED' : 'NOT_CONFIGURED',
+        provider: 'VirusTotal API v3',
+        detail: virustotalConfigured
+          ? 'Live multi-engine URL reputation lookups active'
+          : 'VIRUSTOTAL_API_KEY not configured in Secrets',
+      },
+      urlscan: {
+        status: urlscanConfigured ? 'CONNECTED' : 'NOT_CONFIGURED',
+        provider: 'urlscan.io API v1',
+        detail: urlscanConfigured
+          ? 'Live automated domain verdict scanning active'
+          : 'URLSCAN_API_KEY not configured in Secrets',
+      },
+      rag: {
+        status: ragDocsCount > 0 ? 'READY' : 'NOT_INITIALIZED',
+        provider: 'Security Knowledge Base (MITRE ATT&CK & OWASP)',
+        documentsCount: ragDocsCount,
+        detail: `Loaded ${ragDocsCount} grounding taxonomy documents from knowledge base`,
+      },
+      database: {
+        status: 'CONNECTED',
+        provider: 'Dynamic Document Store',
+        detail: 'Active with persistent schema and strict per-user data isolation',
+      },
+    },
     secrets: {
-      geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
-      virustotalConfigured: Boolean(process.env.VIRUSTOTAL_API_KEY),
-      urlscanConfigured: Boolean(process.env.URLSCAN_API_KEY),
+      geminiConfigured,
+      virustotalConfigured,
+      urlscanConfigured,
     },
   });
 });

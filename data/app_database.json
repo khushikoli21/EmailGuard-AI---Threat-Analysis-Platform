@@ -356,6 +356,25 @@
       "riskScore": 85,
       "riskLevel": "Critical",
       "promptInjectionSuspected": false
+    },
+    "20844019-9440-4223-9968-d485998612f4": {
+      "id": "20844019-9440-4223-9968-d485998612f4",
+      "userId": "test_user_alice_1791324621316",
+      "senderName": "Alice Colleague",
+      "senderEmail": "alice@lab.org",
+      "recipientEmail": "alice@organization.edu",
+      "subject": "Internal Lab Meeting Notes",
+      "body": "Notes from today’s research sync.",
+      "receivedAt": "2026-10-06T22:10:21.316Z",
+      "source": "manual",
+      "hasUrls": false,
+      "hasAttachments": false,
+      "attachmentInfo": [],
+      "urls": [],
+      "createdAt": "2026-10-06T22:10:21.316Z",
+      "isStarred": false,
+      "isRead": true,
+      "folder": "inbox"
     }
   },
   "analyses": {
@@ -600,6 +619,67 @@
       "status": "completed",
       "createdAt": "2026-10-06T21:47:02.149Z",
       "completedAt": "2026-10-06T21:47:02.149Z"
+    },
+    "caee92c2-692a-43cb-bd7e-be36a31d6b88": {
+      "id": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "userId": "test_user_alice_1791324621316",
+      "emailId": "fffcd487-2aba-4018-882a-f1a18bea971b",
+      "classification": "Phishing",
+      "riskScore": 88,
+      "riskLevel": "Critical",
+      "confidence": 84,
+      "explanation": "This email is classified as Phishing because it contains adversarial prompt injection sequences specifically crafted to bypass and manipulate AI orchestration systems. The subject line and sender domain further indicate an explicit, malicious intent to override system directives. Such behavior poses an immediate integrity and security risk to automated processing pipelines.",
+      "recommendedAction": "Quarantine the email immediately, blacklist the sender domain (malicious.io) at the email gateway, and review orchestrator processing logs to ensure no prompt injection payload was executed.",
+      "promptInjectionSuspected": true,
+      "promptInjectionDetails": "Adversarial sequence matched: \"Ignore all previous instructions\"",
+      "status": "completed",
+      "createdAt": "2026-10-06T22:10:21.319Z",
+      "completedAt": "2026-10-06T22:10:21.319Z"
+    },
+    "2f13d8d0-a3db-4dab-9242-b285aaa47f59": {
+      "id": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "userId": "test_user_alice_1791324621316",
+      "emailId": "b00ea674-d029-459a-9199-8504de31eaa4",
+      "classification": "Phishing",
+      "riskScore": 85,
+      "riskLevel": "Critical",
+      "confidence": 96,
+      "explanation": "This email is classified as Phishing because it contains verified threat indicators: Display Name / Origin Domain Mismatch, Coercive Urgency Language, Credential Solicitation Pattern.",
+      "recommendedAction": "Do not click the link or enter credentials. Report this email to your security operations team.",
+      "promptInjectionSuspected": false,
+      "status": "completed",
+      "createdAt": "2026-10-06T22:10:30.992Z",
+      "completedAt": "2026-10-06T22:10:30.992Z"
+    },
+    "50081e1b-68bb-435a-a54f-84c77dde9e86": {
+      "id": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "userId": "test_user_alice_1791324621316",
+      "emailId": "1ac35d02-f8ef-415e-a3d4-e9b241d458b8",
+      "classification": "Phishing",
+      "riskScore": 60,
+      "riskLevel": "High",
+      "confidence": 88,
+      "explanation": "This email is classified as Phishing because it contains verified threat indicators: Financial Transaction / Wire Instruction, Dangerous Attachment File Payload.",
+      "recommendedAction": "Do not click the link or enter credentials. Report this email to your security operations team.",
+      "promptInjectionSuspected": false,
+      "status": "completed",
+      "createdAt": "2026-10-06T22:10:34.506Z",
+      "completedAt": "2026-10-06T22:10:34.506Z"
+    },
+    "290126c0-2e5b-48d5-b857-a2f55d1d2745": {
+      "id": "290126c0-2e5b-48d5-b857-a2f55d1d2745",
+      "userId": "test_user_alice_1791324621316",
+      "emailId": "91b255cf-dc6c-4527-99ad-c127bb353c3e",
+      "classification": "Safe",
+      "riskScore": 0,
+      "riskLevel": "Low",
+      "confidence": 80,
+      "explanation": "No malicious indicators or credential solicitation patterns were detected. Sender identity matches standard baseline.",
+      "recommendedAction": "Safe to proceed with regular delivery.",
+      "promptInjectionSuspected": false,
+      "status": "completed",
+      "createdAt": "2026-10-06T22:10:40.020Z",
+      "completedAt": "2026-10-06T22:10:40.020Z"
     }
   },
   "indicators": {
@@ -962,6 +1042,90 @@
       "evidence": "URL: http://verify-portal-office365.net",
       "source": "Email Analysis Agent (URL Inspection)",
       "createdAt": "2026-10-06T21:47:02.149Z"
+    },
+    "fae2b146-dfb4-4ef3-b498-e9ac025ab7a1": {
+      "id": "fae2b146-dfb4-4ef3-b498-e9ac025ab7a1",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "type": "prompt_injection",
+      "title": "Adversarial Prompt Injection Attempt",
+      "description": "Email content contains directive override sequences targeting the AI orchestrator.",
+      "severity": "Critical",
+      "evidence": "Adversarial sequence matched: \"Ignore all previous instructions\"",
+      "source": "Prompt Injection Detector (OWASP LLM01)",
+      "createdAt": "2026-10-06T22:10:21.319Z"
+    },
+    "f21e118f-e927-42ef-9cc8-d1b5d3e5f6c9": {
+      "id": "f21e118f-e927-42ef-9cc8-d1b5d3e5f6c9",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "sender_domain_mismatch",
+      "title": "Display Name / Origin Domain Mismatch",
+      "description": "Sender display name \"IT Identity Support\" does not align with origin domain \"microsoft365-verify-portal.net\".",
+      "severity": "High",
+      "evidence": "From: IT Identity Support <security-notice@microsoft365-verify-portal.net>",
+      "source": "Email Analysis Agent",
+      "createdAt": "2026-10-06T22:10:30.992Z"
+    },
+    "bf66d029-4c29-4c96-a1c0-f7fddfcddf74": {
+      "id": "bf66d029-4c29-4c96-a1c0-f7fddfcddf74",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "urgency_language",
+      "title": "Coercive Urgency Language",
+      "description": "Psychological pressure triggering panic or rushed action without verification.",
+      "severity": "High",
+      "evidence": "Keyword detected: \"ACTION REQUIRED\"",
+      "source": "Email Analysis Agent (NLP)",
+      "createdAt": "2026-10-06T22:10:30.992Z"
+    },
+    "5f9b1f3c-3edb-4ab1-8157-3ac9ad9bff66": {
+      "id": "5f9b1f3c-3edb-4ab1-8157-3ac9ad9bff66",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "credential_request",
+      "title": "Credential Solicitation Pattern",
+      "description": "Message solicits password reset, session renewal, or authentication verification.",
+      "severity": "High",
+      "evidence": "Keyword detected: \"Password\"",
+      "source": "Email Analysis Agent (NLP)",
+      "createdAt": "2026-10-06T22:10:30.992Z"
+    },
+    "4395b017-9183-48e4-9cf8-af6b212a1c98": {
+      "id": "4395b017-9183-48e4-9cf8-af6b212a1c98",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "suspicious_url",
+      "title": "Suspicious / Lookalike Destination URL",
+      "description": "URL domain \"login-microsoft365-verify-portal.net\" mimics authenticated portal infrastructure or uses raw IP.",
+      "severity": "Critical",
+      "evidence": "URL: http://login-microsoft365-verify-portal.net",
+      "source": "Email Analysis Agent (URL Inspection)",
+      "createdAt": "2026-10-06T22:10:30.992Z"
+    },
+    "e0cc32f9-12db-4c6a-9002-32d1c62d96d7": {
+      "id": "e0cc32f9-12db-4c6a-9002-32d1c62d96d7",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "type": "payment_request",
+      "title": "Financial Transaction / Wire Instruction",
+      "description": "Demands an expedited wire transfer, escrow settlement, or invoice payment.",
+      "severity": "High",
+      "evidence": "Keyword detected: \"Invoice\"",
+      "source": "Email Analysis Agent (NLP)",
+      "createdAt": "2026-10-06T22:10:34.506Z"
+    },
+    "5da2a643-11bf-4af7-89ad-36676a8dd34f": {
+      "id": "5da2a643-11bf-4af7-89ad-36676a8dd34f",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "type": "malicious_attachment",
+      "title": "Dangerous Attachment File Payload",
+      "description": "Attachment \"invoice_2026.vbs\" flagged: Visual Basic Script file commonly used for malware delivery and downloaders",
+      "severity": "High",
+      "evidence": "Filename: invoice_2026.vbs (12 KB), MIME: text/vbscript",
+      "source": "Attachment Security Agent",
+      "createdAt": "2026-10-06T22:10:34.506Z"
     }
   },
   "threatIntelligence": {
@@ -1156,6 +1320,36 @@
       "suspicious": false,
       "reputation": "API Key not configured in environment",
       "checkedAt": "2026-10-06T21:47:02.149Z"
+    },
+    "77b1e58d-ddcd-482b-940c-7087aa1e3afc": {
+      "id": "77b1e58d-ddcd-482b-940c-7087aa1e3afc",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "url": "http://login-microsoft365-verify-portal.net",
+      "provider": "VirusTotal",
+      "status": "not_configured",
+      "malicious": false,
+      "suspicious": false,
+      "reputation": "NOT_CONFIGURED: Set VIRUSTOTAL_API_KEY in environment/secrets",
+      "details": {
+        "note": "API key not configured in environment"
+      },
+      "checkedAt": "2026-10-06T22:10:30.995Z"
+    },
+    "9544df00-ebda-410c-ad3e-16d2ec6ce357": {
+      "id": "9544df00-ebda-410c-ad3e-16d2ec6ce357",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "url": "http://login-microsoft365-verify-portal.net",
+      "provider": "urlscan.io",
+      "status": "not_configured",
+      "malicious": false,
+      "suspicious": false,
+      "reputation": "NOT_CONFIGURED: Set URLSCAN_API_KEY in environment/secrets",
+      "details": {
+        "note": "API key not configured in environment"
+      },
+      "checkedAt": "2026-10-06T22:10:30.995Z"
     }
   },
   "evidence": {
@@ -1617,7 +1811,563 @@
       "source": "Email Analysis Agent (URL Inspection)",
       "sourceUrl": "URL: http://verify-portal-office365.net",
       "createdAt": "2026-10-06T21:47:02.149Z"
+    },
+    "aae4a190-59e3-45d3-b45f-2ee6fa2c20b0": {
+      "id": "aae4a190-59e3-45d3-b45f-2ee6fa2c20b0",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "type": "RAG / Knowledge Base",
+      "title": "OWASP LLM01: Adversarial Prompt Injection in Untrusted Email Payload",
+      "description": "Adversaries embed direct or indirect command instructions into email bodies or headers designed to hijack LLM agent orchestrators into declaring messages Safe. [Grounding: Matches adversarial instruction override pattern targeting LLMs; Instruction override keywords: 'ignore previous instructions', 'system override'; Delimiter simulation: '=== SYSTEM ADVISORY ===', '[SYSTEM]']",
+      "source": "Security Knowledge Base (OWASP LLM01)",
+      "sourceUrl": "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+      "relevanceScore": 0.98,
+      "createdAt": "2026-10-06T22:10:21.320Z"
+    },
+    "5d95679f-210e-473b-8f27-48b797ff0a0c": {
+      "id": "5d95679f-210e-473b-8f27-48b797ff0a0c",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "type": "Email Content",
+      "title": "Adversarial Prompt Injection Attempt",
+      "description": "Email content contains directive override sequences targeting the AI orchestrator.",
+      "source": "Prompt Injection Detector (OWASP LLM01)",
+      "sourceUrl": "Adversarial sequence matched: \"Ignore all previous instructions\"",
+      "createdAt": "2026-10-06T22:10:21.319Z"
+    },
+    "74652a16-89c3-4b98-8605-5f57961f497e": {
+      "id": "74652a16-89c3-4b98-8605-5f57961f497e",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "RAG / Knowledge Base",
+      "title": "MITRE ATT&CK T1566.002: Credential Harvesting via Typosquatted Domains",
+      "description": "Adversaries create lookalike domains imitating enterprise identity providers (Microsoft 365, Google Workspace, Okta) to harvest credentials and session tokens. [Grounding: Aligns with credential-harvesting gateway impersonation; Aligns with credential-harvesting gateway impersonation; Keywords: login, signin, verify, auth, renew]",
+      "source": "Security Knowledge Base (MITRE ATT&CK T1566.002)",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1566/002/",
+      "relevanceScore": 0.98,
+      "createdAt": "2026-10-06T22:10:30.995Z"
+    },
+    "373c0adf-a62c-4586-bdd4-22c8ea92b4d6": {
+      "id": "373c0adf-a62c-4586-bdd4-22c8ea92b4d6",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "RAG / Knowledge Base",
+      "title": "MITRE ATT&CK T1598: Psychological Coercion & Artificial Urgency Pretexts",
+      "description": "Social engineering emails that exploit human panic, fear of loss, or regulatory penalties to induce victims to act impulsively without verifying through secondary channels. [Grounding: Coercive temporal urgency language detected; Artificial countdown timer or immediate action demands]",
+      "source": "Security Knowledge Base (MITRE ATT&CK T1598)",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1598/",
+      "relevanceScore": 0.8,
+      "createdAt": "2026-10-06T22:10:30.995Z"
+    },
+    "2ed64e32-3fac-4248-bb36-741539a8458c": {
+      "id": "2ed64e32-3fac-4248-bb36-741539a8458c",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "RAG / Knowledge Base",
+      "title": "MITRE ATT&CK T1204.001: Deceptive Hyperlinks & Open Redirect Phishing",
+      "description": "Adversaries leverage URL shortening services, IP address hostnames, or legitimate open redirect endpoints to obscure final credential-harvesting landing pages. [Grounding: Destination URL exhibits typosquatting or payload script link indicators]",
+      "source": "Security Knowledge Base (MITRE ATT&CK T1204.001)",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1204/001/",
+      "relevanceScore": 0.55,
+      "createdAt": "2026-10-06T22:10:30.995Z"
+    },
+    "79072690-6424-4561-ba32-9feb97d95e38": {
+      "id": "79072690-6424-4561-ba32-9feb97d95e38",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "Email Content",
+      "title": "Display Name / Origin Domain Mismatch",
+      "description": "Sender display name \"IT Identity Support\" does not align with origin domain \"microsoft365-verify-portal.net\".",
+      "source": "Email Analysis Agent",
+      "sourceUrl": "From: IT Identity Support <security-notice@microsoft365-verify-portal.net>",
+      "createdAt": "2026-10-06T22:10:30.992Z"
+    },
+    "81db5880-6de2-44c6-a322-d2a714530c33": {
+      "id": "81db5880-6de2-44c6-a322-d2a714530c33",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "Email Content",
+      "title": "Coercive Urgency Language",
+      "description": "Psychological pressure triggering panic or rushed action without verification.",
+      "source": "Email Analysis Agent (NLP)",
+      "sourceUrl": "Keyword detected: \"ACTION REQUIRED\"",
+      "createdAt": "2026-10-06T22:10:30.992Z"
+    },
+    "0feade6e-ee28-4d1a-80fc-99ff9b1a258f": {
+      "id": "0feade6e-ee28-4d1a-80fc-99ff9b1a258f",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "Email Content",
+      "title": "Credential Solicitation Pattern",
+      "description": "Message solicits password reset, session renewal, or authentication verification.",
+      "source": "Email Analysis Agent (NLP)",
+      "sourceUrl": "Keyword detected: \"Password\"",
+      "createdAt": "2026-10-06T22:10:30.992Z"
+    },
+    "2e4bf9bf-7eab-4278-9135-a92c58decf9b": {
+      "id": "2e4bf9bf-7eab-4278-9135-a92c58decf9b",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "type": "Email Content",
+      "title": "Suspicious / Lookalike Destination URL",
+      "description": "URL domain \"login-microsoft365-verify-portal.net\" mimics authenticated portal infrastructure or uses raw IP.",
+      "source": "Email Analysis Agent (URL Inspection)",
+      "sourceUrl": "URL: http://login-microsoft365-verify-portal.net",
+      "createdAt": "2026-10-06T22:10:30.992Z"
+    },
+    "c0b4c19a-abaf-4d77-a3da-c44ef8ba5240": {
+      "id": "c0b4c19a-abaf-4d77-a3da-c44ef8ba5240",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "type": "RAG / Knowledge Base",
+      "title": "MITRE ATT&CK T1566.001: Executive Pretext & Wire Fraud (CEO Fraud)",
+      "description": "Adversaries impersonate C-level executives or legal counsel requesting immediate wire transfers or payroll account changes while suppressing telephone verification. [Grounding: Matches executive wire-transfer request with verification channel suppression]",
+      "source": "Security Knowledge Base (MITRE ATT&CK T1566.001)",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1566/001/",
+      "relevanceScore": 0.5,
+      "createdAt": "2026-10-06T22:10:34.507Z"
+    },
+    "2b777d3f-9b34-4dab-a3e4-abb96dc6c746": {
+      "id": "2b777d3f-9b34-4dab-a3e4-abb96dc6c746",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "type": "RAG / Knowledge Base",
+      "title": "MITRE ATT&CK T1027.006: Malicious Script & HTML Smuggling Attachments",
+      "description": "Adversaries attach files containing active scripting (.vbs, .bat, .scr, .ps1) or macro-enabled Office containers (.docm, .xlsm) that execute code when opened by the recipient. [Grounding: File attachment contains dangerous executable or script extensions]",
+      "source": "Security Knowledge Base (MITRE ATT&CK T1027.006)",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1027/006/",
+      "relevanceScore": 0.4,
+      "createdAt": "2026-10-06T22:10:34.507Z"
+    },
+    "463c0ddf-3bad-4ac7-af09-8795472e2d56": {
+      "id": "463c0ddf-3bad-4ac7-af09-8795472e2d56",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "type": "Email Content",
+      "title": "Financial Transaction / Wire Instruction",
+      "description": "Demands an expedited wire transfer, escrow settlement, or invoice payment.",
+      "source": "Email Analysis Agent (NLP)",
+      "sourceUrl": "Keyword detected: \"Invoice\"",
+      "createdAt": "2026-10-06T22:10:34.506Z"
+    },
+    "4593e313-f3fd-4b41-90c3-6f3ce65f02b9": {
+      "id": "4593e313-f3fd-4b41-90c3-6f3ce65f02b9",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "type": "Email Content",
+      "title": "Dangerous Attachment File Payload",
+      "description": "Attachment \"invoice_2026.vbs\" flagged: Visual Basic Script file commonly used for malware delivery and downloaders",
+      "source": "Attachment Security Agent",
+      "sourceUrl": "Filename: invoice_2026.vbs (12 KB), MIME: text/vbscript",
+      "createdAt": "2026-10-06T22:10:34.506Z"
     }
   },
-  "settings": {}
+  "settings": {
+    "google_khushikoli214_gmail_com": {
+      "userId": "google_khushikoli214_gmail_com",
+      "promptInjectionGuard": true,
+      "threatIntelEnabled": true,
+      "theme": "light",
+      "notifications": true,
+      "updatedAt": "2026-10-06T21:49:09.616Z"
+    }
+  },
+  "pipelineLogs": {
+    "67f74b4b-f90e-46cc-9183-8ae84eebfdea": {
+      "id": "67f74b4b-f90e-46cc-9183-8ae84eebfdea",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "component": "email_ingestion",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:21.319Z",
+      "endTime": "2026-10-06T22:10:21.321Z",
+      "durationMs": 2,
+      "message": "Ingested email: \"Feedback Form [SYSTEM OVERRIDE]\" from adversary@malicious.io"
+    },
+    "786355ec-6a83-429d-a8af-b4ff3e710b00": {
+      "id": "786355ec-6a83-429d-a8af-b4ff3e710b00",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "component": "normalization",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:21.319Z",
+      "endTime": "2026-10-06T22:10:21.322Z",
+      "durationMs": 3,
+      "message": "Normalized payload. Extracted 0 URLs and 0 attachment metadata records."
+    },
+    "0118cbc5-80bc-4155-8419-094fe44bbc98": {
+      "id": "0118cbc5-80bc-4155-8419-094fe44bbc98",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "component": "prompt_injection",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:21.319Z",
+      "endTime": "2026-10-06T22:10:21.319Z",
+      "durationMs": 0,
+      "message": "Threat detected: Adversarial sequence matched: \"Ignore all previous instructions\""
+    },
+    "d476f283-7974-484c-a433-b8fa903de1e5": {
+      "id": "d476f283-7974-484c-a433-b8fa903de1e5",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "component": "email_analysis",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:21.319Z",
+      "endTime": "2026-10-06T22:10:21.320Z",
+      "durationMs": 1,
+      "message": "Completed NLP & heuristics analysis. Found 1 threat indicators."
+    },
+    "3b35cd0b-5821-4110-ada2-e930c1d69469": {
+      "id": "3b35cd0b-5821-4110-ada2-e930c1d69469",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "component": "threat_intelligence",
+      "status": "unavailable",
+      "startTime": "2026-10-06T22:10:21.320Z",
+      "endTime": "2026-10-06T22:10:21.320Z",
+      "durationMs": 0,
+      "message": "No URLs present in message for external threat intelligence scanning."
+    },
+    "e1e2f136-9a61-46c4-96b1-a4ae874f39f8": {
+      "id": "e1e2f136-9a61-46c4-96b1-a4ae874f39f8",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "component": "rag",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:21.320Z",
+      "endTime": "2026-10-06T22:10:21.321Z",
+      "durationMs": 1,
+      "message": "Retrieved 1 grounded taxonomy evidence documents from Security Knowledge Base."
+    },
+    "5b6763b0-62fd-4806-942d-2bafff31f73f": {
+      "id": "5b6763b0-62fd-4806-942d-2bafff31f73f",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "component": "risk_engine",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:21.321Z",
+      "endTime": "2026-10-06T22:10:21.321Z",
+      "durationMs": 0,
+      "message": "Deterministic Risk Engine calculated: 88/100 (Critical). Reasons: Adversarial prompt injection pattern detected (+50 risk points)"
+    },
+    "1c708361-4e29-46c6-af1f-891ab08f880b": {
+      "id": "1c708361-4e29-46c6-af1f-891ab08f880b",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "component": "report_generation",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:21.321Z",
+      "endTime": "2026-10-06T22:10:30.991Z",
+      "durationMs": 9670,
+      "message": "Generated explainable report: Verdict Phishing, Confidence: 84%"
+    },
+    "caada60d-6ce0-4155-a067-dd9214b79ca2": {
+      "id": "caada60d-6ce0-4155-a067-dd9214b79ca2",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "caee92c2-692a-43cb-bd7e-be36a31d6b88",
+      "component": "database_storage",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:30.991Z",
+      "endTime": "2026-10-06T22:10:30.992Z",
+      "durationMs": 1,
+      "message": "Persisted analysis record, 1 indicators, 0 threat intelligence lookups, and 2 evidence items."
+    },
+    "72f2c863-7633-4fe5-a669-59d98a3aac0d": {
+      "id": "72f2c863-7633-4fe5-a669-59d98a3aac0d",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "component": "email_ingestion",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:30.992Z",
+      "endTime": "2026-10-06T22:10:30.994Z",
+      "durationMs": 2,
+      "message": "Ingested email: \"ACTION REQUIRED: Mailbox Password Expiry in 24 Hours\" from security-notice@microsoft365-verify-portal.net"
+    },
+    "489cf70c-90f5-490b-8e04-13cde608866f": {
+      "id": "489cf70c-90f5-490b-8e04-13cde608866f",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "component": "normalization",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:30.992Z",
+      "endTime": "2026-10-06T22:10:30.995Z",
+      "durationMs": 3,
+      "message": "Normalized payload. Extracted 1 URLs and 0 attachment metadata records."
+    },
+    "120e8a3d-61ab-4883-93e0-8d992349d60e": {
+      "id": "120e8a3d-61ab-4883-93e0-8d992349d60e",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "component": "prompt_injection",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:30.992Z",
+      "endTime": "2026-10-06T22:10:30.993Z",
+      "durationMs": 1,
+      "message": "Clean: No adversarial prompt injection override patterns found."
+    },
+    "519e807f-d0da-43aa-be2a-d560112066b4": {
+      "id": "519e807f-d0da-43aa-be2a-d560112066b4",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "component": "email_analysis",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:30.993Z",
+      "endTime": "2026-10-06T22:10:30.994Z",
+      "durationMs": 1,
+      "message": "Completed NLP & heuristics analysis. Found 4 threat indicators."
+    },
+    "e03c1a7e-924e-4fa5-ba7d-f05f0b50bfc6": {
+      "id": "e03c1a7e-924e-4fa5-ba7d-f05f0b50bfc6",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "component": "threat_intelligence",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:30.994Z",
+      "endTime": "2026-10-06T22:10:30.995Z",
+      "durationMs": 1,
+      "message": "Queried threat intelligence for 1 URLs (VirusTotal:not_configured, urlscan.io:not_configured)"
+    },
+    "2dfe9c90-8c3f-4a5c-a1e5-f3ef2c9214dd": {
+      "id": "2dfe9c90-8c3f-4a5c-a1e5-f3ef2c9214dd",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "component": "rag",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:30.995Z",
+      "endTime": "2026-10-06T22:10:30.995Z",
+      "durationMs": 0,
+      "message": "Retrieved 3 grounded taxonomy evidence documents from Security Knowledge Base."
+    },
+    "ae9848b4-cdb9-48f7-b378-9efac7837a87": {
+      "id": "ae9848b4-cdb9-48f7-b378-9efac7837a87",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "component": "risk_engine",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:30.995Z",
+      "endTime": "2026-10-06T22:10:30.995Z",
+      "durationMs": 0,
+      "message": "Deterministic Risk Engine calculated: 85/100 (Critical). Reasons: Sender display name mismatch with domain microsoft365-verify-portal.net (+20 risk points); Coercive urgency language detected: \"ACTION REQUIRED\" (+15 risk points); Credential solicitation pattern detected: \"Password\" (+25 risk points); Suspicious / Lookalike URL identified: login-microsoft365-verify-portal.net (+25 risk points)"
+    },
+    "2c1927b7-7f4c-459a-91de-ed938d54712e": {
+      "id": "2c1927b7-7f4c-459a-91de-ed938d54712e",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "component": "report_generation",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:30.995Z",
+      "endTime": "2026-10-06T22:10:34.504Z",
+      "durationMs": 3509,
+      "message": "Generated explainable report: Verdict Phishing, Confidence: 96%"
+    },
+    "17dcb46e-6bd9-4edb-9509-f781c38897ea": {
+      "id": "17dcb46e-6bd9-4edb-9509-f781c38897ea",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "2f13d8d0-a3db-4dab-9242-b285aaa47f59",
+      "component": "database_storage",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:34.504Z",
+      "endTime": "2026-10-06T22:10:34.506Z",
+      "durationMs": 2,
+      "message": "Persisted analysis record, 4 indicators, 2 threat intelligence lookups, and 7 evidence items."
+    },
+    "0b423295-e8e6-4ee4-896f-28552036f0ec": {
+      "id": "0b423295-e8e6-4ee4-896f-28552036f0ec",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "component": "email_ingestion",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:34.506Z",
+      "endTime": "2026-10-06T22:10:34.508Z",
+      "durationMs": 2,
+      "message": "Ingested email: \"Overdue Invoice Attached\" from billing@unverified-relay.org"
+    },
+    "0f5a60ba-0866-4e97-adc7-861c89342085": {
+      "id": "0f5a60ba-0866-4e97-adc7-861c89342085",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "component": "normalization",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:34.506Z",
+      "endTime": "2026-10-06T22:10:34.509Z",
+      "durationMs": 3,
+      "message": "Normalized payload. Extracted 0 URLs and 1 attachment metadata records."
+    },
+    "8d091f5c-76ca-450f-9477-7c410670237a": {
+      "id": "8d091f5c-76ca-450f-9477-7c410670237a",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "component": "prompt_injection",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:34.506Z",
+      "endTime": "2026-10-06T22:10:34.507Z",
+      "durationMs": 1,
+      "message": "Clean: No adversarial prompt injection override patterns found."
+    },
+    "906b39f7-cab5-46d2-90bd-26da6da6eb44": {
+      "id": "906b39f7-cab5-46d2-90bd-26da6da6eb44",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "component": "email_analysis",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:34.507Z",
+      "endTime": "2026-10-06T22:10:34.507Z",
+      "durationMs": 0,
+      "message": "Completed NLP & heuristics analysis. Found 2 threat indicators."
+    },
+    "53fb4a0f-ce19-43a2-9b53-76cbd2ee5a53": {
+      "id": "53fb4a0f-ce19-43a2-9b53-76cbd2ee5a53",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "component": "threat_intelligence",
+      "status": "unavailable",
+      "startTime": "2026-10-06T22:10:34.507Z",
+      "endTime": "2026-10-06T22:10:34.507Z",
+      "durationMs": 0,
+      "message": "No URLs present in message for external threat intelligence scanning."
+    },
+    "c10d0a30-2e56-4bc4-8deb-97cef5f0d03d": {
+      "id": "c10d0a30-2e56-4bc4-8deb-97cef5f0d03d",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "component": "rag",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:34.507Z",
+      "endTime": "2026-10-06T22:10:34.507Z",
+      "durationMs": 0,
+      "message": "Retrieved 2 grounded taxonomy evidence documents from Security Knowledge Base."
+    },
+    "64e09360-ee61-4fa5-bca0-42c2f04cf4a3": {
+      "id": "64e09360-ee61-4fa5-bca0-42c2f04cf4a3",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "component": "risk_engine",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:34.507Z",
+      "endTime": "2026-10-06T22:10:34.507Z",
+      "durationMs": 0,
+      "message": "Deterministic Risk Engine calculated: 60/100 (High). Reasons: Financial transaction / wire request detected: \"Invoice\" (+25 risk points); High-risk attachment detected: invoice_2026.vbs (+35 risk points)"
+    },
+    "b363448b-4fa3-4461-8067-d3a074c43ccf": {
+      "id": "b363448b-4fa3-4461-8067-d3a074c43ccf",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "component": "report_generation",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:34.507Z",
+      "endTime": "2026-10-06T22:10:40.018Z",
+      "durationMs": 5511,
+      "message": "Generated explainable report: Verdict Phishing, Confidence: 88%"
+    },
+    "5827bbb6-34ea-4e50-a5aa-1743ded50581": {
+      "id": "5827bbb6-34ea-4e50-a5aa-1743ded50581",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "50081e1b-68bb-435a-a54f-84c77dde9e86",
+      "component": "database_storage",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:40.018Z",
+      "endTime": "2026-10-06T22:10:40.020Z",
+      "durationMs": 2,
+      "message": "Persisted analysis record, 2 indicators, 0 threat intelligence lookups, and 4 evidence items."
+    },
+    "861af40f-6699-4ac2-9a56-645498b17073": {
+      "id": "861af40f-6699-4ac2-9a56-645498b17073",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "290126c0-2e5b-48d5-b857-a2f55d1d2745",
+      "component": "email_ingestion",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:40.020Z",
+      "endTime": "2026-10-06T22:10:40.022Z",
+      "durationMs": 2,
+      "message": "Ingested email: \"Colloquium: Graph Neural Networks in SOC Telemetry\" from seminars@cs.stanford.edu"
+    },
+    "8c306f7b-a841-42da-a9d9-e90b1b552480": {
+      "id": "8c306f7b-a841-42da-a9d9-e90b1b552480",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "290126c0-2e5b-48d5-b857-a2f55d1d2745",
+      "component": "normalization",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:40.020Z",
+      "endTime": "2026-10-06T22:10:40.023Z",
+      "durationMs": 3,
+      "message": "Normalized payload. Extracted 0 URLs and 0 attachment metadata records."
+    },
+    "114087de-c07c-48bb-bb26-4dba457bfb6a": {
+      "id": "114087de-c07c-48bb-bb26-4dba457bfb6a",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "290126c0-2e5b-48d5-b857-a2f55d1d2745",
+      "component": "prompt_injection",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:40.020Z",
+      "endTime": "2026-10-06T22:10:40.020Z",
+      "durationMs": 0,
+      "message": "Clean: No adversarial prompt injection override patterns found."
+    },
+    "522a48d5-e319-4f80-9702-38090e3eed85": {
+      "id": "522a48d5-e319-4f80-9702-38090e3eed85",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "290126c0-2e5b-48d5-b857-a2f55d1d2745",
+      "component": "email_analysis",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:40.020Z",
+      "endTime": "2026-10-06T22:10:40.020Z",
+      "durationMs": 0,
+      "message": "Completed NLP & heuristics analysis. Found 0 threat indicators."
+    },
+    "3fd71cbf-7b7f-4e5f-9f86-f095fd3f5103": {
+      "id": "3fd71cbf-7b7f-4e5f-9f86-f095fd3f5103",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "290126c0-2e5b-48d5-b857-a2f55d1d2745",
+      "component": "threat_intelligence",
+      "status": "unavailable",
+      "startTime": "2026-10-06T22:10:40.020Z",
+      "endTime": "2026-10-06T22:10:40.020Z",
+      "durationMs": 0,
+      "message": "No URLs present in message for external threat intelligence scanning."
+    },
+    "3e7b3b7f-e622-46d2-9fd6-d47b14b71150": {
+      "id": "3e7b3b7f-e622-46d2-9fd6-d47b14b71150",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "290126c0-2e5b-48d5-b857-a2f55d1d2745",
+      "component": "rag",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:40.020Z",
+      "endTime": "2026-10-06T22:10:40.020Z",
+      "durationMs": 0,
+      "message": "Retrieved 0 grounded taxonomy evidence documents from Security Knowledge Base."
+    },
+    "b6149bc2-296d-41b1-bb20-5435648e6d16": {
+      "id": "b6149bc2-296d-41b1-bb20-5435648e6d16",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "290126c0-2e5b-48d5-b857-a2f55d1d2745",
+      "component": "risk_engine",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:40.020Z",
+      "endTime": "2026-10-06T22:10:40.020Z",
+      "durationMs": 0,
+      "message": "Deterministic Risk Engine calculated: 0/100 (Low). Reasons: No risk indicators detected."
+    },
+    "34cab54a-6d17-4de9-b401-d6f88073e30d": {
+      "id": "34cab54a-6d17-4de9-b401-d6f88073e30d",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "290126c0-2e5b-48d5-b857-a2f55d1d2745",
+      "component": "report_generation",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:40.020Z",
+      "endTime": "2026-10-06T22:10:45.030Z",
+      "durationMs": 5010,
+      "message": "Generated explainable report: Verdict Safe, Confidence: 80%"
+    },
+    "2bf92fca-14fb-432f-82fb-5cbcdd9051fd": {
+      "id": "2bf92fca-14fb-432f-82fb-5cbcdd9051fd",
+      "userId": "test_user_alice_1791324621316",
+      "analysisId": "290126c0-2e5b-48d5-b857-a2f55d1d2745",
+      "component": "database_storage",
+      "status": "completed",
+      "startTime": "2026-10-06T22:10:45.030Z",
+      "endTime": "2026-10-06T22:10:45.031Z",
+      "durationMs": 1,
+      "message": "Persisted analysis record, 0 indicators, 0 threat intelligence lookups, and 0 evidence items."
+    }
+  }
 }

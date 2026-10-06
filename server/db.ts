@@ -44,6 +44,29 @@ export interface EmailRecord {
   riskScore?: number | null;
   riskLevel?: 'Low' | 'Medium' | 'High' | 'Critical';
   promptInjectionSuspected?: boolean;
+  isDevelopmentSample?: boolean;
+}
+
+export interface PipelineLogRecord {
+  id: string;
+  userId: string;
+  analysisId: string;
+  component:
+    | 'email_ingestion'
+    | 'normalization'
+    | 'prompt_injection'
+    | 'email_analysis'
+    | 'threat_intelligence'
+    | 'rag'
+    | 'risk_engine'
+    | 'report_generation'
+    | 'database_storage';
+  status: 'completed' | 'failed' | 'skipped' | 'unavailable';
+  startTime: string;
+  endTime: string;
+  durationMs: number;
+  message?: string;
+  error?: string;
 }
 
 export interface AnalysisRecord {
@@ -120,6 +143,7 @@ export interface DatabaseSchema {
   threatIntelligence: Record<string, ThreatIntelRecord>;
   evidence: Record<string, EvidenceRecord>;
   settings: Record<string, UserSettingsRecord>;
+  pipelineLogs: Record<string, PipelineLogRecord>;
 }
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -134,6 +158,7 @@ class DatabaseManager {
     threatIntelligence: {},
     evidence: {},
     settings: {},
+    pipelineLogs: {},
   };
   private isSaving = false;
   private pendingSave = false;
@@ -321,6 +346,21 @@ class DatabaseManager {
     this.save();
   }
 
+  // --- Pipeline Logs ---
+  public getPipelineLogsByAnalysis(analysisId: string, userId: string): PipelineLogRecord[] {
+    return Object.values(this.db.pipelineLogs || {}).filter(
+      (log) => log.analysisId === analysisId && log.userId === userId
+    );
+  }
+
+  public savePipelineLogs(logs: PipelineLogRecord[]) {
+    if (!this.db.pipelineLogs) this.db.pipelineLogs = {};
+    for (const log of logs) {
+      this.db.pipelineLogs[log.id] = log;
+    }
+    this.save();
+  }
+
   // --- Settings ---
   public getSettings(userId: string): UserSettingsRecord {
     if (!this.db.settings[userId]) {
@@ -434,6 +474,7 @@ class DatabaseManager {
         id: uuidv4(),
         userId: user.uid,
         ...em,
+        isDevelopmentSample: true,
         createdAt: em.receivedAt,
       };
       this.saveEmail(emailRecord);

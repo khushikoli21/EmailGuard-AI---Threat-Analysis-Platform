@@ -119,6 +119,11 @@ export const EmailRow: React.FC<EmailRowProps> = ({
 
       {/* Subject & Preview */}
       <div className="flex-1 min-w-0 flex items-baseline gap-1.5 truncate">
+        {email.isDevelopmentSample && (
+          <span className="shrink-0 text-[9px] font-mono font-bold text-amber-800 bg-amber-100 border border-amber-300 px-1.5 py-0.5 rounded uppercase tracking-wider">
+            Development Sample Data
+          </span>
+        )}
         <span
           className={`truncate shrink-0 max-w-[260px] sm:max-w-[340px] ${
             !email.isRead ? 'text-slate-900 font-bold' : 'text-slate-800 font-medium'

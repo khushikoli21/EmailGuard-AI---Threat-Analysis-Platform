@@ -28,6 +28,29 @@ export interface EmailRecord {
   riskScore?: number | null;
   riskLevel?: 'Low' | 'Medium' | 'High' | 'Critical';
   promptInjectionSuspected?: boolean;
+  isDevelopmentSample?: boolean;
+}
+
+export interface PipelineLogRecord {
+  id: string;
+  userId: string;
+  analysisId: string;
+  component:
+    | 'email_ingestion'
+    | 'normalization'
+    | 'prompt_injection'
+    | 'email_analysis'
+    | 'threat_intelligence'
+    | 'rag'
+    | 'risk_engine'
+    | 'report_generation'
+    | 'database_storage';
+  status: 'completed' | 'failed' | 'skipped' | 'unavailable';
+  startTime: string;
+  endTime: string;
+  durationMs: number;
+  message?: string;
+  error?: string;
 }
 
 export interface AnalysisRecord {
@@ -93,6 +116,7 @@ export interface ThreatReportPayload {
   indicators: IndicatorRecord[];
   threatIntel: ThreatIntelRecord[];
   evidence: EvidenceRecord[];
+  pipelineLogs?: PipelineLogRecord[];
 }
 
 export interface AnalyticsSummary {
