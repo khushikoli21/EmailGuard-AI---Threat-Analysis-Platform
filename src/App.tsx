@@ -1,122 +1,239 @@
 import React, { useState, useEffect } from 'react';
-import { Sidebar, NavTab } from './components/layout/Sidebar';
-import { Navbar } from './components/layout/Navbar';
-import { DashboardPage } from './pages/DashboardPage';
-import { InboxPage } from './pages/InboxPage';
-import { AnalyzePage } from './pages/AnalyzePage';
-import { ReportPage } from './pages/ReportPage';
-import { AnalyticsPage } from './pages/AnalyticsPage';
-import { EvaluationPage } from './pages/EvaluationPage';
-import { KnowledgeBasePage } from './pages/KnowledgeBasePage';
-import { SettingsPage } from './pages/SettingsPage';
-import { ConnectGmailModal } from './components/inbox/ConnectGmailModal';
-import { getBackendConfig, updateBackendConfig } from './services/api';
-import { BackendConfig, EmailRecord, ThreatReport } from './types';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { LoginPage } from './pages/LoginPage';
+import { TopBar } from './components/gmail/TopBar';
+import { Sidebar } from './components/gmail/Sidebar';
+import { EmailList } from './components/gmail/EmailList';
+import { EmailViewer } from './components/gmail/EmailViewer';
+import { ComposeModal } from './components/gmail/ComposeModal';
+import { ReportsView } from './components/gmail/ReportsView';
+import { AnalyticsView } from './components/gmail/AnalyticsView';
+import { EvidenceView } from './components/gmail/EvidenceView';
+import { EvaluationView } from './components/gmail/EvaluationView';
+import { SettingsView } from './components/gmail/SettingsView';
+import { EmailRecord, fetchEmails, updateEmail, deleteEmail } from './services/api';
+import { Shield, Loader2 } from 'lucide-react';
 
-export default function App() {
-  const [currentTab, setCurrentTab] = useState<NavTab>('dashboard');
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isGmailModalOpen, setIsGmailModalOpen] = useState(false);
-  const [selectedEmailId, setSelectedEmailId] = useState<string | null>('em-001');
-  const [backendConfig, setBackendConfig] = useState<BackendConfig>(getBackendConfig());
+function MainGmailApplication() {
+  const { user } = useAuth();
+  const [currentTab, setCurrentTab] = useState<string>('inbox');
+  const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [emails, setEmails] = useState<EmailRecord[]>([]);
+  const [isLoadingEmails, setIsLoadingEmails] = useState<boolean>(true);
+  const [selectedEmail, setSelectedEmail] = useState<EmailRecord | null>(null);
+  const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState<boolean>(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
+  const [isComposeOpen, setIsComposeOpen] = useState<boolean>(false);
 
-  const handleSelectTab = (tab: NavTab) => {
-    setCurrentTab(tab);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  // Load emails whenever folder tab, search, or filter changes
+  const loadEmails = async () => {
+    try {
+      setIsLoadingEmails(true);
+      const folder = ['inbox', 'starred', 'sent', 'drafts', 'trash'].includes(currentTab)
+        ? currentTab
+        : currentTab === 'threats'
+        ? 'inbox'
+        : 'inbox';
+
+      const data = await fetchEmails(folder, searchQuery, activeFilter);
+      setEmails(data.items || []);
+    } catch (err) {
+      console.error('[GMAIL] Error loading emails:', err);
+    } finally {
+      setIsLoadingEmails(false);
+    }
   };
 
-  const handleViewReport = (emailId: string) => {
-    setSelectedEmailId(emailId);
-    setCurrentTab('reports');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  useEffect(() => {
+    loadEmails();
+  }, [currentTab, searchQuery, activeFilter]);
+
+  const handleToggleStar = async (emailId: string, isStarred: boolean) => {
+    try {
+      await updateEmail(emailId, { isStarred });
+      setEmails((prev) =>
+        prev.map((e) => (e.id === emailId ? { ...e, isStarred } : e))
+      );
+      if (selectedEmail && selectedEmail.id === emailId) {
+        setSelectedEmail({ ...selectedEmail, isStarred });
+      }
+    } catch (err) {
+      console.error('[GMAIL] Star update error:', err);
+    }
   };
 
-  const handleAnalysisComplete = (newEmail: EmailRecord, newReport: ThreatReport) => {
-    setSelectedEmailId(newEmail.id);
-    setCurrentTab('reports');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleDeleteSelected = async (emailIds: string[]) => {
+    try {
+      for (const id of emailIds) {
+        await deleteEmail(id);
+      }
+      loadEmails();
+    } catch (err) {
+      console.error('[GMAIL] Delete error:', err);
+    }
   };
 
-  const handleUpdateConfig = (updates: Partial<BackendConfig>) => {
-    const updated = updateBackendConfig(updates);
-    setBackendConfig(updated);
-    return updated;
+  const handleMarkReadSelected = async (emailIds: string[], isRead: boolean) => {
+    try {
+      for (const id of emailIds) {
+        await updateEmail(id, { isRead });
+      }
+      loadEmails();
+    } catch (err) {
+      console.error('[GMAIL] Mark read error:', err);
+    }
   };
+
+  const handleSelectEmail = async (email: EmailRecord) => {
+    setSelectedEmail(email);
+    if (!email.isRead) {
+      try {
+        await updateEmail(email.id, { isRead: true });
+        setEmails((prev) =>
+          prev.map((e) => (e.id === email.id ? { ...e, isRead: true } : e))
+        );
+      } catch (err) {
+        console.warn('[GMAIL] Mark as read error:', err);
+      }
+    }
+  };
+
+  const handleNavigateFromReport = (emailId: string) => {
+    const found = emails.find((e) => e.id === emailId);
+    if (found) {
+      setSelectedEmail(found);
+    } else {
+      setCurrentTab('inbox');
+    }
+  };
+
+  const unreadCount = emails.filter((e) => !e.isRead).length;
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 font-sans flex antialiased">
-      {/* Left Sidebar Navigation */}
-      <Sidebar
-        currentTab={currentTab}
-        onSelectTab={handleSelectTab}
-        backendConfig={backendConfig}
-        isOpenMobile={isMobileMenuOpen}
-        onCloseMobile={() => setIsMobileMenuOpen(false)}
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 antialiased overflow-hidden">
+      {/* Top Gmail Navigation Bar */}
+      <TopBar
+        onToggleSidebar={() => {
+          if (window.innerWidth < 768) {
+            setIsSidebarOpenMobile(!isSidebarOpenMobile);
+          } else {
+            setIsSidebarCollapsed(!isSidebarCollapsed);
+          }
+        }}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        onNavigateTab={(tab) => {
+          setSelectedEmail(null);
+          setCurrentTab(tab);
+        }}
       />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64 transition-all duration-300">
-        {/* Top Navbar */}
-        <Navbar
+      {/* Main App Container */}
+      <div className="flex-1 flex min-w-0 overflow-hidden">
+        {/* Gmail Left Sidebar */}
+        <Sidebar
           currentTab={currentTab}
-          onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
-          onConnectGmailClick={() => setIsGmailModalOpen(true)}
-          onSelectTab={handleSelectTab}
-          onSearch={(query) => {
-            handleSelectTab('inbox');
+          onSelectTab={(tab) => {
+            setSelectedEmail(null);
+            setCurrentTab(tab);
           }}
+          onOpenCompose={() => setIsComposeOpen(true)}
+          unreadCount={unreadCount}
+          isOpenMobile={isSidebarOpenMobile}
+          onCloseMobile={() => setIsSidebarOpenMobile(false)}
+          isCollapsed={isSidebarCollapsed}
         />
 
-        {/* Dynamic Page Container */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
-          {currentTab === 'dashboard' && (
-            <DashboardPage
-              onNavigateToInbox={() => handleSelectTab('inbox')}
-              onNavigateToAnalyze={() => handleSelectTab('analyze')}
-              onViewReport={handleViewReport}
+        {/* Center Main Stage */}
+        <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+          {selectedEmail ? (
+            <EmailViewer
+              email={selectedEmail}
+              onBack={() => {
+                setSelectedEmail(null);
+                loadEmails();
+              }}
+              onDelete={async (id) => {
+                await deleteEmail(id);
+                setSelectedEmail(null);
+                loadEmails();
+              }}
+              onToggleStar={handleToggleStar}
+              onEmailUpdated={(updated) => {
+                setSelectedEmail(updated);
+                loadEmails();
+              }}
             />
-          )}
-
-          {currentTab === 'inbox' && (
-            <InboxPage
-              onViewReport={handleViewReport}
-              onNavigateToAnalyze={() => handleSelectTab('analyze')}
-            />
-          )}
-
-          {currentTab === 'analyze' && (
-            <AnalyzePage onAnalysisComplete={handleAnalysisComplete} />
-          )}
-
-          {currentTab === 'reports' && (
-            <ReportPage
-              currentEmailId={selectedEmailId}
-              onSelectEmailId={(id) => setSelectedEmailId(id)}
-              onNavigateToInbox={() => handleSelectTab('inbox')}
-            />
-          )}
-
-          {currentTab === 'evidence' && <KnowledgeBasePage />}
-
-          {currentTab === 'analytics' && <AnalyticsPage />}
-
-          {currentTab === 'evaluation' && <EvaluationPage />}
-
-          {currentTab === 'settings' && (
-            <SettingsPage
-              backendConfig={backendConfig}
-              onUpdateConfig={handleUpdateConfig}
-              onOpenGmailModal={() => setIsGmailModalOpen(true)}
+          ) : currentTab === 'reports' ? (
+            <ReportsView onSelectReportEmailId={handleNavigateFromReport} />
+          ) : currentTab === 'analytics' ? (
+            <AnalyticsView />
+          ) : currentTab === 'evidence' ? (
+            <EvidenceView />
+          ) : currentTab === 'evaluation' ? (
+            <EvaluationView />
+          ) : currentTab === 'settings' ? (
+            <SettingsView />
+          ) : (
+            <EmailList
+              emails={emails}
+              isLoading={isLoadingEmails}
+              onRefresh={loadEmails}
+              onSelectEmail={handleSelectEmail}
+              onToggleStar={(id, isStarred) => handleToggleStar(id, isStarred)}
+              onDeleteSelected={handleDeleteSelected}
+              onMarkReadSelected={handleMarkReadSelected}
+              activeFilter={activeFilter}
+              onFilterChange={setActiveFilter}
             />
           )}
         </main>
       </div>
 
-      {/* Global Gmail OAuth Modal */}
-      <ConnectGmailModal
-        isOpen={isGmailModalOpen}
-        onClose={() => setIsGmailModalOpen(false)}
+      {/* Floating Compose & Analyze Dialog */}
+      <ComposeModal
+        isOpen={isComposeOpen}
+        onClose={() => setIsComposeOpen(false)}
+        onSuccess={() => {
+          loadEmails();
+          setCurrentTab('inbox');
+        }}
       />
     </div>
+  );
+}
+
+function AuthenticatedRoot() {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="text-center space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-md">
+            <Shield className="w-6 h-6 animate-pulse" />
+          </div>
+          <div className="flex items-center justify-center gap-2 text-xs font-semibold text-slate-600">
+            <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+            <span>Authenticating session with secure database...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  return <MainGmailApplication />;
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AuthenticatedRoot />
+    </AuthProvider>
   );
 }
