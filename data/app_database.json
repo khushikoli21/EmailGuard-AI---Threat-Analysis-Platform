@@ -14,7 +14,7 @@
       "email": "nareshkarothia@gmail.com",
       "photoURL": "https://api.dicebear.com/7.x/initials/svg?seed=Naresh%20Karothia&backgroundColor=0284c7",
       "createdAt": "2026-10-06T21:33:55.903Z",
-      "lastLogin": "2026-10-06T21:33:55.903Z"
+      "lastLogin": "2026-10-06T21:42:48.203Z"
     },
     "google_khushikoli214_gmail_com": {
       "uid": "google_khushikoli214_gmail_com",
@@ -22,7 +22,7 @@
       "email": "khushikoli214@gmail.com",
       "photoURL": "https://api.dicebear.com/7.x/initials/svg?seed=khushikoli214&backgroundColor=0284c7",
       "createdAt": "2026-10-06T21:35:33.376Z",
-      "lastLogin": "2026-10-06T21:35:33.376Z"
+      "lastLogin": "2026-10-06T21:43:34.507Z"
     }
   },
   "emails": {
@@ -138,7 +138,7 @@
         "https://login-microsoft365-verify-portal.net/auth/session/renew?token=894fc82"
       ],
       "isStarred": true,
-      "isRead": false,
+      "isRead": true,
       "folder": "inbox",
       "createdAt": "2026-10-06T20:58:55.903Z",
       "latestAnalysisId": "bac98988-de53-4f3a-8130-bb7117000118",
@@ -171,7 +171,7 @@
       ],
       "urls": [],
       "isStarred": false,
-      "isRead": false,
+      "isRead": true,
       "folder": "inbox",
       "createdAt": "2026-10-06T19:33:55.903Z"
     },
@@ -237,9 +237,14 @@
         "https://login-microsoft365-verify-portal.net/auth/session/renew?token=894fc82"
       ],
       "isStarred": true,
-      "isRead": false,
+      "isRead": true,
       "folder": "inbox",
-      "createdAt": "2026-10-06T21:00:33.377Z"
+      "createdAt": "2026-10-06T21:00:33.377Z",
+      "latestAnalysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "classification": "Phishing",
+      "riskScore": 100,
+      "riskLevel": "Critical",
+      "promptInjectionSuspected": false
     },
     "61727164-eadd-40ab-8d98-6506e5314774": {
       "id": "61727164-eadd-40ab-8d98-6506e5314774",
@@ -265,9 +270,14 @@
       ],
       "urls": [],
       "isStarred": false,
-      "isRead": false,
+      "isRead": true,
       "folder": "inbox",
-      "createdAt": "2026-10-06T19:35:33.377Z"
+      "createdAt": "2026-10-06T19:35:33.377Z",
+      "latestAnalysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "classification": "Phishing",
+      "riskScore": 100,
+      "riskLevel": "Critical",
+      "promptInjectionSuspected": false
     },
     "a86e8cc3-06e9-4905-9abe-ea01a8a93253": {
       "id": "a86e8cc3-06e9-4905-9abe-ea01a8a93253",
@@ -286,10 +296,15 @@
       "urls": [
         "https://organization.edu/events/fall-all-hands-2026"
       ],
-      "isStarred": false,
+      "isStarred": true,
       "isRead": true,
       "folder": "inbox",
-      "createdAt": "2026-10-05T21:35:33.377Z"
+      "createdAt": "2026-10-05T21:35:33.377Z",
+      "latestAnalysisId": "343bef61-f5f2-400f-a1e4-a687a911e183",
+      "classification": "Safe",
+      "riskScore": 0,
+      "riskLevel": "Low",
+      "promptInjectionSuspected": false
     },
     "e63a1663-d578-4e37-a7d7-26d2d9a84b2f": {
       "id": "e63a1663-d578-4e37-a7d7-26d2d9a84b2f",
@@ -309,9 +324,38 @@
         "http://candidate-portfolio-raw-redirect.io/payload.vbs"
       ],
       "isStarred": false,
+      "isRead": true,
+      "folder": "inbox",
+      "createdAt": "2026-10-04T21:35:33.377Z",
+      "latestAnalysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "classification": "Phishing",
+      "riskScore": 100,
+      "riskLevel": "Critical",
+      "promptInjectionSuspected": true
+    },
+    "42a11dbb-bdc2-41a9-8d8a-f018d02e5893": {
+      "id": "42a11dbb-bdc2-41a9-8d8a-f018d02e5893",
+      "userId": "google_nareshkarothia_gmail_com",
+      "senderName": "Naresh Karothia",
+      "senderEmail": "external-sender@unverified.org",
+      "recipientEmail": "nareshkarothia@gmail.com",
+      "subject": "Urgent: Microsoft 365 Password Reset Required",
+      "body": "Your session has expired. Click http://verify-portal-office365.net immediately to renew.",
+      "receivedAt": "2026-10-06T21:47:02.148Z",
+      "source": "manual",
+      "hasUrls": false,
+      "hasAttachments": false,
+      "attachmentInfo": [],
+      "urls": [],
+      "createdAt": "2026-10-06T21:47:02.148Z",
+      "isStarred": false,
       "isRead": false,
       "folder": "inbox",
-      "createdAt": "2026-10-04T21:35:33.377Z"
+      "latestAnalysisId": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "classification": "Phishing",
+      "riskScore": 85,
+      "riskLevel": "Critical",
+      "promptInjectionSuspected": false
     }
   },
   "analyses": {
@@ -480,6 +524,82 @@
       "status": "completed",
       "createdAt": "2026-10-06T21:39:23.721Z",
       "completedAt": "2026-10-06T21:39:23.721Z"
+    },
+    "ccb8540e-8819-49de-bb0d-d5825872e4bb": {
+      "id": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "userId": "google_khushikoli214_gmail_com",
+      "emailId": "ab2632e3-a50d-4f29-9878-7529535d853f",
+      "classification": "Phishing",
+      "riskScore": 100,
+      "riskLevel": "Critical",
+      "confidence": 96,
+      "explanation": "This email is classified as Phishing because it contains verified threat indicators: Display Name / Origin Domain Mismatch, Coercive Urgency Language, Credential Solicitation Pattern.",
+      "recommendedAction": "Do not click the link or enter credentials. Report this email to your security operations team.",
+      "promptInjectionSuspected": false,
+      "status": "completed",
+      "createdAt": "2026-10-06T21:43:59.156Z",
+      "completedAt": "2026-10-06T21:43:59.156Z"
+    },
+    "a2d48aff-f97c-4d35-8da0-ecc5644e66e2": {
+      "id": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "userId": "google_khushikoli214_gmail_com",
+      "emailId": "61727164-eadd-40ab-8d98-6506e5314774",
+      "classification": "Phishing",
+      "riskScore": 100,
+      "riskLevel": "Critical",
+      "confidence": 98,
+      "explanation": "This email is classified as Phishing because it contains verified threat indicators: Display Name / Origin Domain Mismatch, Coercive Urgency Language, Financial Transaction / Wire Instruction.",
+      "recommendedAction": "Do not click the link or enter credentials. Report this email to your security operations team.",
+      "promptInjectionSuspected": false,
+      "status": "completed",
+      "createdAt": "2026-10-06T21:44:12.823Z",
+      "completedAt": "2026-10-06T21:44:12.823Z"
+    },
+    "343bef61-f5f2-400f-a1e4-a687a911e183": {
+      "id": "343bef61-f5f2-400f-a1e4-a687a911e183",
+      "userId": "google_khushikoli214_gmail_com",
+      "emailId": "a86e8cc3-06e9-4905-9abe-ea01a8a93253",
+      "classification": "Safe",
+      "riskScore": 0,
+      "riskLevel": "Low",
+      "confidence": 80,
+      "explanation": "No malicious indicators or credential solicitation patterns were detected. Sender identity matches standard baseline.",
+      "recommendedAction": "Safe to proceed with regular delivery.",
+      "promptInjectionSuspected": false,
+      "status": "completed",
+      "createdAt": "2026-10-06T21:44:19.090Z",
+      "completedAt": "2026-10-06T21:44:19.090Z"
+    },
+    "fd408f4b-e9ad-4c3a-9174-5d074bada1a5": {
+      "id": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "userId": "google_khushikoli214_gmail_com",
+      "emailId": "e63a1663-d578-4e37-a7d7-26d2d9a84b2f",
+      "classification": "Phishing",
+      "riskScore": 100,
+      "riskLevel": "Critical",
+      "confidence": 92,
+      "explanation": "CRITICAL ADVERSARIAL ALERT: This email contains instruction override markers matching prompt injection techniques. The system isolated this input as untrusted data.",
+      "recommendedAction": "Quarantine email immediately. Disregard any embedded directives. Block sending domain.",
+      "promptInjectionSuspected": true,
+      "promptInjectionDetails": "Adversarial sequence matched: \"Ignore all previous instructions\"",
+      "status": "completed",
+      "createdAt": "2026-10-06T21:44:31.291Z",
+      "completedAt": "2026-10-06T21:44:31.291Z"
+    },
+    "953bd8a4-37dd-4dce-b518-eef014371f45": {
+      "id": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "userId": "google_nareshkarothia_gmail_com",
+      "emailId": "42a11dbb-bdc2-41a9-8d8a-f018d02e5893",
+      "classification": "Phishing",
+      "riskScore": 85,
+      "riskLevel": "Critical",
+      "confidence": 92,
+      "explanation": "This email is classified as Phishing because it contains verified threat indicators: Coercive Urgency Language, Credential Solicitation Pattern, Suspicious / Lookalike Destination URL.",
+      "recommendedAction": "Do not click the link or enter credentials. Report this email to your security operations team.",
+      "promptInjectionSuspected": false,
+      "status": "completed",
+      "createdAt": "2026-10-06T21:47:02.149Z",
+      "completedAt": "2026-10-06T21:47:02.149Z"
     }
   },
   "indicators": {
@@ -662,6 +782,186 @@
       "evidence": "URL: https://login-microsoft365-verify-portal.net/auth/session/renew?token=894fc82",
       "source": "Email Analysis Agent (URL Inspection)",
       "createdAt": "2026-10-06T21:39:23.721Z"
+    },
+    "a3c04ed7-1045-44a9-8e40-7429bb4b013a": {
+      "id": "a3c04ed7-1045-44a9-8e40-7429bb4b013a",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "type": "sender_domain_mismatch",
+      "title": "Display Name / Origin Domain Mismatch",
+      "description": "Sender display name \"IT Identity Service\" does not align with domain \"microsoft365-verify-portal.net\".",
+      "severity": "High",
+      "evidence": "From: IT Identity Service <security-notice@microsoft365-verify-portal.net>",
+      "source": "Email Analysis Agent",
+      "createdAt": "2026-10-06T21:43:59.156Z"
+    },
+    "1d121d06-6335-4941-806b-aa88466c40e9": {
+      "id": "1d121d06-6335-4941-806b-aa88466c40e9",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "type": "urgency_language",
+      "title": "Coercive Urgency Language",
+      "description": "Psychological pressure triggering panic or rushed action without verification.",
+      "severity": "High",
+      "evidence": "Keyword detected: \"URGENT\"",
+      "source": "Email Analysis Agent (NLP)",
+      "createdAt": "2026-10-06T21:43:59.156Z"
+    },
+    "e57cde83-4d97-4dbb-9323-7ac9851263b9": {
+      "id": "e57cde83-4d97-4dbb-9323-7ac9851263b9",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "type": "credential_request",
+      "title": "Credential Solicitation Pattern",
+      "description": "Message solicits password reset, session renewal, or authentication verification.",
+      "severity": "High",
+      "evidence": "Keyword detected: \"Password\"",
+      "source": "Email Analysis Agent (NLP)",
+      "createdAt": "2026-10-06T21:43:59.156Z"
+    },
+    "7cd90c89-58e6-4b6c-a8cc-7a7297e061de": {
+      "id": "7cd90c89-58e6-4b6c-a8cc-7a7297e061de",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "type": "suspicious_url",
+      "title": "Suspicious / Lookalike Destination URL",
+      "description": "URL domain \"login-microsoft365-verify-portal.net\" mimics authenticated portal infrastructure.",
+      "severity": "Critical",
+      "evidence": "URL: https://login-microsoft365-verify-portal.net/auth/session/renew?token=894fc82",
+      "source": "Email Analysis Agent (URL Inspection)",
+      "createdAt": "2026-10-06T21:43:59.156Z"
+    },
+    "6dd55c57-0124-404b-abf7-b5779f95e40e": {
+      "id": "6dd55c57-0124-404b-abf7-b5779f95e40e",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "sender_domain_mismatch",
+      "title": "Display Name / Origin Domain Mismatch",
+      "description": "Sender display name \"Robert Vance (CEO)\" does not align with domain \"exec-priority-mail.co\".",
+      "severity": "High",
+      "evidence": "From: Robert Vance (CEO) <ceo-office.internal@exec-priority-mail.co>",
+      "source": "Email Analysis Agent",
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "d2f3b434-b55a-47e5-8d71-8f128cafb20f": {
+      "id": "d2f3b434-b55a-47e5-8d71-8f128cafb20f",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "urgency_language",
+      "title": "Coercive Urgency Language",
+      "description": "Psychological pressure triggering panic or rushed action without verification.",
+      "severity": "High",
+      "evidence": "Keyword detected: \"urgent\"",
+      "source": "Email Analysis Agent (NLP)",
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "25a36be7-8a7f-4c1a-80d1-7ca7ad4f23e9": {
+      "id": "25a36be7-8a7f-4c1a-80d1-7ca7ad4f23e9",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "payment_request",
+      "title": "Financial Transaction / Wire Instruction",
+      "description": "Demands an expedited wire transfer, escrow settlement, or invoice payment.",
+      "severity": "High",
+      "evidence": "Keyword detected: \"Wire Transfer\"",
+      "source": "Email Analysis Agent (NLP)",
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "998cdbf3-7f4b-4382-b7c5-27c1ebd46a4d": {
+      "id": "998cdbf3-7f4b-4382-b7c5-27c1ebd46a4d",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "impersonation",
+      "title": "Verification Channel Suppression",
+      "description": "Instructs recipient not to call or verify independently due to travel/flight pretext.",
+      "severity": "High",
+      "evidence": "Phrasing detected: \"boarding a flight\"",
+      "source": "Email Analysis Agent",
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "0c2e7347-5e89-49de-b3f3-5c6e67ace087": {
+      "id": "0c2e7347-5e89-49de-b3f3-5c6e67ace087",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "malicious_attachment",
+      "title": "Suspicious File Attachment",
+      "description": "Attachment \"Escrow_Routing_Instructions.pdf\" has high-risk script extensions or unverified payload.",
+      "severity": "High",
+      "evidence": "Attachment: Escrow_Routing_Instructions.pdf (142 KB)",
+      "source": "Email Analysis Agent",
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "e1be13b4-5962-4396-b947-5b48e37ce93a": {
+      "id": "e1be13b4-5962-4396-b947-5b48e37ce93a",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "type": "prompt_injection",
+      "title": "Adversarial Prompt Injection Attempt",
+      "description": "Email content contains directive override sequences targeting the AI orchestrator.",
+      "severity": "Critical",
+      "evidence": "Adversarial sequence matched: \"Ignore all previous instructions\"",
+      "source": "Prompt Injection Detector (OWASP LLM01)",
+      "createdAt": "2026-10-06T21:44:31.291Z"
+    },
+    "cc0dddd5-1e56-4b6a-b689-234fa11b512e": {
+      "id": "cc0dddd5-1e56-4b6a-b689-234fa11b512e",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "type": "urgency_language",
+      "title": "Coercive Urgency Language",
+      "description": "Psychological pressure triggering panic or rushed action without verification.",
+      "severity": "High",
+      "evidence": "Keyword detected: \"Immediately\"",
+      "source": "Email Analysis Agent (NLP)",
+      "createdAt": "2026-10-06T21:44:31.291Z"
+    },
+    "d47dbcd4-f296-4e6f-91a0-79623eaa0481": {
+      "id": "d47dbcd4-f296-4e6f-91a0-79623eaa0481",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "type": "suspicious_url",
+      "title": "Malicious Script Payload Link",
+      "description": "Hyperlink targets executable or script file extension: http://candidate-portfolio-raw-redirect.io/payload.vbs",
+      "severity": "Critical",
+      "evidence": "URL: http://candidate-portfolio-raw-redirect.io/payload.vbs",
+      "source": "Email Analysis Agent (URL Inspection)",
+      "createdAt": "2026-10-06T21:44:31.291Z"
+    },
+    "47108a4a-1bfa-46ae-a680-1fd7f6b82d6d": {
+      "id": "47108a4a-1bfa-46ae-a680-1fd7f6b82d6d",
+      "userId": "google_nareshkarothia_gmail_com",
+      "analysisId": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "type": "urgency_language",
+      "title": "Coercive Urgency Language",
+      "description": "Psychological pressure triggering panic or rushed action without verification.",
+      "severity": "High",
+      "evidence": "Keyword detected: \"Urgent\"",
+      "source": "Email Analysis Agent (NLP)",
+      "createdAt": "2026-10-06T21:47:02.149Z"
+    },
+    "8232c2f3-3536-402b-959f-d5f5289502a6": {
+      "id": "8232c2f3-3536-402b-959f-d5f5289502a6",
+      "userId": "google_nareshkarothia_gmail_com",
+      "analysisId": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "type": "credential_request",
+      "title": "Credential Solicitation Pattern",
+      "description": "Message solicits password reset, session renewal, or authentication verification.",
+      "severity": "High",
+      "evidence": "Keyword detected: \"Password\"",
+      "source": "Email Analysis Agent (NLP)",
+      "createdAt": "2026-10-06T21:47:02.149Z"
+    },
+    "16ce0787-2359-43f2-83fa-031bdc2b98ec": {
+      "id": "16ce0787-2359-43f2-83fa-031bdc2b98ec",
+      "userId": "google_nareshkarothia_gmail_com",
+      "analysisId": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "type": "suspicious_url",
+      "title": "Suspicious / Lookalike Destination URL",
+      "description": "URL domain \"verify-portal-office365.net\" mimics authenticated portal infrastructure.",
+      "severity": "Critical",
+      "evidence": "URL: http://verify-portal-office365.net",
+      "source": "Email Analysis Agent (URL Inspection)",
+      "createdAt": "2026-10-06T21:47:02.149Z"
     }
   },
   "threatIntelligence": {
@@ -760,6 +1060,102 @@
       "suspicious": false,
       "reputation": "API Key not configured in environment",
       "checkedAt": "2026-10-06T21:39:23.721Z"
+    },
+    "0a2bf9eb-d8d5-4cba-92f3-5df508ee1aea": {
+      "id": "0a2bf9eb-d8d5-4cba-92f3-5df508ee1aea",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "url": "https://login-microsoft365-verify-portal.net/auth/session/renew?token=894fc82",
+      "provider": "VirusTotal",
+      "status": "not_configured",
+      "malicious": false,
+      "suspicious": false,
+      "reputation": "API Key not configured in environment",
+      "checkedAt": "2026-10-06T21:43:59.156Z"
+    },
+    "c8484082-a551-4d08-9883-689ab1c5f7d4": {
+      "id": "c8484082-a551-4d08-9883-689ab1c5f7d4",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "url": "https://login-microsoft365-verify-portal.net/auth/session/renew?token=894fc82",
+      "provider": "urlscan.io",
+      "status": "not_configured",
+      "malicious": false,
+      "suspicious": false,
+      "reputation": "API Key not configured in environment",
+      "checkedAt": "2026-10-06T21:43:59.156Z"
+    },
+    "71696e20-57c5-4baa-a160-c7033f680b7c": {
+      "id": "71696e20-57c5-4baa-a160-c7033f680b7c",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "343bef61-f5f2-400f-a1e4-a687a911e183",
+      "url": "https://organization.edu/events/fall-all-hands-2026",
+      "provider": "VirusTotal",
+      "status": "not_configured",
+      "malicious": false,
+      "suspicious": false,
+      "reputation": "API Key not configured in environment",
+      "checkedAt": "2026-10-06T21:44:19.090Z"
+    },
+    "9b762ad5-0e90-4332-b5f8-31b4ca4d038b": {
+      "id": "9b762ad5-0e90-4332-b5f8-31b4ca4d038b",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "343bef61-f5f2-400f-a1e4-a687a911e183",
+      "url": "https://organization.edu/events/fall-all-hands-2026",
+      "provider": "urlscan.io",
+      "status": "not_configured",
+      "malicious": false,
+      "suspicious": false,
+      "reputation": "API Key not configured in environment",
+      "checkedAt": "2026-10-06T21:44:19.090Z"
+    },
+    "aab5b26b-55f0-418c-992c-2b3249871cad": {
+      "id": "aab5b26b-55f0-418c-992c-2b3249871cad",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "url": "http://candidate-portfolio-raw-redirect.io/payload.vbs",
+      "provider": "VirusTotal",
+      "status": "not_configured",
+      "malicious": false,
+      "suspicious": false,
+      "reputation": "API Key not configured in environment",
+      "checkedAt": "2026-10-06T21:44:31.291Z"
+    },
+    "12bbf077-5efd-4c3f-adaa-2690f6723806": {
+      "id": "12bbf077-5efd-4c3f-adaa-2690f6723806",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "url": "http://candidate-portfolio-raw-redirect.io/payload.vbs",
+      "provider": "urlscan.io",
+      "status": "not_configured",
+      "malicious": false,
+      "suspicious": false,
+      "reputation": "API Key not configured in environment",
+      "checkedAt": "2026-10-06T21:44:31.291Z"
+    },
+    "6c0dd9d8-af11-402b-b051-a7bf1baed1a2": {
+      "id": "6c0dd9d8-af11-402b-b051-a7bf1baed1a2",
+      "userId": "google_nareshkarothia_gmail_com",
+      "analysisId": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "url": "http://verify-portal-office365.net",
+      "provider": "VirusTotal",
+      "status": "not_configured",
+      "malicious": false,
+      "suspicious": false,
+      "reputation": "API Key not configured in environment",
+      "checkedAt": "2026-10-06T21:47:02.149Z"
+    },
+    "5a583475-bd0d-4b85-880a-c9d5116ebc59": {
+      "id": "5a583475-bd0d-4b85-880a-c9d5116ebc59",
+      "userId": "google_nareshkarothia_gmail_com",
+      "analysisId": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "url": "http://verify-portal-office365.net",
+      "provider": "urlscan.io",
+      "status": "not_configured",
+      "malicious": false,
+      "suspicious": false,
+      "reputation": "API Key not configured in environment",
+      "checkedAt": "2026-10-06T21:47:02.149Z"
     }
   },
   "evidence": {
@@ -997,6 +1393,230 @@
       "source": "Email Analysis Agent (URL Inspection)",
       "sourceUrl": "URL: https://login-microsoft365-verify-portal.net/auth/session/renew?token=894fc82",
       "createdAt": "2026-10-06T21:39:23.721Z"
+    },
+    "750da763-7999-49e9-8fbd-57d506a7a4a8": {
+      "id": "750da763-7999-49e9-8fbd-57d506a7a4a8",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "type": "RAG / Knowledge Base",
+      "title": "MITRE ATT&CK T1566.002: Spearphishing Link",
+      "description": "Adversaries send spearphishing emails with a link designed to lure victims to credential harvesting portals.",
+      "source": "MITRE ATT&CK Framework",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1566/002/",
+      "relevanceScore": 0.91,
+      "createdAt": "2026-10-06T21:43:59.156Z"
+    },
+    "b40ca2dc-5e0f-4172-8ad8-cc484b1e50f7": {
+      "id": "b40ca2dc-5e0f-4172-8ad8-cc484b1e50f7",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "type": "Email Content",
+      "title": "Display Name / Origin Domain Mismatch",
+      "description": "Sender display name \"IT Identity Service\" does not align with domain \"microsoft365-verify-portal.net\".",
+      "source": "Email Analysis Agent",
+      "sourceUrl": "From: IT Identity Service <security-notice@microsoft365-verify-portal.net>",
+      "createdAt": "2026-10-06T21:43:59.156Z"
+    },
+    "a81a93f1-9942-4521-9e76-deb85b2876cc": {
+      "id": "a81a93f1-9942-4521-9e76-deb85b2876cc",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "type": "Email Content",
+      "title": "Coercive Urgency Language",
+      "description": "Psychological pressure triggering panic or rushed action without verification.",
+      "source": "Email Analysis Agent (NLP)",
+      "sourceUrl": "Keyword detected: \"URGENT\"",
+      "createdAt": "2026-10-06T21:43:59.156Z"
+    },
+    "9ad6ab6c-9b23-4089-9d23-dd86d0607b88": {
+      "id": "9ad6ab6c-9b23-4089-9d23-dd86d0607b88",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "type": "Email Content",
+      "title": "Credential Solicitation Pattern",
+      "description": "Message solicits password reset, session renewal, or authentication verification.",
+      "source": "Email Analysis Agent (NLP)",
+      "sourceUrl": "Keyword detected: \"Password\"",
+      "createdAt": "2026-10-06T21:43:59.156Z"
+    },
+    "8cdb7c74-8476-489d-ab1b-0afa61cbcfe6": {
+      "id": "8cdb7c74-8476-489d-ab1b-0afa61cbcfe6",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "ccb8540e-8819-49de-bb0d-d5825872e4bb",
+      "type": "Email Content",
+      "title": "Suspicious / Lookalike Destination URL",
+      "description": "URL domain \"login-microsoft365-verify-portal.net\" mimics authenticated portal infrastructure.",
+      "source": "Email Analysis Agent (URL Inspection)",
+      "sourceUrl": "URL: https://login-microsoft365-verify-portal.net/auth/session/renew?token=894fc82",
+      "createdAt": "2026-10-06T21:43:59.156Z"
+    },
+    "6d25f82f-2976-435c-be96-22901f5a6e51": {
+      "id": "6d25f82f-2976-435c-be96-22901f5a6e51",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "RAG / Knowledge Base",
+      "title": "FBI IC3: Business Email Compromise (BEC) CEO Fraud",
+      "description": "Social engineering attack impersonating C-level executives requesting urgent wire transfers with suppression of phone verification.",
+      "source": "FBI Internet Crime Complaint Center (IC3)",
+      "relevanceScore": 0.94,
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "77a42469-2fa9-464f-95e4-70fa3a3cac49": {
+      "id": "77a42469-2fa9-464f-95e4-70fa3a3cac49",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "Email Content",
+      "title": "Display Name / Origin Domain Mismatch",
+      "description": "Sender display name \"Robert Vance (CEO)\" does not align with domain \"exec-priority-mail.co\".",
+      "source": "Email Analysis Agent",
+      "sourceUrl": "From: Robert Vance (CEO) <ceo-office.internal@exec-priority-mail.co>",
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "460ba8ad-a69e-4257-abfe-5ff6c5da0c4a": {
+      "id": "460ba8ad-a69e-4257-abfe-5ff6c5da0c4a",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "Email Content",
+      "title": "Coercive Urgency Language",
+      "description": "Psychological pressure triggering panic or rushed action without verification.",
+      "source": "Email Analysis Agent (NLP)",
+      "sourceUrl": "Keyword detected: \"urgent\"",
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "b87cf57b-61da-48cc-8fc4-fed43431766d": {
+      "id": "b87cf57b-61da-48cc-8fc4-fed43431766d",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "Email Content",
+      "title": "Financial Transaction / Wire Instruction",
+      "description": "Demands an expedited wire transfer, escrow settlement, or invoice payment.",
+      "source": "Email Analysis Agent (NLP)",
+      "sourceUrl": "Keyword detected: \"Wire Transfer\"",
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "c6b17e09-1e35-4c9b-975c-4c67f5941ccb": {
+      "id": "c6b17e09-1e35-4c9b-975c-4c67f5941ccb",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "Email Content",
+      "title": "Verification Channel Suppression",
+      "description": "Instructs recipient not to call or verify independently due to travel/flight pretext.",
+      "source": "Email Analysis Agent",
+      "sourceUrl": "Phrasing detected: \"boarding a flight\"",
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "d2833aa2-3a7d-4549-aa8e-bd05fdeef7d0": {
+      "id": "d2833aa2-3a7d-4549-aa8e-bd05fdeef7d0",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "a2d48aff-f97c-4d35-8da0-ecc5644e66e2",
+      "type": "Email Content",
+      "title": "Suspicious File Attachment",
+      "description": "Attachment \"Escrow_Routing_Instructions.pdf\" has high-risk script extensions or unverified payload.",
+      "source": "Email Analysis Agent",
+      "sourceUrl": "Attachment: Escrow_Routing_Instructions.pdf (142 KB)",
+      "createdAt": "2026-10-06T21:44:12.823Z"
+    },
+    "a0aa582c-bf04-448f-a3f0-2f78ef3209a7": {
+      "id": "a0aa582c-bf04-448f-a3f0-2f78ef3209a7",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "type": "RAG / Knowledge Base",
+      "title": "OWASP LLM01: Direct & Indirect Prompt Injection",
+      "description": "Matches adversarial payload patterns intended to subvert language model system instructions.",
+      "source": "OWASP Top 10 for LLM Applications",
+      "sourceUrl": "https://owasp.org/www-project-top-10-for-large-language-model-applications/",
+      "relevanceScore": 0.96,
+      "createdAt": "2026-10-06T21:44:31.291Z"
+    },
+    "51a9ec02-f58c-4013-905c-418b522c2241": {
+      "id": "51a9ec02-f58c-4013-905c-418b522c2241",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "type": "RAG / Knowledge Base",
+      "title": "MITRE ATT&CK T1566.002: Spearphishing Link",
+      "description": "Adversaries send spearphishing emails with a link designed to lure victims to credential harvesting portals.",
+      "source": "MITRE ATT&CK Framework",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1566/002/",
+      "relevanceScore": 0.91,
+      "createdAt": "2026-10-06T21:44:31.291Z"
+    },
+    "7fd7d9d2-4d57-43d5-96ad-0c10b2acb026": {
+      "id": "7fd7d9d2-4d57-43d5-96ad-0c10b2acb026",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "type": "Email Content",
+      "title": "Adversarial Prompt Injection Attempt",
+      "description": "Email content contains directive override sequences targeting the AI orchestrator.",
+      "source": "Prompt Injection Detector (OWASP LLM01)",
+      "sourceUrl": "Adversarial sequence matched: \"Ignore all previous instructions\"",
+      "createdAt": "2026-10-06T21:44:31.291Z"
+    },
+    "d952a1af-81c5-4570-bc4a-e743162491d9": {
+      "id": "d952a1af-81c5-4570-bc4a-e743162491d9",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "type": "Email Content",
+      "title": "Coercive Urgency Language",
+      "description": "Psychological pressure triggering panic or rushed action without verification.",
+      "source": "Email Analysis Agent (NLP)",
+      "sourceUrl": "Keyword detected: \"Immediately\"",
+      "createdAt": "2026-10-06T21:44:31.291Z"
+    },
+    "7852da27-d601-4c4d-8edd-50693823dea7": {
+      "id": "7852da27-d601-4c4d-8edd-50693823dea7",
+      "userId": "google_khushikoli214_gmail_com",
+      "analysisId": "fd408f4b-e9ad-4c3a-9174-5d074bada1a5",
+      "type": "Email Content",
+      "title": "Malicious Script Payload Link",
+      "description": "Hyperlink targets executable or script file extension: http://candidate-portfolio-raw-redirect.io/payload.vbs",
+      "source": "Email Analysis Agent (URL Inspection)",
+      "sourceUrl": "URL: http://candidate-portfolio-raw-redirect.io/payload.vbs",
+      "createdAt": "2026-10-06T21:44:31.291Z"
+    },
+    "04ff06a1-72f5-44b8-8c1c-2c91f8a710dd": {
+      "id": "04ff06a1-72f5-44b8-8c1c-2c91f8a710dd",
+      "userId": "google_nareshkarothia_gmail_com",
+      "analysisId": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "type": "RAG / Knowledge Base",
+      "title": "MITRE ATT&CK T1566.002: Spearphishing Link",
+      "description": "Adversaries send spearphishing emails with a link designed to lure victims to credential harvesting portals.",
+      "source": "MITRE ATT&CK Framework",
+      "sourceUrl": "https://attack.mitre.org/techniques/T1566/002/",
+      "relevanceScore": 0.91,
+      "createdAt": "2026-10-06T21:47:02.149Z"
+    },
+    "d1af3baf-6cee-45f5-a0a0-fb68de99639f": {
+      "id": "d1af3baf-6cee-45f5-a0a0-fb68de99639f",
+      "userId": "google_nareshkarothia_gmail_com",
+      "analysisId": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "type": "Email Content",
+      "title": "Coercive Urgency Language",
+      "description": "Psychological pressure triggering panic or rushed action without verification.",
+      "source": "Email Analysis Agent (NLP)",
+      "sourceUrl": "Keyword detected: \"Urgent\"",
+      "createdAt": "2026-10-06T21:47:02.149Z"
+    },
+    "b2e2bcee-c21e-4a0a-9837-d604f5aa33c7": {
+      "id": "b2e2bcee-c21e-4a0a-9837-d604f5aa33c7",
+      "userId": "google_nareshkarothia_gmail_com",
+      "analysisId": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "type": "Email Content",
+      "title": "Credential Solicitation Pattern",
+      "description": "Message solicits password reset, session renewal, or authentication verification.",
+      "source": "Email Analysis Agent (NLP)",
+      "sourceUrl": "Keyword detected: \"Password\"",
+      "createdAt": "2026-10-06T21:47:02.149Z"
+    },
+    "37ae7740-bf5b-4385-90e2-bc70aae76f8f": {
+      "id": "37ae7740-bf5b-4385-90e2-bc70aae76f8f",
+      "userId": "google_nareshkarothia_gmail_com",
+      "analysisId": "953bd8a4-37dd-4dce-b518-eef014371f45",
+      "type": "Email Content",
+      "title": "Suspicious / Lookalike Destination URL",
+      "description": "URL domain \"verify-portal-office365.net\" mimics authenticated portal infrastructure.",
+      "source": "Email Analysis Agent (URL Inspection)",
+      "sourceUrl": "URL: http://verify-portal-office365.net",
+      "createdAt": "2026-10-06T21:47:02.149Z"
     }
   },
   "settings": {}
