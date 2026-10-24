@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { GoogleGenAI } from '@google/genai';
 import { db, EmailRecord, AnalysisRecord, IndicatorRecord, ThreatIntelRecord, EvidenceRecord, PipelineLogRecord } from './db.js';
 import { ragEngine } from './ragService.js';
 import { threatIntelService } from './threatIntelService.js';
@@ -478,15 +479,74 @@ export async function executeThreatAnalysisPipeline(
     message: `Deterministic Risk Engine calculated: ${finalRiskScore}/100 (${riskLevel}). Reasons: ${deterministicReasons.join('; ') || 'No risk indicators detected.'}`,
   });
 
-  // 7. LLM Reasoning / Explainability (Groq)
+  // 7. LLM Reasoning / Explainability (Gemini 3.8 Flash & Groq with Deterministic Fallback)
   const t7 = Date.now();
   let explanation = '';
   let recommendedAction = '';
   let confidenceScore: number | null = null;
-  let llmStatus: 'completed'|'not_configured'|'unavailable' = process.env.GROQ_API_KEY ? 'completed' : 'not_configured';
+  let llmStatus: 'completed' | 'not_configured' | 'unavailable' =
+    process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY ? 'completed' : 'not_configured';
 
-  const grokKey = process.env.GROQ_API_KEY;
-  if (grokKey) {
+  // Primary: Gemini 3.8 Flash
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const ai = new GoogleGenAI();
+      const systemPrompt = `You are an expert cybersecurity analyst specializing in email threat detection.
+Provide clear, accurate, and actionable explanations for email security verdicts.
+Always respond with valid JSON in this exact format:
+{
+  "explanation": "2-3 concise sentences explaining the classification",
+  "recommended_action": "Clear operational recommendation for the user/SOC team",
+  "confidence": 0
+}`;
+
+      const userPrompt = `Analyze this email and provide explanation:
+
+Email Subject: ${email.subject}
+Sender: ${email.senderName} <${email.senderEmail}>
+Body Preview: ${email.body.substring(0, 500)}${email.body.length > 500 ? '...' : ''}
+
+Detected Indicators: ${indicators.map((i) => `- ${i.title}: ${i.description}`).join('\n')}
+Threat Intel Flags: ${threatIntel.filter((t) => t.malicious || t.suspicious).map((t) => `- ${t.provider}: ${t.reputation}`).join('\n') || 'None'}
+Prompt Injection Suspected: ${promptInjectionSuspected}
+
+Risk Score: ${finalRiskScore}/100
+Risk Level: ${riskLevel}
+Classification: ${classification}
+
+Provide a detailed yet concise explanation based on the evidence.`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents: userPrompt,
+        config: {
+          systemInstruction: systemPrompt,
+          temperature: 0.2,
+          responseMimeType: 'application/json',
+        },
+      });
+
+      const content = response.text || '';
+      try {
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(content);
+        explanation = parsed.explanation || '';
+        recommendedAction = parsed.recommended_action || '';
+        confidenceScore = Number.isFinite(Number(parsed.confidence))
+          ? Math.max(0, Math.min(100, Number(parsed.confidence)))
+          : null;
+        llmStatus = 'completed';
+      } catch (parseErr) {
+        console.warn('[AI] Failed to parse Gemini response JSON:', parseErr);
+      }
+    } catch (err: any) {
+      console.warn('[AI] Gemini generation error, attempting fallback:', err?.message || err);
+    }
+  }
+
+  // Secondary: Groq fallback if Gemini did not produce an explanation
+  if (!explanation && process.env.GROQ_API_KEY) {
+    const grokKey = process.env.GROQ_API_KEY;
     try {
       const systemPrompt = `You are an expert cybersecurity analyst specializing in email threat detection. 
 Your job is to provide clear, accurate, and actionable explanations for email security verdicts.
@@ -505,7 +565,7 @@ Sender: ${email.senderName} <${email.senderEmail}>
 Body Preview: ${email.body.substring(0, 500)}${email.body.length > 500 ? '...' : ''}
 
 Detected Indicators: ${indicators.map((i) => `- ${i.title}: ${i.description}`).join('\n')}
-Threat Intel Flags: ${threatIntel.filter(t => t.malicious || t.suspicious).map(t => `- ${t.provider}: ${t.reputation}`).join('\n') || 'None'}
+Threat Intel Flags: ${threatIntel.filter((t) => t.malicious || t.suspicious).map((t) => `- ${t.provider}: ${t.reputation}`).join('\n') || 'None'}
 Prompt Injection Suspected: ${promptInjectionSuspected}
 
 Risk Score: ${finalRiskScore}/100
@@ -518,14 +578,14 @@ Provide a detailed yet concise explanation based on the evidence.`;
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${grokKey}`,
+          Authorization: `Bearer ${grokKey}`,
         },
         signal: AbortSignal.timeout(Number(process.env.GROQ_TIMEOUT_MS || 20000)),
         body: JSON.stringify({
-          model: (process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'),
+          model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
           messages: [
             { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
+            { role: 'user', content: userPrompt },
           ],
           temperature: 0.3,
           max_tokens: 500,
@@ -536,31 +596,40 @@ Provide a detailed yet concise explanation based on the evidence.`;
         const data = await response.json();
         const content = data.choices?.[0]?.message?.content || '';
         try {
-          // Try to parse JSON from response (handle markdown code blocks)
           const jsonMatch = content.match(/\{[\s\S]*\}/);
           const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(content);
           explanation = parsed.explanation || '';
           recommendedAction = parsed.recommended_action || '';
-          confidenceScore = Number.isFinite(Number(parsed.confidence)) ? Math.max(0, Math.min(100, Number(parsed.confidence))) : null;
+          confidenceScore = Number.isFinite(Number(parsed.confidence))
+            ? Math.max(0, Math.min(100, Number(parsed.confidence)))
+            : null;
           llmStatus = 'completed';
-        } catch (parseErr) {
+        } catch {
           llmStatus = 'unavailable';
-          console.warn('[AI] Failed to parse Groq response, using evidence-based fallback');
         }
       } else {
         llmStatus = 'unavailable';
-        console.warn(`[AI] Grok API error: ${response.status} ${response.statusText}`);
       }
     } catch (err: any) {
       llmStatus = 'unavailable';
-      console.warn('[AI] Groq generation fallback to deterministic rationale:', err?.message || err);
+      console.warn('[AI] Groq fallback error:', err?.message || err);
     }
   }
 
+  // Tertiary: Evidence-backed Deterministic Rationale
   if (!explanation) {
-    const observed = indicators.map(i => i.title + (i.evidence ? ' (' + i.evidence + ')' : '')).concat(threatIntel.filter(t => t.malicious || t.suspicious).map(t => t.provider + ': ' + t.url + ' ' + (t.reputation || 'flagged')));
-    explanation = observed.length ? 'Risk score ' + finalRiskScore + '/100 is based on observed evidence: ' + observed.slice(0,5).join('; ') + '.' : 'No configured detector or threat-intelligence source returned a finding. Unavailable integrations are unknown, not evidence of a clean email.';
-    recommendedAction = observed.length ? 'Review the evidence and verify sender requests through a trusted channel before interacting with links or attachments.' : 'No action is indicated by available evidence.';
+    const observed = indicators
+      .map((i) => i.title + (i.evidence ? ' (' + i.evidence + ')' : ''))
+      .concat(threatIntel.filter((t) => t.malicious || t.suspicious).map((t) => t.provider + ': ' + t.url + ' ' + (t.reputation || 'flagged')));
+    explanation = observed.length
+      ? 'Risk score ' + finalRiskScore + '/100 is based on observed evidence: ' + observed.slice(0, 5).join('; ') + '.'
+      : 'No configured detector or threat-intelligence source returned a finding. Unavailable integrations are unknown, not evidence of a clean email.';
+    recommendedAction = observed.length
+      ? 'Review the evidence and verify sender requests through a trusted channel before interacting with links or attachments.'
+      : 'No action is indicated by available evidence.';
+    if (!process.env.GEMINI_API_KEY && !process.env.GROQ_API_KEY) {
+      llmStatus = 'not_configured';
+    }
   }
 
 

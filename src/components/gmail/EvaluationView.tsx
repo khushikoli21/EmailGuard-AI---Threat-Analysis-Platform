@@ -93,6 +93,45 @@ export const EvaluationView: React.FC = () => {
     }
   };
 
+  const handleExportEvaluationCsv = () => {
+    if (!latestRun) return;
+    const rows = [
+      ['Evaluation Dataset', latestRun.datasetName],
+      ['Executed At', latestRun.executedAt],
+      ['Accuracy', `${latestRun.metrics.accuracy}%`],
+      ['Precision', `${latestRun.metrics.precision}%`],
+      ['Recall', `${latestRun.metrics.recall}%`],
+      ['F1 Score', `${latestRun.metrics.f1Score}%`],
+      ['True Positives', String(latestRun.confusionMatrix.truePositives)],
+      ['False Positives', String(latestRun.confusionMatrix.falsePositives)],
+      ['True Negatives', String(latestRun.confusionMatrix.trueNegatives)],
+      ['False Negatives', String(latestRun.confusionMatrix.falseNegatives)],
+      [],
+      ['Sample ID', 'Subject', 'Sender', 'Ground Truth', 'Predicted Class', 'Risk Score', 'Verdict Correct', 'Indicators Count', 'Rationale'],
+      ...latestRun.samples.map((s) => [
+        s.id,
+        s.subject,
+        s.senderEmail,
+        s.groundTruth,
+        s.predictedClass,
+        String(s.riskScore),
+        s.isCorrect ? 'TRUE' : 'FALSE',
+        String(s.indicatorsCount),
+        s.explanation,
+      ]),
+    ];
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      rows.map((row) => row.map((cell) => `"${String(cell || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `Evaluation_Benchmark_${latestRun.datasetId}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const latestRun = data?.latestRun;
 
   return (
@@ -116,6 +155,17 @@ export const EvaluationView: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
+          {latestRun && (
+            <button
+              onClick={handleExportEvaluationCsv}
+              className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              title="Download tabular evaluation results as CSV"
+            >
+              <Download className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Export CSV</span>
+            </button>
+          )}
+
           <button
             onClick={() => setShowUploadModal(!showUploadModal)}
             className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"

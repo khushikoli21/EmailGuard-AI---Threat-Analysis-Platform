@@ -11,6 +11,8 @@ import { AnalyticsView } from './components/gmail/AnalyticsView';
 import { EvidenceView } from './components/gmail/EvidenceView';
 import { EvaluationView } from './components/gmail/EvaluationView';
 import { SettingsView } from './components/gmail/SettingsView';
+import { ThreatTriageView } from './components/gmail/ThreatTriageView';
+import { SecurityAnalystsView } from './components/gmail/SecurityAnalystsView';
 import { EmailRecord, fetchEmails, updateEmail, deleteEmail } from './services/api';
 import { Shield, Loader2 } from 'lucide-react';
 
@@ -25,18 +27,16 @@ function MainGmailApplication() {
   const [isSidebarOpenMobile, setIsSidebarOpenMobile] = useState<boolean>(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [isComposeOpen, setIsComposeOpen] = useState<boolean>(false);
+  const [analystTargetEmailId, setAnalystTargetEmailId] = useState<string | undefined>(undefined);
 
   // Load emails whenever folder tab, search, or filter changes
   const loadEmails = async () => {
+    const mailFolders = ['inbox', 'starred', 'sent', 'drafts', 'archived', 'trash', 'spam'];
+    if (!mailFolders.includes(currentTab)) return;
+
     try {
       setIsLoadingEmails(true);
-      const folder = currentTab === 'threats'
-        ? 'threats'
-        : ['inbox', 'starred', 'sent', 'drafts', 'trash'].includes(currentTab)
-        ? currentTab
-        : 'inbox';
-
-      const data = await fetchEmails(folder, searchQuery, activeFilter);
+      const data = await fetchEmails(currentTab, searchQuery, activeFilter);
       setEmails(data.items || []);
     } catch (err) {
       console.error('[GMAIL] Error loading emails:', err);
@@ -165,12 +165,34 @@ function MainGmailApplication() {
                 loadEmails();
               }}
             />
+          ) : currentTab === 'threat_triage' ? (
+            <ThreatTriageView
+              onOpenAnalystView={(emailId) => {
+                setSelectedEmail(null);
+                setAnalystTargetEmailId(emailId);
+                setCurrentTab('analysts');
+              }}
+              onOpenReport={() => {
+                setSelectedEmail(null);
+                setCurrentTab('reports');
+              }}
+            />
+          ) : currentTab === 'analysts' ? (
+            <SecurityAnalystsView
+              initialEmailId={analystTargetEmailId}
+              onNavigateToReport={() => {
+                setSelectedEmail(null);
+                setCurrentTab('reports');
+              }}
+            />
           ) : currentTab === 'reports' ? (
-            <ReportsView onSelectReportEmailId={handleNavigateFromReport} />
-          ) : currentTab === 'analytics' ? (
-            <AnalyticsView />
-          ) : currentTab === 'evidence' ? (
-            <EvidenceView />
+            <ReportsView
+              onSelectReportEmailId={(emailId) => {
+                setSelectedEmail(null);
+                setAnalystTargetEmailId(emailId);
+                setCurrentTab('analysts');
+              }}
+            />
           ) : currentTab === 'evaluation' ? (
             <EvaluationView />
           ) : currentTab === 'settings' ? (
@@ -178,7 +200,11 @@ function MainGmailApplication() {
           ) : (
             <EmailList
               emails={emails}
-              title={currentTab === 'threats' ? 'Threat Triage' : currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}
+              title={
+                currentTab === 'inbox'
+                  ? 'Inbox'
+                  : currentTab.charAt(0).toUpperCase() + currentTab.slice(1)
+              }
               isLoading={isLoadingEmails}
               onRefresh={loadEmails}
               onSelectEmail={handleSelectEmail}
@@ -198,7 +224,7 @@ function MainGmailApplication() {
         onClose={() => setIsComposeOpen(false)}
         onSuccess={() => {
           setSelectedEmail(null);
-          setCurrentTab('threats');
+          setCurrentTab('threat_triage');
         }}
       />
     </div>

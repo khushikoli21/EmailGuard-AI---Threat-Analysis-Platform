@@ -39,7 +39,7 @@ export interface EmailRecord {
   createdAt: string;
   isStarred: boolean;
   isRead: boolean;
-  folder: 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash' | 'analysis';
+  folder: 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash' | 'analysis' | 'archived' | 'spam';
   latestAnalysisId?: string;
   classification?: 'Safe' | 'Suspicious' | 'Phishing' | 'Spam' | 'Unanalyzed';
   riskScore?: number | null;
@@ -140,6 +140,64 @@ export interface UserSettingsRecord {
   updatedAt: string;
 }
 
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  timestamp: string;
+  evidenceUsed?: string[];
+}
+
+export interface TriageActivity {
+  id: string;
+  action: string;
+  timestamp: string;
+  details?: string;
+  actor?: string;
+}
+
+export interface TriageRecord {
+  id: string;
+  userId: string;
+  type: 'compose' | 'analyst';
+  title: string;
+  status: 'new' | 'in_review' | 'escalated' | 'quarantined' | 'resolved';
+  riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
+  riskScore: number | null;
+  emailId?: string;
+  analysisId?: string;
+  draftData?: {
+    recipientEmail: string;
+    senderEmail?: string;
+    senderName?: string;
+    subject: string;
+    body: string;
+    urls: string[];
+    attachmentInfo: EmailAttachment[];
+  };
+  messages: ChatMessage[];
+  activities: TriageActivity[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StoredReportRecord {
+  id: string;
+  userId: string;
+  title: string;
+  type: 'email_investigation' | 'dataset_evaluation';
+  targetId: string;
+  generatedAt: string;
+  summary: string;
+  riskScore?: number | null;
+  riskLevel?: 'Low' | 'Medium' | 'High' | 'Critical';
+  classification?: string;
+  sender?: string;
+  subject?: string;
+  indicatorsCount?: number;
+  data: any;
+}
+
 export interface DatabaseSchema {
   users: Record<string, UserRecord>;
   emails: Record<string, EmailRecord>;
@@ -149,6 +207,8 @@ export interface DatabaseSchema {
   evidence: Record<string, EvidenceRecord>;
   settings: Record<string, UserSettingsRecord>;
   pipelineLogs: Record<string, PipelineLogRecord>;
+  triage: Record<string, TriageRecord>;
+  reports: Record<string, StoredReportRecord>;
 }
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -164,6 +224,8 @@ class DatabaseManager {
     evidence: {},
     settings: {},
     pipelineLogs: {},
+    triage: {},
+    reports: {},
   };
   private isSaving = false;
   private pendingSave = false;
@@ -189,6 +251,9 @@ class DatabaseManager {
         this.db.threatIntelligence = this.db.threatIntelligence || {};
         this.db.evidence = this.db.evidence || {};
         this.db.settings = this.db.settings || {};
+        this.db.pipelineLogs = this.db.pipelineLogs || {};
+        this.db.triage = this.db.triage || {};
+        this.db.reports = this.db.reports || {};
       } else {
         this.persistSync();
       }
@@ -390,6 +455,115 @@ class DatabaseManager {
     return updated;
   }
 
+  // --- Threat Triage (Compose Sessions & Analyst Investigations) ---
+  public getTriageItems(
+    userId: string,
+    filter?: { type?: string; riskLevel?: string; status?: string; search?: string }
+  ): TriageRecord[] {
+    let items = Object.values(this.db.triage || {}).filter((t) => t.userId === userId);
+
+    if (filter?.type && filter.type !== 'all') {
+      items = items.filter((t) => t.type === filter.type);
+    }
+    if (filter?.riskLevel && filter.riskLevel !== 'all') {
+      items = items.filter((t) => t.riskLevel?.toLowerCase() === filter.riskLevel!.toLowerCase());
+    }
+    if (filter?.status && filter.status !== 'all') {
+      items = items.filter((t) => t.status === filter.status);
+    }
+    if (filter?.search && filter.search.trim()) {
+      const q = filter.search.toLowerCase();
+      items = items.filter(
+        (t) =>
+          t.title.toLowerCase().includes(q) ||
+          t.draftData?.subject.toLowerCase().includes(q) ||
+          t.draftData?.recipientEmail.toLowerCase().includes(q)
+      );
+    }
+
+    return items.sort((a, b) => new Date(b.updatedAt || b.createdAt).getTime() - new Date(a.updatedAt || a.createdAt).getTime());
+  }
+
+  public getTriageItem(id: string, userId: string): TriageRecord | null {
+    const item = (this.db.triage || {})[id];
+    if (item && item.userId === userId) {
+      return item;
+    }
+    return null;
+  }
+
+  public saveTriageItem(item: TriageRecord): TriageRecord {
+    if (!this.db.triage) this.db.triage = {};
+    this.db.triage[item.id] = item;
+    this.save();
+    return item;
+  }
+
+  public updateTriageItem(id: string, userId: string, updates: Partial<TriageRecord>): TriageRecord | null {
+    const existing = this.getTriageItem(id, userId);
+    if (!existing) return null;
+    const updated: TriageRecord = {
+      ...existing,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    this.db.triage[id] = updated;
+    this.save();
+    return updated;
+  }
+
+  public deleteTriageItem(id: string, userId: string): boolean {
+    const existing = this.getTriageItem(id, userId);
+    if (!existing) return false;
+    delete this.db.triage[id];
+    this.save();
+    return true;
+  }
+
+  public addTriageMessage(triageId: string, userId: string, message: ChatMessage): TriageRecord | null {
+    const existing = this.getTriageItem(triageId, userId);
+    if (!existing) return null;
+    const messages = [...(existing.messages || []), message];
+    return this.updateTriageItem(triageId, userId, { messages });
+  }
+
+  public addTriageActivity(triageId: string, userId: string, activity: TriageActivity): TriageRecord | null {
+    const existing = this.getTriageItem(triageId, userId);
+    if (!existing) return null;
+    const activities = [...(existing.activities || []), activity];
+    return this.updateTriageItem(triageId, userId, { activities });
+  }
+
+  // --- Stored Threat Reports ---
+  public getStoredReports(userId: string): StoredReportRecord[] {
+    return Object.values(this.db.reports || {})
+      .filter((r) => r.userId === userId)
+      .sort((a, b) => new Date(b.generatedAt).getTime() - new Date(a.generatedAt).getTime());
+  }
+
+  public getStoredReport(id: string, userId: string): StoredReportRecord | null {
+    const report = (this.db.reports || {})[id];
+    if (report && report.userId === userId) {
+      return report;
+    }
+    return null;
+  }
+
+  public saveStoredReport(report: StoredReportRecord): StoredReportRecord {
+    if (!this.db.reports) this.db.reports = {};
+    this.db.reports[report.id] = report;
+    this.save();
+    return report;
+  }
+
+  public deleteStoredReport(id: string, userId: string): boolean {
+    const existing = this.getStoredReport(id, userId);
+    if (!existing) return false;
+    delete this.db.reports[id];
+    this.save();
+    return true;
+  }
+
   // Seed default starting emails for a new user if they have 0 emails
   public seedUserStarterEmails(user: UserRecord) {
     const userEmails = this.getEmailsByUser(user.uid);
@@ -483,6 +657,105 @@ class DatabaseManager {
         createdAt: em.receivedAt,
       };
       this.saveEmail(emailRecord);
+    }
+
+    // Seed initial triage items (one analyst investigation and one compose draft session)
+    const existingTriage = this.getTriageItems(user.uid);
+    if (existingTriage.length === 0) {
+      const now = new Date().toISOString();
+      const promptInjectionEmail = this.getEmailsByUser(user.uid).find((e) => e.subject.includes('SYSTEM OVERRIDE'));
+      if (promptInjectionEmail) {
+        const triageItem: TriageRecord = {
+          id: uuidv4(),
+          userId: user.uid,
+          type: 'analyst',
+          title: 'Adversarial Prompt Injection in Resume Submission',
+          status: 'in_review',
+          riskLevel: 'Critical',
+          riskScore: 95,
+          emailId: promptInjectionEmail.id,
+          messages: [
+            {
+              id: uuidv4(),
+              role: 'user',
+              text: 'Why was this applicant email flagged as critical?',
+              timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+            },
+            {
+              id: uuidv4(),
+              role: 'assistant',
+              text: 'This email contains an active prompt injection attack (OWASP LLM01) disguised inside a CV submission, attempting to command the AI system to disregard all safety classifiers and force a "Safe" verdict. It also links to a suspicious Visual Basic Script payload (.vbs).',
+              timestamp: new Date(Date.now() - 1000 * 60 * 29).toISOString(),
+              evidenceUsed: ['OWASP LLM01: Prompt Injection', 'Malicious Script Payload (.vbs)'],
+            },
+          ],
+          activities: [
+            {
+              id: uuidv4(),
+              action: 'Investigation Created',
+              timestamp: new Date(Date.now() - 1000 * 60 * 35).toISOString(),
+              details: 'Triaged from incoming inbox feed.',
+              actor: user.name,
+            },
+            {
+              id: uuidv4(),
+              action: 'Status Updated',
+              timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+              details: 'Marked under active review with SOC team.',
+              actor: user.name,
+            },
+          ],
+          createdAt: new Date(Date.now() - 1000 * 60 * 40).toISOString(),
+          updatedAt: now,
+        };
+        this.saveTriageItem(triageItem);
+      }
+
+      // Compose draft session stored in Triage (NOT inbox!)
+      const composeTriage: TriageRecord = {
+        id: uuidv4(),
+        userId: user.uid,
+        type: 'compose',
+        title: 'Draft: Enterprise Security Advisory on Phishing Campaign',
+        status: 'new',
+        riskLevel: 'Low',
+        riskScore: 10,
+        draftData: {
+          recipientEmail: 'all-employees@organization.edu',
+          senderEmail: user.email,
+          senderName: user.name,
+          subject: 'Security Notice: Beware of Fake Microsoft 365 Expiry Alerts',
+          body: 'Hello Team,\n\nPlease be advised of a targeted phishing campaign claiming passwords are about to expire. Do not click links to external net portals or enter login credentials.\n\nReport suspicious emails to SOC immediately.\n\nSecurity Operations Center',
+          urls: [],
+          attachmentInfo: [],
+        },
+        messages: [
+          {
+            id: uuidv4(),
+            role: 'user',
+            text: 'Is this draft advisory safe to send to company employees?',
+            timestamp: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+          },
+          {
+            id: uuidv4(),
+            role: 'assistant',
+            text: 'Yes, this draft contains clear defensive security guidance without suspicious URLs, payload attachments, or coercive urgency. It is safe for corporate distribution.',
+            timestamp: new Date(Date.now() - 1000 * 60 * 14).toISOString(),
+          },
+        ],
+        activities: [
+          {
+            id: uuidv4(),
+            action: 'Draft Created in Threat Triage',
+            timestamp: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
+            details: 'Draft initialized in secure triage workspace.',
+            actor: user.name,
+          },
+        ],
+        createdAt: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
+        updatedAt: now,
+      };
+      this.saveTriageItem(composeTriage);
     }
   }
 }

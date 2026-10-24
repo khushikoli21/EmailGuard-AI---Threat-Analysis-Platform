@@ -22,7 +22,7 @@ export interface EmailRecord {
   createdAt: string;
   isStarred: boolean;
   isRead: boolean;
-  folder: 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash' | 'analysis';
+  folder: 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash' | 'analysis' | 'archived' | 'spam';
   latestAnalysisId?: string;
   classification?: 'Safe' | 'Suspicious' | 'Phishing' | 'Spam' | 'Unanalyzed';
   riskScore?: number | null;
@@ -320,4 +320,190 @@ export async function fetchKnowledgeBase(): Promise<{items: Array<{id:string;nam
   const res = await apiFetch('/api/knowledge-base');
   if (!res.ok) throw new Error('Failed to load security knowledge base');
   return res.json();
+}
+
+// --- Threat Triage & Chatbot Types & Methods ---
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  text: string;
+  timestamp: string;
+  evidenceUsed?: string[];
+}
+
+export interface TriageActivity {
+  id: string;
+  action: string;
+  timestamp: string;
+  details?: string;
+  actor?: string;
+}
+
+export interface TriageItem {
+  id: string;
+  userId: string;
+  type: 'compose' | 'analyst';
+  title: string;
+  status: 'new' | 'in_review' | 'escalated' | 'quarantined' | 'resolved';
+  riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
+  riskScore: number | null;
+  emailId?: string;
+  analysisId?: string;
+  draftData?: {
+    recipientEmail: string;
+    senderEmail?: string;
+    senderName?: string;
+    subject: string;
+    body: string;
+    urls: string[];
+    attachmentInfo: any[];
+  };
+  messages: ChatMessage[];
+  activities: TriageActivity[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface StoredReportItem {
+  id: string;
+  userId: string;
+  title: string;
+  type: 'email_investigation' | 'dataset_evaluation';
+  targetId: string;
+  generatedAt: string;
+  summary: string;
+  riskScore?: number | null;
+  riskLevel?: 'Low' | 'Medium' | 'High' | 'Critical';
+  classification?: string;
+  sender?: string;
+  subject?: string;
+  indicatorsCount?: number;
+  data: any;
+}
+
+export async function fetchTriageItems(filters?: {
+  type?: string;
+  riskLevel?: string;
+  status?: string;
+  q?: string;
+}): Promise<{ total: number; items: TriageItem[] }> {
+  const params = new URLSearchParams();
+  if (filters?.type && filters.type !== 'all') params.append('type', filters.type);
+  if (filters?.riskLevel && filters.riskLevel !== 'all') params.append('riskLevel', filters.riskLevel);
+  if (filters?.status && filters.status !== 'all') params.append('status', filters.status);
+  if (filters?.q) params.append('q', filters.q);
+
+  const res = await apiFetch(`/api/triage?${params.toString()}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch triage items`);
+  return res.json();
+}
+
+export async function fetchTriageItem(id: string): Promise<{
+  item: TriageItem;
+  email: EmailRecord | null;
+  analysis: AnalysisRecord | null;
+  indicators: IndicatorRecord[];
+  threatIntel: ThreatIntelRecord[];
+  evidence: EvidenceRecord[];
+}> {
+  const res = await apiFetch(`/api/triage/${id}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch triage item details`);
+  return res.json();
+}
+
+export async function createTriageItem(payload: {
+  type: 'compose' | 'analyst';
+  title?: string;
+  emailId?: string;
+  draftData?: TriageItem['draftData'];
+  status?: TriageItem['status'];
+}): Promise<TriageItem> {
+  const res = await apiFetch('/api/triage', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to create triage item`);
+  return res.json();
+}
+
+export async function updateTriageItem(id: string, updates: Partial<TriageItem>): Promise<TriageItem> {
+  const res = await apiFetch(`/api/triage/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to update triage item`);
+  return res.json();
+}
+
+export async function sendTriageDraft(id: string): Promise<{ success: boolean; message: string; sentEmail: EmailRecord }> {
+  const res = await apiFetch(`/api/triage/${id}/send`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to send triage draft`);
+  return res.json();
+}
+
+export async function deleteTriageItem(id: string): Promise<void> {
+  const res = await apiFetch(`/api/triage/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to delete triage session`);
+}
+
+export async function askChatbot(payload: {
+  contextType: 'compose' | 'analyst';
+  contextId?: string;
+  question: string;
+  emailId?: string;
+  analysisId?: string;
+  draftData?: any;
+  history?: Array<{ role: 'user' | 'assistant'; text: string }>;
+}): Promise<{
+  answer: string;
+  evidenceUsed: string[];
+  confidence: number;
+  mode: 'gemini' | 'deterministic';
+  timestamp: string;
+}> {
+  const res = await apiFetch('/api/chat/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Chatbot processing failed`);
+  return res.json();
+}
+
+export async function fetchStoredReports(): Promise<{ items: StoredReportItem[] }> {
+  const res = await apiFetch('/api/reports/stored');
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch stored reports`);
+  return res.json();
+}
+
+export async function generateStoredReport(payload: {
+  title?: string;
+  type?: 'email_investigation' | 'dataset_evaluation';
+  targetId?: string;
+  summary?: string;
+  riskScore?: number | null;
+  riskLevel?: string;
+  classification?: string;
+  sender?: string;
+  subject?: string;
+  data: any;
+}): Promise<StoredReportItem> {
+  const res = await apiFetch('/api/reports/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to generate stored report`);
+  return res.json();
+}
+
+export async function deleteStoredReport(id: string): Promise<void> {
+  const res = await apiFetch(`/api/reports/stored/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to delete stored report`);
 }

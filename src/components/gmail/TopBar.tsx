@@ -91,9 +91,9 @@ export const TopBar: React.FC<TopBarProps> = ({
       {/* Right: Security Status, Settings, Profile Avatar */}
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         <button
-          onClick={() => onNavigateTab('analytics')}
+          onClick={() => onNavigateTab('threat_triage')}
           className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
-          title="AI Threat Shield Active"
+          title="Open Threat Triage"
         >
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
           <span>Shield Active</span>
