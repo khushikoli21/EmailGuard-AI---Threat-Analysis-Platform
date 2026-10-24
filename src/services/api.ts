@@ -22,11 +22,13 @@ export interface EmailRecord {
   createdAt: string;
   isStarred: boolean;
   isRead: boolean;
-  folder: 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash';
+  folder: 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash' | 'analysis';
   latestAnalysisId?: string;
   classification?: 'Safe' | 'Suspicious' | 'Phishing' | 'Spam' | 'Unanalyzed';
   riskScore?: number | null;
   riskLevel?: 'Low' | 'Medium' | 'High' | 'Critical';
+  analysisConfidence?: number | null;
+  analysisCompletedAt?: string;
   promptInjectionSuspected?: boolean;
   isDevelopmentSample?: boolean;
 }
@@ -60,7 +62,7 @@ export interface AnalysisRecord {
   classification: 'Safe' | 'Suspicious' | 'Phishing' | 'Spam';
   riskScore: number;
   riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
-  confidence: number;
+  confidence: number | null;
   explanation: string;
   recommendedAction: string;
   promptInjectionSuspected: boolean;
@@ -68,6 +70,9 @@ export interface AnalysisRecord {
   status: 'pending' | 'completed' | 'failed';
   createdAt: string;
   completedAt: string;
+  riskBreakdown?: Array<{factor:string;weight:number;applied:boolean;source:string}>;
+  llmStatus?: 'completed'|'not_configured'|'unavailable';
+  recommendedActions?: string[];
 }
 
 export interface IndicatorRecord {
@@ -79,6 +84,7 @@ export interface IndicatorRecord {
   description: string;
   severity: 'Low' | 'Medium' | 'High' | 'Critical';
   evidence?: string;
+  textSpans?: Array<{start:number;end:number;findingId:string;category:string;title:string;reason:string;severity?:'Low'|'Medium'|'High'|'Critical';matchedText?:string;evidence?:string}>;
   source: string;
   createdAt: string;
 }
@@ -307,5 +313,11 @@ export async function runEvaluation(datasetId?: string, customSamples?: any[]): 
     body: JSON.stringify({ datasetId, customSamples }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}: Benchmark run failed`);
+  return res.json();
+}
+
+export async function fetchKnowledgeBase(): Promise<{items: Array<{id:string;name:string;category:string;technique:string;description:string;url?:string}>}> {
+  const res = await apiFetch('/api/knowledge-base');
+  if (!res.ok) throw new Error('Failed to load security knowledge base');
   return res.json();
 }

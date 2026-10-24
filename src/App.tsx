@@ -30,10 +30,10 @@ function MainGmailApplication() {
   const loadEmails = async () => {
     try {
       setIsLoadingEmails(true);
-      const folder = ['inbox', 'starred', 'sent', 'drafts', 'trash'].includes(currentTab)
+      const folder = currentTab === 'threats'
+        ? 'threats'
+        : ['inbox', 'starred', 'sent', 'drafts', 'trash'].includes(currentTab)
         ? currentTab
-        : currentTab === 'threats'
-        ? 'inbox'
         : 'inbox';
 
       const data = await fetchEmails(folder, searchQuery, activeFilter);
@@ -111,7 +111,7 @@ function MainGmailApplication() {
   const unreadCount = emails.filter((e) => !e.isRead).length;
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800 antialiased overflow-hidden">
+    <div className="h-dvh min-h-[480px] bg-slate-50 flex flex-col font-sans text-slate-800 antialiased overflow-hidden">
       {/* Top Gmail Navigation Bar */}
       <TopBar
         onToggleSidebar={() => {
@@ -146,7 +146,7 @@ function MainGmailApplication() {
         />
 
         {/* Center Main Stage */}
-        <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-white">
+        <main className="flex-1 min-h-0 flex flex-col min-w-0 overflow-hidden bg-white">
           {selectedEmail ? (
             <EmailViewer
               email={selectedEmail}
@@ -178,6 +178,7 @@ function MainGmailApplication() {
           ) : (
             <EmailList
               emails={emails}
+              title={currentTab === 'threats' ? 'Threat Triage' : currentTab.charAt(0).toUpperCase() + currentTab.slice(1)}
               isLoading={isLoadingEmails}
               onRefresh={loadEmails}
               onSelectEmail={handleSelectEmail}
@@ -196,8 +197,8 @@ function MainGmailApplication() {
         isOpen={isComposeOpen}
         onClose={() => setIsComposeOpen(false)}
         onSuccess={() => {
-          loadEmails();
-          setCurrentTab('inbox');
+          setSelectedEmail(null);
+          setCurrentTab('threats');
         }}
       />
     </div>

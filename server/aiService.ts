@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import { GoogleGenAI } from '@google/genai';
 import { db, EmailRecord, AnalysisRecord, IndicatorRecord, ThreatIntelRecord, EvidenceRecord, PipelineLogRecord } from './db.js';
 import { ragEngine } from './ragService.js';
 import { threatIntelService } from './threatIntelService.js';
+import { calculateRiskScore } from './riskEngine.js';
 
 const INJECTION_PATTERNS = [
   /ignore\s+(?:all\s+)?(?:previous|prior|above|system)\s+(?:instructions|directions|rules|prompts|protocols)/i,
@@ -34,10 +34,10 @@ const DANGEROUS_EXTENSIONS: Record<string, string> = {
   '.pptm': 'Macro-enabled Microsoft PowerPoint presentation',
 };
 
-const URGENCY_REGEX = /\b(?:urgent|immediately|within 24 hours|within 48 hours|suspension|decommission|purge|scheduled for deletion|action required|expire immediately|final warning|penalty|account suspended)\b/i;
+const URGENCY_REGEX = /\b(?:urgent|immediately|within 24 hours|within 48 hours|before \d{1,2}(?::\d{2})?\s*(?:AM|PM)(?:\s+[A-Z]{2,4})?\s+today|suspension|decommission|purge|scheduled for deletion|action required|expire immediately|final warning|penalty|account suspended)\b/gi;
 const CREDENTIAL_REGEX = /\b(?:password|credentials|login|sign[- ]in|verify your account|session expired|renew session|confirm identity|update credentials|mailbox quota|storage limit|mfa code|otp)\b/i;
-const PAYMENT_REGEX = /\b(?:wire transfer|invoice|remittance|unpaid balance|past due|gift card|escrow|routing number|ach payment|swift code|settlement|late fee)\b/i;
-const SUPPRESSION_REGEX = /\b(?:do not call|in a meeting|currently airborne|boarding a flight|limited connectivity|do not contact my cell|confidential transaction)\b/i;
+const PAYMENT_REGEX = /\b(?:urgent\s+wire\s+of\s+(?:USD\s*)?\$?[\d,]+(?:\.\d{2})?|wire\s+(?:transfer|of\s+(?:USD\s*)?\$?[\d,]+(?:\.\d{2})?)|invoice|remittance|unpaid balance|past due|gift card|escrow|routing number|ach payment|swift code|settlement|late fee)\b/i;
+const SUPPRESSION_REGEX = /\b(?:do not call|in a meeting|currently airborne|boarding a flight|limited connectivity|(?:please\s+)?do not contact my cell(?: phone)?|confidential transaction)\b/gi;
 
 function extractUrls(text: string): string[] {
   const matches = text.match(URL_REGEX) || [];
@@ -59,6 +59,57 @@ function extractDomain(urlOrEmail: string): string {
   } catch {
     return '';
   }
+}
+
+
+function visibleEmailText(value: string): string {
+  return value
+    .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&#(x[0-9a-f]+|[0-9]+);/gi, (_match, code: string) =>
+      String.fromCodePoint(parseInt(code[0].toLowerCase() === 'x' ? code.slice(1) : code, code[0].toLowerCase() === 'x' ? 16 : 10))
+    );
+}
+export function attachTextSpans(body: string, indicators: IndicatorRecord[]) {
+  const normalized = visibleEmailText(body);
+  for (const finding of indicators) {
+    let phrases: string[] = [];
+    if (finding.type === 'suspicious_url' && finding.evidence?.startsWith('URL: ')) {
+      phrases = [finding.evidence.slice(5)];
+    } else if (finding.evidence) {
+      phrases = Array.from(finding.evidence.matchAll(/"([^"]+)"/g), (match) => match[1]);
+    }
+    const spans: NonNullable<IndicatorRecord['textSpans']> = [];
+    for (const phrase of new Set(phrases.filter(Boolean))) {
+      let offset = 0;
+      while (offset < normalized.length) {
+        const start = normalized.indexOf(phrase, offset);
+        if (start < 0) break;
+        spans.push({start, end:start+phrase.length, findingId:finding.id, category:finding.type, title:finding.title, reason:finding.description, severity:finding.severity, matchedText:phrase, evidence:finding.evidence});
+        offset = start + Math.max(1, phrase.length);
+      }
+    }
+    finding.textSpans = spans;
+  }
+}
+function buildRecommendedActions(indicators: IndicatorRecord[], intel: ThreatIntelRecord[]): string[] {
+  const types = new Set(indicators.map((item) => item.type));
+  const actions: string[] = [];
+  if (types.has('prompt_injection')) actions.push('Treat embedded instructions as untrusted; do not follow requests to bypass security checks.');
+  if (types.has('credential_request')) actions.push('Do not enter passwords, MFA codes, or other credentials from this email.');
+  if (types.has('suspicious_url')) actions.push('Do not open the flagged link until its destination is verified independently.');
+  if (types.has('malicious_attachment')) actions.push('Do not open or run the flagged attachment; submit it to your security team.');
+  if (types.has('sender_domain_mismatch') || types.has('payment_request') || types.has('impersonation')) actions.push('Verify the sender and any payment or account request using a known, separate contact channel.');
+  if (intel.some((item) => item.malicious)) actions.push('Report and quarantine this message; threat intelligence returned a malicious listing.');
+  else if (intel.some((item) => item.suspicious)) actions.push('Escalate for review because an external source returned a suspicious result.');
+  if (actions.length === 0 && !intel.some((item) => item.status === 'not_configured' || item.status === 'failed' || item.status === 'unavailable')) actions.push('No action is indicated by the available findings; remain alert to unexpected requests.');
+  return actions;
 }
 
 export async function executeThreatAnalysisPipeline(
@@ -92,7 +143,8 @@ export async function executeThreatAnalysisPipeline(
   });
 
   const t1 = Date.now();
-  const text = `${email.subject}\n${email.body}`;
+  const bodyText = visibleEmailText(email.body);
+  const text = email.subject + '\n' + bodyText;
   const allUrls = Array.from(new Set([...(email.urls || []), ...extractUrls(email.body)]));
   pipelineLogs.push({
     id: uuidv4(),
@@ -178,8 +230,9 @@ export async function executeThreatAnalysisPipeline(
   }
 
   // Linguistic Urgency
-  const urgencyMatch = text.match(URGENCY_REGEX);
-  if (urgencyMatch) {
+  const urgencyMatches = Array.from(text.matchAll(URGENCY_REGEX));
+  if (urgencyMatches.length) {
+    const urgencyEvidence = urgencyMatches.map((match) => `"${match[0]}"`).join(", ");
     indicators.push({
       id: uuidv4(),
       userId,
@@ -188,11 +241,11 @@ export async function executeThreatAnalysisPipeline(
       title: 'Coercive Urgency Language',
       description: 'Psychological pressure triggering panic or rushed action without verification.',
       severity: 'High',
-      evidence: `Keyword detected: "${urgencyMatch[0]}"`,
+      evidence: `Keywords detected: ${urgencyEvidence}`,
       source: 'Email Analysis Agent (NLP)',
       createdAt: now,
     });
-    deterministicReasons.push(`Coercive urgency language detected: "${urgencyMatch[0]}" (+15 risk points)`);
+    deterministicReasons.push(`Coercive urgency language detected: ${urgencyEvidence} (+15 risk points)`);
   }
 
   // Credential Solicitation
@@ -214,7 +267,7 @@ export async function executeThreatAnalysisPipeline(
   }
 
   // Payment Fraud / Wire Transfer
-  const payMatch = text.match(PAYMENT_REGEX);
+  const payMatch = bodyText.match(PAYMENT_REGEX) || text.match(PAYMENT_REGEX);
   if (payMatch) {
     indicators.push({
       id: uuidv4(),
@@ -232,8 +285,9 @@ export async function executeThreatAnalysisPipeline(
   }
 
   // Verification Suppression
-  const suppMatch = text.match(SUPPRESSION_REGEX);
-  if (suppMatch) {
+  const suppressionMatches = Array.from(bodyText.matchAll(SUPPRESSION_REGEX));
+  if (suppressionMatches.length) {
+    const suppressionEvidence = suppressionMatches.map((match) => `"${match[0]}"`).join(", ");
     indicators.push({
       id: uuidv4(),
       userId,
@@ -242,7 +296,7 @@ export async function executeThreatAnalysisPipeline(
       title: 'Verification Channel Suppression',
       description: 'Instructs recipient not to call or verify independently due to travel/flight pretext.',
       severity: 'High',
-      evidence: `Phrasing detected: "${suppMatch[0]}"`,
+      evidence: `Phrasing detected: ${suppressionEvidence}`,
       source: 'Email Analysis Agent',
       createdAt: now,
     });
@@ -304,6 +358,8 @@ export async function executeThreatAnalysisPipeline(
     }
   }
 
+  attachTextSpans(email.body, indicators);
+
   pipelineLogs.push({
     id: uuidv4(),
     userId,
@@ -316,28 +372,24 @@ export async function executeThreatAnalysisPipeline(
     message: `Completed NLP & heuristics analysis. Found ${indicators.length} threat indicators.`,
   });
 
-  // 4. Real Threat Intelligence Queries (VirusTotal & urlscan.io)
+  // 4. Real Threat Intelligence Queries (VirusTotal & URLhaus)
   const t4 = Date.now();
-  const threatIntel: ThreatIntelRecord[] = [];
-  for (const url of allUrls.slice(0, 3)) {
-    try {
-      const urlResults = await threatIntelService.checkUrl(url, analysisId, userId);
-      threatIntel.push(...urlResults);
-      for (const res of urlResults) {
-        if (res.malicious) {
-          deterministicReasons.push(`Threat Intelligence: ${res.provider} flagged ${url} as MALICIOUS (+40 risk points)`);
-        }
-      }
-    } catch (err: any) {
-      console.warn(`[THREAT_INTEL] Lookup failed for ${url}:`, err.message);
-    }
+  const intelLookups = await Promise.all([
+    ...allUrls.slice(0, 10).flatMap((url) => [
+      threatIntelService.checkUrl(url, analysisId, userId, 'url'),
+      threatIntelService.checkUrl(threatIntelService.extractDomain(url), analysisId, userId, 'domain'),
+    ]),
+    ...(email.attachmentInfo || []).filter((attachment) => attachment.hash && /^[a-f0-9]{32,128}$/i.test(attachment.hash))
+      .map((attachment) => threatIntelService.checkUrl(attachment.hash!, analysisId, userId, 'hash')),
+  ]);
+  const threatIntel: ThreatIntelRecord[] = intelLookups.flat();
+  for (const result of threatIntel.filter((item) => item.malicious || item.suspicious)) {
+    deterministicReasons.push('Threat Intelligence: ' + result.provider + ' returned positive evidence for ' + result.url);
   }
 
   const tiStatus = threatIntel.some((t) => t.status === 'completed')
     ? 'completed'
-    : threatIntel.some((t) => t.status === 'not_configured')
-    ? 'completed'
-    : 'unavailable';
+    : threatIntel.length === 0 ? 'skipped' : 'unavailable';
 
   pipelineLogs.push({
     id: uuidv4(),
@@ -386,22 +438,16 @@ export async function executeThreatAnalysisPipeline(
 
   // 6. Deterministic Risk Engine (Strict Mathematical Formulation)
   const t6 = Date.now();
-  let rawScore = 0;
-  if (promptInjectionSuspected) rawScore += 50;
-  if (indicators.some((i) => i.type === 'malicious_attachment')) rawScore += 35;
-  if (threatIntel.some((ti) => ti.malicious)) rawScore += 40;
-  if (indicators.some((i) => i.type === 'suspicious_url')) rawScore += 25;
-  if (indicators.some((i) => i.type === 'credential_request')) rawScore += 25;
-  if (indicators.some((i) => i.type === 'payment_request')) rawScore += 25;
-  if (indicators.some((i) => i.type === 'sender_domain_mismatch')) rawScore += 20;
-  if (indicators.some((i) => i.type === 'impersonation')) rawScore += 20;
-  if (indicators.some((i) => i.type === 'urgency_language')) rawScore += 15;
+  const scoreResult = calculateRiskScore({
+    prompt_injection:promptInjectionSuspected,malicious_intel:threatIntel.some(t=>t.malicious),
+    suspicious_intel:!threatIntel.some(t=>t.malicious)&&threatIntel.some(t=>t.suspicious),
+    malicious_attachment:indicators.some(i=>i.type==='malicious_attachment'),suspicious_url:indicators.some(i=>i.type==='suspicious_url'),
+    credential_request:indicators.some(i=>i.type==='credential_request'),payment_request:indicators.some(i=>i.type==='payment_request'),
+    sender_domain_mismatch:indicators.some(i=>i.type==='sender_domain_mismatch'),impersonation:indicators.some(i=>i.type==='impersonation'),
+    urgency_language:indicators.some(i=>i.type==='urgency_language')});
+  const rawScore=scoreResult.score;
 
-  if (promptInjectionSuspected && rawScore < 85) {
-    rawScore = 88;
-  }
-
-  const finalRiskScore = Math.min(100, Math.max(0, Math.round(rawScore)));
+  const finalRiskScore = rawScore;
 
   let riskLevel: 'Low' | 'Medium' | 'High' | 'Critical' = 'Low';
   let classification: 'Safe' | 'Suspicious' | 'Phishing' | 'Spam' = 'Safe';
@@ -432,62 +478,91 @@ export async function executeThreatAnalysisPipeline(
     message: `Deterministic Risk Engine calculated: ${finalRiskScore}/100 (${riskLevel}). Reasons: ${deterministicReasons.join('; ') || 'No risk indicators detected.'}`,
   });
 
-  // 7. LLM Reasoning / Explainability (gemini-3.8-flash)
+  // 7. LLM Reasoning / Explainability (Groq)
   const t7 = Date.now();
   let explanation = '';
   let recommendedAction = '';
+  let confidenceScore: number | null = null;
+  let llmStatus: 'completed'|'not_configured'|'unavailable' = process.env.GROQ_API_KEY ? 'completed' : 'not_configured';
 
-  const geminiKey = process.env.GEMINI_API_KEY;
-  if (geminiKey) {
+  const grokKey = process.env.GROQ_API_KEY;
+  if (grokKey) {
     try {
-      const ai = new GoogleGenAI({ apiKey: geminiKey });
-      const prompt = `You are a cybersecurity email threat analysis engine.
+      const systemPrompt = `You are an expert cybersecurity analyst specializing in email threat detection. 
+Your job is to provide clear, accurate, and actionable explanations for email security verdicts.
+
+Always respond with valid JSON in this exact format:
+{
+  "explanation": "2-3 concise sentences explaining the classification",
+  "recommended_action": "Clear operational recommendation for the user/SOC team",
+  "confidence": 0
+}`;
+
+      const userPrompt = `Analyze this email and provide explanation:
+
 Email Subject: ${email.subject}
 Sender: ${email.senderName} <${email.senderEmail}>
-Detected Indicators: ${indicators.map((i) => `${i.title} (${i.description})`).join('; ')}
+Body Preview: ${email.body.substring(0, 500)}${email.body.length > 500 ? '...' : ''}
+
+Detected Indicators: ${indicators.map((i) => `- ${i.title}: ${i.description}`).join('\n')}
+Threat Intel Flags: ${threatIntel.filter(t => t.malicious || t.suspicious).map(t => `- ${t.provider}: ${t.reputation}`).join('\n') || 'None'}
+Prompt Injection Suspected: ${promptInjectionSuspected}
+
 Risk Score: ${finalRiskScore}/100
 Risk Level: ${riskLevel}
 Classification: ${classification}
-Prompt Injection Suspected: ${promptInjectionSuspected}
 
-Output JSON format:
-{
-  "explanation": "2-3 concise sentences explaining why this email was classified as ${classification}",
-  "recommended_action": "Clear operational recommendation for the user/SOC team"
-}`;
+Provide a detailed yet concise explanation based on the evidence.`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
-        contents: prompt,
-        config: { responseMimeType: 'application/json' },
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${grokKey}`,
+        },
+        signal: AbortSignal.timeout(Number(process.env.GROQ_TIMEOUT_MS || 20000)),
+        body: JSON.stringify({
+          model: (process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'),
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
+          ],
+          temperature: 0.3,
+          max_tokens: 500,
+        }),
       });
 
-      const parsed = JSON.parse(response.text || '{}');
-      explanation = parsed.explanation || '';
-      recommendedAction = parsed.recommended_action || '';
+      if (response.ok) {
+        const data = await response.json();
+        const content = data.choices?.[0]?.message?.content || '';
+        try {
+          // Try to parse JSON from response (handle markdown code blocks)
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : JSON.parse(content);
+          explanation = parsed.explanation || '';
+          recommendedAction = parsed.recommended_action || '';
+          confidenceScore = Number.isFinite(Number(parsed.confidence)) ? Math.max(0, Math.min(100, Number(parsed.confidence))) : null;
+          llmStatus = 'completed';
+        } catch (parseErr) {
+          llmStatus = 'unavailable';
+          console.warn('[AI] Failed to parse Groq response, using evidence-based fallback');
+        }
+      } else {
+        llmStatus = 'unavailable';
+        console.warn(`[AI] Grok API error: ${response.status} ${response.statusText}`);
+      }
     } catch (err: any) {
-      console.warn('[AI] Gemini generation fallback to deterministic rationale:', err?.message || err);
+      llmStatus = 'unavailable';
+      console.warn('[AI] Groq generation fallback to deterministic rationale:', err?.message || err);
     }
   }
 
   if (!explanation) {
-    if (promptInjectionSuspected) {
-      explanation =
-        'CRITICAL ADVERSARIAL ALERT: This email contains instruction override markers matching prompt injection techniques. The system isolated this input as untrusted data.';
-      recommendedAction = 'Quarantine email immediately. Disregard any embedded directives. Block sending domain.';
-    } else if (classification === 'Phishing') {
-      const reasons = indicators.map((i) => i.title).slice(0, 3).join(', ');
-      explanation = `This email is classified as Phishing because it contains verified threat indicators: ${reasons || 'deceptive identity pretexts and credential solicitation'}.`;
-      recommendedAction = 'Do not click the link or enter credentials. Report this email to your security operations team.';
-    } else if (classification === 'Suspicious') {
-      explanation =
-        'This email contains moderate risk anomalies such as unaligned sender domains or financial payment requests requiring secondary verification.';
-      recommendedAction = 'Verify the sender through an official out-of-band channel before taking any requested action.';
-    } else {
-      explanation = 'No malicious indicators or credential solicitation patterns were detected. Sender identity matches standard baseline.';
-      recommendedAction = 'Safe to proceed with regular delivery.';
-    }
+    const observed = indicators.map(i => i.title + (i.evidence ? ' (' + i.evidence + ')' : '')).concat(threatIntel.filter(t => t.malicious || t.suspicious).map(t => t.provider + ': ' + t.url + ' ' + (t.reputation || 'flagged')));
+    explanation = observed.length ? 'Risk score ' + finalRiskScore + '/100 is based on observed evidence: ' + observed.slice(0,5).join('; ') + '.' : 'No configured detector or threat-intelligence source returned a finding. Unavailable integrations are unknown, not evidence of a clean email.';
+    recommendedAction = observed.length ? 'Review the evidence and verify sender requests through a trusted channel before interacting with links or attachments.' : 'No action is indicated by available evidence.';
   }
+
 
   pipelineLogs.push({
     id: uuidv4(),
@@ -498,7 +573,7 @@ Output JSON format:
     startTime: new Date(t7).toISOString(),
     endTime: new Date().toISOString(),
     durationMs: Date.now() - t7,
-    message: `Generated explainable report: Verdict ${classification}, Confidence: ${Math.min(98, 80 + indicators.length * 4)}%`,
+    message: `Generated explainable report: Verdict ${classification}, Confidence: ${Math.min(99, 50 + indicators.length * 5 + threatIntel.filter(t=>t.status==='completed'&&(t.malicious||t.suspicious)).length*10)}%`,
   });
 
   // 8. Assemble Analysis Record & Database Storage
@@ -510,7 +585,7 @@ Output JSON format:
     classification,
     riskScore: finalRiskScore,
     riskLevel,
-    confidence: Math.min(98, 80 + indicators.length * 4),
+    confidence: confidenceScore,
     explanation,
     recommendedAction,
     promptInjectionSuspected,
@@ -518,6 +593,9 @@ Output JSON format:
     status: 'completed',
     createdAt: now,
     completedAt: now,
+    riskBreakdown: scoreResult.factors,
+    llmStatus,
+    recommendedActions: buildRecommendedActions(indicators, threatIntel),
   };
 
   // Persist into database

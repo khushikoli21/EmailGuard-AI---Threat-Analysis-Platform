@@ -82,35 +82,53 @@ export const EmailRow: React.FC<EmailRowProps> = ({
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={onClick}
-      className={`group flex items-center gap-3 px-3 sm:px-4 py-2.5 border-b border-slate-150 hover:bg-slate-50 transition-colors cursor-pointer text-xs select-none ${
+      onKeyDown={(event) => {
+        if ((event.key === 'Enter' || event.key === ' ') && event.target === event.currentTarget) {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      aria-label={`Open email from ${email.senderName || email.senderEmail}: ${email.subject}`}
+      className={`group flex items-center gap-3 px-3 sm:px-5 py-3 border-b border-slate-100 hover:bg-blue-50/50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-400 focus-visible:outline-offset-[-2px] transition-colors cursor-pointer text-xs select-none ${
         !email.isRead ? 'bg-white font-semibold' : 'bg-slate-50/40 text-slate-600'
       } ${isSelected ? 'bg-blue-50/80 hover:bg-blue-50' : ''}`}
     >
       {/* Checkbox */}
-      <div onClick={onToggleSelect} className="shrink-0 p-1 hover:bg-slate-200/50 rounded">
-        <input
-          type="checkbox"
-          checked={isSelected}
-          onChange={() => {}}
-          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer w-3.5 h-3.5"
-        />
-      </div>
+      <button
+        type="button"
+        onClick={onToggleSelect}
+        aria-label={`${isSelected ? 'Deselect' : 'Select'} email from ${email.senderName || email.senderEmail}`}
+        aria-pressed={isSelected}
+        className="shrink-0 p-1 hover:bg-slate-200/70 rounded-md cursor-pointer"
+      >
+        <span aria-hidden="true" className={`w-4 h-4 rounded border flex items-center justify-center ${isSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
+          {isSelected && <span className="text-[11px] leading-none">?</span>}
+        </span>
+      </button>
 
       {/* Star */}
-      <div onClick={onToggleStar} className="shrink-0 p-1 hover:bg-slate-200/50 rounded">
+      <button
+        type="button"
+        onClick={onToggleStar}
+        aria-label={email.isStarred ? 'Remove star' : 'Add star'}
+        aria-pressed={email.isStarred}
+        className="shrink-0 p-1 hover:bg-slate-200/70 rounded-md cursor-pointer"
+      >
         <Star
-          className={`w-4 h-4 transition-colors cursor-pointer ${
+          className={`w-4 h-4 transition-colors ${
             email.isStarred ? 'text-amber-400 fill-amber-400' : 'text-slate-300 hover:text-slate-500'
           }`}
         />
-      </div>
+      </button>
 
       {/* Sender Display Name */}
-      <div className="w-36 sm:w-44 shrink-0 truncate">
+      <div className="w-32 sm:w-44 shrink-0 truncate text-[12px]">
         <span
           className={`truncate ${
-            !email.isRead ? 'text-slate-900 font-bold' : 'text-slate-700 font-normal'
+            !email.isRead ? 'text-slate-900 font-bold' : 'text-slate-700 font-medium'
           }`}
         >
           {email.senderName || email.senderEmail}
@@ -131,7 +149,7 @@ export const EmailRow: React.FC<EmailRowProps> = ({
         >
           {email.subject}
         </span>
-        <span className="text-slate-400 font-normal truncate hidden sm:inline">
+        <span className="text-slate-500 font-normal truncate hidden sm:inline">
           — {email.body.replace(/\n+/g, ' ').slice(0, 120)}
         </span>
       </div>
@@ -143,8 +161,20 @@ export const EmailRow: React.FC<EmailRowProps> = ({
         </div>
       )}
 
-      {/* Threat Badge */}
-      <div className="shrink-0 hidden md:block">{renderSecurityBadge()}</div>
+      {/* Threat Badge and analysis details */}
+      <div className="shrink-0 hidden md:flex items-center gap-2">
+        {renderSecurityBadge()}
+        {email.analysisConfidence != null && (
+          <span className="text-[10px] font-mono text-slate-500" title="Analysis confidence">
+            {email.analysisConfidence}% confidence
+          </span>
+        )}
+        {email.analysisCompletedAt && (
+          <span className="text-[10px] font-mono text-slate-400" title="Analysis completed">
+            Analyzed {new Date(email.analysisCompletedAt).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
+          </span>
+        )}
+      </div>
 
       {/* Timestamp */}
       <div className="shrink-0 w-16 text-right font-mono text-[11px] text-slate-500 group-hover:text-slate-700">

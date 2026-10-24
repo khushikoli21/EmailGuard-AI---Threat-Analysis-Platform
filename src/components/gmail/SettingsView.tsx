@@ -39,11 +39,11 @@ export const SettingsView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50 space-y-6 max-w-4xl mx-auto">
-      <div className="pb-3 border-b border-slate-200 flex items-center justify-between">
+    <div className="workspace-page space-y-6"><div className="mx-auto w-full max-w-4xl space-y-6">
+      <div className="workspace-header">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Platform Settings</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="workspace-title">Platform Settings</h2>
+          <p className="workspace-description">
             Manage your Google authenticated profile, security safeguards, and backend configurations
           </p>
         </div>
@@ -56,7 +56,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* 1. Google Account Profile Card */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+      <div className="workspace-card p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
           <User className="w-4 h-4 text-blue-600" />
           <span>Google Account Identity</span>
@@ -86,7 +86,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* 2. Security Safeguards */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+      <div className="workspace-card p-5 sm:p-6 space-y-4">
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
           <Shield className="w-4 h-4 text-blue-600" />
           <span>Security Preferences</span>
@@ -130,7 +130,7 @@ export const SettingsView: React.FC = () => {
       </div>
 
       {/* 3. System & Integrations Status (Real Status Verification) */}
-      <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+      <div className="workspace-card p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
             <Server className="w-4 h-4 text-blue-600" />
@@ -227,13 +227,13 @@ export const SettingsView: React.FC = () => {
           {/* Database */}
           <div className="p-3 bg-slate-50 rounded-lg border border-slate-200 space-y-1 sm:col-span-2 lg:col-span-3">
             <div className="flex items-center justify-between">
-              <span className="font-bold text-slate-800">Persistent Production Database</span>
+              <span className="font-bold text-slate-800">Persistent Local Database</span>
               <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300">
                 CONNECTED
               </span>
             </div>
             <p className="text-[11px] text-slate-500">
-              Isolated user collections (Emails, Analyses, Indicators, Threat Intel, RAG Evidence, Logs)
+              User-isolated records stored in the local JSON database
             </p>
           </div>
         </div>
@@ -241,6 +241,7 @@ export const SettingsView: React.FC = () => {
         <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
           External secrets are managed securely on the server and are never exposed in browser code. Services marked NOT_CONFIGURED fallback gracefully to deterministic heuristic analysis.
         </p>
+      </div>
       </div>
     </div>
   );

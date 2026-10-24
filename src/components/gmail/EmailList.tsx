@@ -5,6 +5,7 @@ import { EmailRow } from './EmailRow';
 
 interface EmailListProps {
   emails: EmailRecord[];
+  title: string;
   isLoading: boolean;
   onRefresh: () => void;
   onSelectEmail: (email: EmailRecord) => void;
@@ -17,6 +18,7 @@ interface EmailListProps {
 
 export const EmailList: React.FC<EmailListProps> = ({
   emails,
+  title,
   isLoading,
   onRefresh,
   onSelectEmail,
@@ -68,22 +70,34 @@ export const EmailList: React.FC<EmailListProps> = ({
   ];
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-white overflow-hidden">
+    <div className="flex-1 min-h-0 flex flex-col min-w-0 bg-white overflow-hidden">
+      <div className="px-4 sm:px-6 py-4 border-b border-slate-200/80 bg-gradient-to-r from-blue-50/70 via-white to-white flex items-center justify-between gap-4">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="workspace-icon"><Inbox className="w-5 h-5" /></div>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900">{title}</h1>
+            <p className="text-xs text-slate-500 mt-0.5">{title === 'Threat Triage' ? 'Completed security analyses, linked to their original emails.' : 'Messages from your local mailbox dataset.'}</p>
+          </div>
+        </div>
+        <div className="hidden sm:flex items-center gap-2 rounded-full bg-white/80 border border-slate-200 px-3 py-1.5 text-xs text-slate-500 shadow-sm">
+          <span className="font-semibold text-slate-800">{emails.length}</span> {emails.length === 1 ? 'message' : 'messages'}
+        </div>
+      </div>
       {/* Gmail Top Action Toolbar */}
-      <div className="h-12 border-b border-slate-200/90 px-3 sm:px-4 flex items-center justify-between text-xs bg-white select-none">
+      <div className="min-h-14 border-b border-slate-200/90 px-3 sm:px-5 flex items-center justify-between gap-3 text-xs bg-white select-none">
         {/* Left Toolbar actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <button
+            type="button"
             onClick={handleToggleSelectAll}
+            aria-label={allSelected ? 'Deselect all emails' : 'Select all emails'}
+            aria-pressed={allSelected}
             className="p-1.5 hover:bg-slate-100 rounded text-slate-600 cursor-pointer"
-            title="Select All"
+            title={allSelected ? 'Deselect all' : 'Select all'}
           >
-            <input
-              type="checkbox"
-              checked={allSelected}
-              onChange={() => {}}
-              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer w-3.5 h-3.5 pointer-events-none"
-            />
+            <span aria-hidden="true" className={`w-4 h-4 rounded border flex items-center justify-center ${allSelected ? 'bg-blue-600 border-blue-600 text-white' : 'border-slate-300 bg-white'}`}>
+              {allSelected && <span className="text-[11px] leading-none">?</span>}
+            </span>
           </button>
 
           <button
@@ -116,7 +130,7 @@ export const EmailList: React.FC<EmailListProps> = ({
         </div>
 
         {/* Right: Security Classification Segmented Filter Tabs */}
-        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg overflow-x-auto">
+        <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg overflow-x-auto max-w-[70vw] sm:max-w-none">
           {filterTabs.map((tab) => {
             const isActive = activeFilter.toLowerCase() === tab.id;
             return (
@@ -137,7 +151,7 @@ export const EmailList: React.FC<EmailListProps> = ({
       </div>
 
       {/* Email Rows List */}
-      <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+      <div className="flex-1 min-h-0 overflow-y-auto divide-y divide-slate-100">
         {isLoading && emails.length === 0 ? (
           <div className="p-8 text-center text-xs text-slate-400 space-y-2">
             <RefreshCw className="w-6 h-6 animate-spin mx-auto text-blue-600" />

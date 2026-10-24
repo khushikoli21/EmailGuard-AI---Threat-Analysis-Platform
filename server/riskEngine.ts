@@ -1,0 +1,3 @@
+export type RiskFacts=Record<string,boolean>;
+const defaults:Record<string,number>={prompt_injection:85,malicious_intel:40,suspicious_intel:15,malicious_attachment:35,suspicious_url:25,credential_request:25,payment_request:25,sender_domain_mismatch:20,impersonation:20,urgency_language:15};
+export function calculateRiskScore(facts:RiskFacts,env:NodeJS.ProcessEnv=process.env){const factors=Object.entries(defaults).map(([factor,fallback])=>{const v=env['RISK_WEIGHT_'+factor.toUpperCase()],n=v===undefined?fallback:Number(v);return{factor,weight:Number.isFinite(n)?Math.max(0,n):fallback,applied:!!facts[factor],source:'deterministic evidence'};});return{score:Math.min(100,Math.round(factors.reduce((s,f)=>s+(f.applied?f.weight:0),0))),factors};}

@@ -4,8 +4,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import { v4 as uuidv4 } from 'uuid';
-import { db, UserRecord, EmailRecord } from './server/db.js';
-import { executeThreatAnalysisPipeline } from './server/aiService.js';
+import { db, UserRecord, EmailRecord, AnalysisRecord } from './server/db.js';
+import { attachTextSpans, executeThreatAnalysisPipeline } from './server/aiService.js';
 import { ragEngine } from './server/ragService.js';
 
 dotenv.config();
@@ -171,7 +171,29 @@ app.get('/api/emails', requireAuth, (req: AuthenticatedRequest, res: Response) =
   const search = (req.query.q as string)?.toLowerCase();
   const classificationFilter = (req.query.classification as string)?.toLowerCase();
 
-  let emails = db.getEmailsByUser(userId, folder);
+  let emails: (EmailRecord & { analysisConfidence?: number | null; analysisCompletedAt?: string })[];
+  if (folder === 'threats') {
+    const latestCompletedByEmail = new Map<string, AnalysisRecord>();
+    for (const analysis of db.getAnalysesByUser(userId)) {
+      if (analysis.status !== 'completed' || latestCompletedByEmail.has(analysis.emailId)) continue;
+      latestCompletedByEmail.set(analysis.emailId, analysis);
+    }
+    emails = Array.from(latestCompletedByEmail.values()).flatMap((analysis) => {
+      const email = db.getEmail(analysis.emailId, userId);
+      return email ? [{
+        ...email,
+        latestAnalysisId: analysis.id,
+        classification: analysis.classification,
+        riskScore: analysis.riskScore,
+        riskLevel: analysis.riskLevel,
+        promptInjectionSuspected: analysis.promptInjectionSuspected,
+        analysisConfidence: analysis.confidence,
+        analysisCompletedAt: analysis.completedAt || analysis.createdAt,
+      }] : [];
+    }).sort((a, b) => new Date(b.analysisCompletedAt || '').getTime() - new Date(a.analysisCompletedAt || '').getTime());
+  } else {
+    emails = db.getEmailsByUser(userId, folder);
+  }
 
   if (search && search.trim()) {
     emails = emails.filter(
@@ -295,8 +317,12 @@ app.post('/api/analyze', requireAuth, async (req: AuthenticatedRequest, res: Res
   try {
     const { senderName, senderEmail, recipientEmail, subject, body, urls, attachmentInfo } = req.body;
 
-    if (!subject || !body) {
-      return res.status(400).json({ error: 'Subject and email body are required for analysis.' });
+    if (!senderEmail?.trim() || !recipientEmail?.trim() || !subject?.trim() || !body?.trim()) {
+      return res.status(400).json({ error: 'To, From, Subject, and email body are required for analysis.' });
+    }
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(senderEmail.trim()) || !emailPattern.test(recipientEmail.trim())) {
+      return res.status(400).json({ error: 'Enter valid email addresses for To and From.' });
     }
 
     const now = new Date().toISOString();
@@ -317,7 +343,7 @@ app.post('/api/analyze', requireAuth, async (req: AuthenticatedRequest, res: Res
       createdAt: now,
       isStarred: false,
       isRead: false,
-      folder: 'inbox',
+      folder: 'analysis' as EmailRecord['folder'],
     };
 
     db.saveEmail(newEmail);
@@ -353,6 +379,7 @@ app.get('/api/reports/:id', requireAuth, (req: AuthenticatedRequest, res: Respon
     const evidence = db.getEvidenceByAnalysis(byEmail.id, req.userId!);
     const pipelineLogs = db.getPipelineLogsByAnalysis(byEmail.id, req.userId!);
     const email = db.getEmail(byEmail.emailId, req.userId!);
+    if (email) attachTextSpans(email.body, indicators);
 
     return res.json({
       analysis: byEmail,
@@ -369,6 +396,7 @@ app.get('/api/reports/:id', requireAuth, (req: AuthenticatedRequest, res: Respon
   const evidence = db.getEvidenceByAnalysis(analysis.id, req.userId!);
   const pipelineLogs = db.getPipelineLogsByAnalysis(analysis.id, req.userId!);
   const email = db.getEmail(analysis.emailId, req.userId!);
+  if (email) attachTextSpans(email.body, indicators);
 
   return res.json({
     analysis,
@@ -690,11 +718,15 @@ app.post('/api/evaluation/run', requireAuth, async (req: AuthenticatedRequest, r
   }
 });
 
+app.get('/api/knowledge-base', requireAuth, (_req: AuthenticatedRequest, res: Response) => {
+  return res.json({ items: ragEngine.listDocuments() });
+});
+
 // System health & Secrets availability check
 app.get('/api/health', (req: Request, res: Response) => {
-  const geminiConfigured = Boolean(process.env.GEMINI_API_KEY);
+  const groqConfigured = Boolean(process.env.GROQ_API_KEY);
   const virustotalConfigured = Boolean(process.env.VIRUSTOTAL_API_KEY);
-  const urlscanConfigured = Boolean(process.env.URLSCAN_API_KEY);
+  const urlhausConfigured = Boolean(process.env.URLHAUS_AUTH_KEY);
   const ragDocsCount = ragEngine.getDocumentCount();
 
   return res.json({
@@ -713,11 +745,11 @@ app.get('/api/health', (req: Request, res: Response) => {
         detail: 'OAuth access declined/not enabled by user. Using direct input & dataset harness.',
       },
       llm: {
-        status: geminiConfigured ? 'CONNECTED' : 'NOT_CONFIGURED',
-        provider: 'Google Gemini (gemini-3.8-flash)',
-        detail: geminiConfigured
+        status: groqConfigured ? 'CONNECTED' : 'NOT_CONFIGURED',
+        provider: 'Groq (' + (process.env.GROQ_MODEL || 'llama-3.3-70b-versatile') + ')',
+        detail: groqConfigured
           ? 'Live API key active for explainable analysis and rationale generation'
-          : 'GEMINI_API_KEY missing in Secrets',
+          : 'GROQ_API_KEY missing in Secrets',
       },
       virusTotal: {
         status: virustotalConfigured ? 'CONNECTED' : 'NOT_CONFIGURED',
@@ -726,12 +758,12 @@ app.get('/api/health', (req: Request, res: Response) => {
           ? 'Live multi-engine URL reputation lookups active'
           : 'VIRUSTOTAL_API_KEY not configured in Secrets',
       },
-      urlscan: {
-        status: urlscanConfigured ? 'CONNECTED' : 'NOT_CONFIGURED',
-        provider: 'urlscan.io API v1',
-        detail: urlscanConfigured
+      urlhaus: {
+        status: urlhausConfigured ? 'CONNECTED' : 'NOT_CONFIGURED',
+        provider: 'URLhaus Community API',
+        detail: urlhausConfigured
           ? 'Live automated domain verdict scanning active'
-          : 'URLSCAN_API_KEY not configured in Secrets',
+          : 'URLHAUS_AUTH_KEY not configured in Secrets',
       },
       rag: {
         status: ragDocsCount > 0 ? 'READY' : 'NOT_INITIALIZED',
@@ -746,9 +778,9 @@ app.get('/api/health', (req: Request, res: Response) => {
       },
     },
     secrets: {
-      geminiConfigured,
+      groqConfigured,
       virustotalConfigured,
-      urlscanConfigured,
+      urlhausConfigured,
     },
   });
 });

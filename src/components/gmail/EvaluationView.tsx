@@ -96,9 +96,9 @@ export const EvaluationView: React.FC = () => {
   const latestRun = data?.latestRun;
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50 space-y-6">
+    <div className="workspace-page space-y-6">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="workspace-header flex-col md:flex-row md:items-center">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 flex items-center gap-1">
@@ -107,10 +107,10 @@ export const EvaluationView: React.FC = () => {
             </span>
             <span className="text-xs text-slate-500 font-medium">Offline Dataset Evaluation</span>
           </div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+          <h2 className="workspace-title">
             Threat Detection Benchmark & Performance Metrics
           </h2>
-          <p className="text-xs text-slate-500 max-w-2xl">
+          <p className="workspace-description max-w-2xl">
             Empirical validation harness evaluating the multi-agent detection pipeline against offline cybersecurity test corpora. Metrics are computed strictly on-demand from real execution.
           </p>
         </div>
@@ -225,7 +225,7 @@ export const EvaluationView: React.FC = () => {
       {/* 4 Main Benchmark Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Accuracy */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-1">
+        <div className="workspace-card p-5 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Accuracy
@@ -241,7 +241,7 @@ export const EvaluationView: React.FC = () => {
         </div>
 
         {/* Precision */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-1">
+        <div className="workspace-card p-5 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Precision
@@ -257,7 +257,7 @@ export const EvaluationView: React.FC = () => {
         </div>
 
         {/* Recall */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-1">
+        <div className="workspace-card p-5 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Recall
@@ -273,7 +273,7 @@ export const EvaluationView: React.FC = () => {
         </div>
 
         {/* F1 Score */}
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-1">
+        <div className="workspace-card p-5 space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Macro F1-Score
@@ -292,7 +292,7 @@ export const EvaluationView: React.FC = () => {
       {/* Confusion Matrix & Execution Metadata */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Confusion Matrix Card */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="workspace-card p-5 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <Layers className="w-4 h-4 text-blue-600" />
@@ -337,7 +337,7 @@ export const EvaluationView: React.FC = () => {
         </div>
 
         {/* Benchmark Execution Telemetry */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-4">
+        <div className="workspace-card p-5 sm:p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <Clock className="w-4 h-4 text-purple-600" />
@@ -384,7 +384,7 @@ export const EvaluationView: React.FC = () => {
 
       {/* Per-Sample Audit Trail Table */}
       {latestRun && latestRun.samples && (
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs space-y-3">
+        <div className="workspace-card p-5 sm:p-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
               <FileSpreadsheet className="w-4 h-4 text-blue-600" />

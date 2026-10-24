@@ -36,7 +36,7 @@ export const LoginPage: React.FC = () => {
       {/* Background ambient pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] opacity-70 pointer-events-none" />
 
-      <div className="relative w-full max-w-md bg-white border border-slate-200/90 rounded-2xl shadow-xl shadow-slate-200/50 p-6 sm:p-8 space-y-6">
+      <div className="relative w-full max-w-md bg-white/95 backdrop-blur border border-slate-200/90 rounded-3xl shadow-2xl shadow-slate-300/40 p-6 sm:p-8 space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
           <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-lg shadow-blue-500/25 ring-4 ring-blue-50">
@@ -70,7 +70,7 @@ export const LoginPage: React.FC = () => {
             type="button"
             onClick={handleDefaultGoogleLogin}
             disabled={isLoading}
-            className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 text-slate-800 border-2 border-slate-200 hover:border-slate-300 rounded-xl font-semibold text-sm shadow-xs transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group active:scale-[0.99]"
+            className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white hover:bg-blue-50/50 text-slate-800 border border-slate-200 hover:border-blue-300 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group active:scale-[0.99]"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />

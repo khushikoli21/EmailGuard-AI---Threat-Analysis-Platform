@@ -31,9 +31,9 @@ export const TopBar: React.FC<TopBarProps> = ({
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
-    <header className="h-16 bg-white border-b border-slate-200 sticky top-0 z-30 flex items-center justify-between px-3 sm:px-4 select-none">
+    <header className="h-16 shrink-0 bg-white/95 backdrop-blur-md border-b border-slate-200/90 sticky top-0 z-30 flex items-center justify-between gap-2 px-3 sm:px-5 select-none shadow-[0_1px_3px_rgb(15_23_42/4%)]">
       {/* Left: Hamburger & Gmail-style Logo */}
-      <div className="flex items-center gap-2 sm:gap-3 w-64 shrink-0">
+      <div className="flex items-center gap-2 sm:gap-3 w-auto sm:w-56 lg:w-64 shrink-0">
         <button
           onClick={onToggleSidebar}
           className="p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-colors cursor-pointer"
@@ -42,26 +42,28 @@ export const TopBar: React.FC<TopBarProps> = ({
           <Menu className="w-5 h-5" />
         </button>
 
-        <div
+        <button
+          type="button"
           onClick={() => onNavigateTab('inbox')}
           className="flex items-center gap-2 cursor-pointer group"
+          aria-label="EmailGuard Mail, go to Inbox"
         >
           <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-xs">
             <Shield className="w-4 h-4" />
           </div>
           <div className="flex items-baseline">
             <span className="text-lg font-bold text-slate-800 tracking-tight font-sans">
-              EmailGuard
+              <span className="hidden sm:inline">EmailGuard</span>
             </span>
             <span className="text-xs font-semibold text-slate-400 ml-1 font-sans">
               Mail
             </span>
           </div>
-        </div>
+        </button>
       </div>
 
       {/* Center: Gmail-style Large Search Bar */}
-      <div className="flex-1 max-w-2xl px-2 sm:px-4">
+      <div className="flex-1 min-w-0 max-w-2xl px-1 sm:px-4">
         <div className="relative flex items-center">
           <div className="absolute left-3.5 text-slate-400 pointer-events-none">
             <Search className="w-4 h-4" />
@@ -69,10 +71,10 @@ export const TopBar: React.FC<TopBarProps> = ({
 
           <input
             type="text"
-            placeholder="Search mail (e.g. from:amazon, urgent, phishing...)"
+            placeholder="Search mail, sender, subject, or threat"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-9 py-2.5 bg-slate-100/90 hover:bg-slate-100 focus:bg-white text-xs sm:text-sm text-slate-800 placeholder-slate-500 rounded-full border border-transparent focus:border-slate-300 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 shadow-inner-xs transition-all font-sans"
+            className="w-full pl-10 pr-9 py-2.5 bg-slate-100/80 hover:bg-slate-100 focus:bg-white text-xs sm:text-sm text-slate-800 placeholder-slate-500 rounded-xl sm:rounded-full border border-transparent focus:border-blue-200 focus:outline-hidden focus:ring-4 focus:ring-blue-500/10 shadow-inner-xs transition-all font-sans" aria-label="Search email"
           />
 
           {searchQuery && (
@@ -90,7 +92,7 @@ export const TopBar: React.FC<TopBarProps> = ({
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
         <button
           onClick={() => onNavigateTab('analytics')}
-          className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
+          className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium text-emerald-800 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors cursor-pointer"
           title="AI Threat Shield Active"
         >
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
@@ -112,6 +114,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             onClick={() => setShowProfileMenu(!showProfileMenu)}
             className="flex items-center gap-2 p-1 rounded-full hover:ring-2 hover:ring-slate-200 transition-all cursor-pointer"
             aria-label="User account"
+            aria-expanded={showProfileMenu}
           >
             {user?.photoURL ? (
               <img

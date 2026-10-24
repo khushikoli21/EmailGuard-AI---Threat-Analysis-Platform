@@ -16,6 +16,8 @@ import {
   PenSquare,
   HardDrive,
   Cloud,
+  ChevronDown,
+  ChevronRight,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -37,8 +39,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   isCollapsed = false,
 }) => {
+  const [isInboxExpanded, setIsInboxExpanded] = React.useState(true);
+
   const mailNavItems = [
-    { id: 'inbox', label: 'Inbox', icon: Inbox, count: unreadCount },
     { id: 'starred', label: 'Starred', icon: Star },
     { id: 'snoozed', label: 'Snoozed', icon: Clock },
     { id: 'sent', label: 'Sent', icon: Send },
@@ -97,32 +100,67 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 Mail
               </div>
             )}
-            {mailNavItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = currentTab === item.id;
-              return (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => handleItemClick('inbox')}
+                title="Inbox"
+                className={`min-w-0 flex-1 flex items-center justify-between px-3 py-2 rounded-r-full text-xs font-semibold transition-colors cursor-pointer text-left ${
+                  currentTab === 'inbox'
+                    ? 'bg-blue-50 text-blue-800 font-bold border-l-4 border-blue-600'
+                    : 'text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <span className="flex items-center gap-3 min-w-0">
+                  <Inbox className={`w-4 h-4 shrink-0 ${currentTab === 'inbox' ? 'text-blue-600' : 'text-slate-500'}`} />
+                  {!isCollapsed && <span className="truncate">Inbox</span>}
+                </span>
+                {!isCollapsed && unreadCount > 0 && (
+                  <span className="ml-2 font-mono text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+              {!isCollapsed && (
                 <button
-                  key={item.id}
-                  onClick={() => handleItemClick(item.id)}
-                  title={item.label}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-r-full text-xs font-semibold transition-colors cursor-pointer text-left ${
-                    isActive
-                      ? 'bg-blue-50 text-blue-800 font-bold border-l-4 border-blue-600'
-                      : 'text-slate-700 hover:bg-slate-100'
-                  }`}
+                  type="button"
+                  aria-label={isInboxExpanded ? 'Collapse Inbox folders' : 'Expand Inbox folders'}
+                  aria-expanded={isInboxExpanded}
+                  onClick={() => setIsInboxExpanded((expanded) => !expanded)}
+                  className="p-1.5 rounded-full text-slate-500 hover:bg-slate-100 hover:text-blue-700 transition-colors cursor-pointer"
                 >
-                  <div className="flex items-center gap-3 truncate">
-                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
-                    {!isCollapsed && <span className="truncate">{item.label}</span>}
-                  </div>
-                  {!isCollapsed && item.count && item.count > 0 ? (
-                    <span className="font-mono text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-700">
-                      {item.count}
-                    </span>
-                  ) : null}
+                  {isInboxExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                 </button>
-              );
-            })}
+              )}
+            </div>
+            <div
+              className={`grid transition-[grid-template-rows,opacity] duration-200 ease-in-out ${
+                isInboxExpanded && !isCollapsed ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+              }`}
+              aria-hidden={!isInboxExpanded || isCollapsed}
+            >
+              <div className="overflow-hidden">
+                {mailNavItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = currentTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleItemClick(item.id)}
+                      title={item.label}
+                      tabIndex={isInboxExpanded && !isCollapsed ? 0 : -1}
+                      className={`w-full flex items-center gap-3 pl-9 pr-3 py-2 rounded-r-full text-xs font-semibold transition-colors cursor-pointer text-left ${
+                        isActive
+                          ? 'bg-blue-50 text-blue-800 font-bold border-l-4 border-blue-600'
+                          : 'text-slate-700 hover:bg-slate-100'
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
+                      <span className="truncate">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           </div>
 
           {/* Security Suite */}

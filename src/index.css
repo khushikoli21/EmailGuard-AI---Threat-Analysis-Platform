@@ -1,1 +1,107 @@
 @import "tailwindcss";
+
+
+@layer base {
+  :root {
+    color-scheme: light;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-width: 320px;
+    background: #f6f8fc;
+    color: #172033;
+  }
+
+  button, a, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 3px solid rgb(59 130 246 / 38%);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgb(191 219 254 / 75%);
+    color: #172554;
+  }
+
+  * {
+    scrollbar-color: #cbd5e1 transparent;
+    scrollbar-width: thin;
+  }
+}
+
+@layer components {
+  .workspace-page {
+    flex: 1 1 0%;
+    min-height: 0;
+    overflow: auto;
+    padding: clamp(1rem, 2.4vw, 2rem);
+    background: linear-gradient(180deg, #f8faff 0%, #f3f6fb 100%);
+  }
+
+  .workspace-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .workspace-title {
+    color: #111827;
+    font-size: clamp(1.2rem, 2vw, 1.55rem);
+    font-weight: 750;
+    letter-spacing: -0.035em;
+    line-height: 1.2;
+  }
+
+  .workspace-description {
+    margin-top: 0.35rem;
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    max-width: 52rem;
+  }
+
+  .workspace-card {
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: rgb(255 255 255 / 94%);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 4%), 0 8px 24px rgb(15 23 42 / 3%);
+    transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+  }
+
+  .workspace-card:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 3px 8px rgb(15 23 42 / 5%), 0 12px 30px rgb(15 23 42 / 5%);
+  }
+
+  .workspace-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex: 0 0 auto;
+    border: 1px solid #dbeafe;
+    border-radius: 0.85rem;
+    background: linear-gradient(145deg, #eff6ff, #dbeafe);
+    color: #2563eb;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

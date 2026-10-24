@@ -55,18 +55,18 @@ export const AnalyticsView: React.FC = () => {
   const { summary, threatDistribution, riskScoreBuckets } = data;
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-50 space-y-6">
+    <div className="workspace-page space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+      <div className="workspace-header">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 tracking-tight">Security Telemetry & Analytics</h2>
-          <p className="text-xs text-slate-500">
+          <h2 className="workspace-title">Security Telemetry & Analytics</h2>
+          <p className="workspace-description">
             Real-time security metrics derived dynamically from your authenticated mailbox database
           </p>
         </div>
         <button
           onClick={loadData}
-          className="p-1.5 bg-white border border-slate-200 rounded-lg text-slate-600 hover:text-slate-900 shadow-2xs cursor-pointer"
+          className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:text-blue-700 hover:border-blue-200 shadow-sm transition-colors cursor-pointer" aria-label="Refresh analytics"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
@@ -74,25 +74,25 @@ export const AnalyticsView: React.FC = () => {
 
       {/* 4 Dynamic Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-1">
+        <div className="workspace-card p-5 space-y-2">
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Total Emails</div>
           <div className="text-3xl font-extrabold font-mono text-slate-900">{summary.totalEmails}</div>
           <div className="text-[11px] text-slate-500">Inbound corpus stored</div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-1">
+        <div className="workspace-card p-5 space-y-2">
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Analyzed Emails</div>
           <div className="text-3xl font-extrabold font-mono text-blue-600">{summary.analyzedEmails}</div>
           <div className="text-[11px] text-slate-500">Processed by AI pipeline</div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-1">
+        <div className="workspace-card p-5 space-y-2">
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Threats Detected</div>
           <div className="text-3xl font-extrabold font-mono text-rose-600">{summary.threatsDetected}</div>
           <div className="text-[11px] text-slate-500">Phishing & suspicious hits</div>
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs space-y-1">
+        <div className="workspace-card p-5 space-y-2">
           <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Mean Risk Score</div>
           <div className="text-3xl font-extrabold font-mono text-slate-900">{summary.averageRiskScore} <span className="text-xs text-slate-400 font-normal">/ 100</span></div>
           <div className="text-[11px] text-slate-500">Deterministic index</div>
@@ -102,7 +102,7 @@ export const AnalyticsView: React.FC = () => {
       {/* Visual Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Threat Distribution */}
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-xs flex flex-col justify-between">
+        <div className="workspace-card p-5 sm:p-6 flex flex-col justify-between">
           <div>
             <h3 className="text-sm font-bold text-slate-900 mb-1">Threat Classification Share</h3>
             <p className="text-xs text-slate-500 mb-4">Distribution of verdicts for analyzed messages</p>

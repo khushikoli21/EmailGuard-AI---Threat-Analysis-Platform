@@ -1,302 +1,43 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ThreatIntelRecord } from './db.js';
-
-interface CachedIntel {
-  record: ThreatIntelRecord;
-  cachedAt: number;
+type IndicatorType = 'url' | 'domain' | 'hash';
+type FetchLike = typeof fetch;
+const timeoutMs = () => Math.max(1000, Number(process.env.THREAT_INTEL_TIMEOUT_MS || 8000));
+export function parseVirusTotal(data: any) {
+  const attrs=data?.data?.attributes||{}, stats=attrs.last_analysis_stats||{};
+  const malicious=Number(stats.malicious||0), suspicious=Number(stats.suspicious||0);
+  return {malicious:malicious>0,suspicious:suspicious>0,stats,reputation:malicious?`${malicious} VirusTotal engine(s) marked this indicator malicious`:suspicious?`${suspicious} VirusTotal engine(s) marked this indicator suspicious`:'No malicious or suspicious detections in returned VirusTotal analysis'};
 }
-
-class ThreatIntelligenceService {
-  private cache: Map<string, CachedIntel> = new Map();
-  private readonly CACHE_TTL_MS = 1000 * 60 * 60; // 1 hour cache
-
-  // Normalize URL for consistent lookup
-  public normalizeUrl(rawUrl: string): string {
-    try {
-      const clean = rawUrl.trim();
-      const hasProto = clean.startsWith('http://') || clean.startsWith('https://');
-      const parsed = new URL(hasProto ? clean : `http://${clean}`);
-      // Strip trailing slashes, fragments
-      return `${parsed.protocol}//${parsed.hostname}${parsed.pathname === '/' ? '' : parsed.pathname}${parsed.search}`;
-    } catch {
-      return rawUrl.trim();
-    }
+export function parseUrlhaus(data:any) {
+  const found=data?.query_status==='ok';
+  return {found,malicious:found&&data.url_status==='online',suspicious:false};
+}
+export class ThreatIntelligenceService {
+  constructor(private fetcher:FetchLike=fetch) {}
+  normalizeUrl(raw:string):string { try {const p=new URL(raw.trim().startsWith('http')?raw.trim():'http://'+raw.trim());return p.origin+(p.pathname==='/'?'':p.pathname)+p.search;}catch{return raw.trim();} }
+  extractDomain(raw:string):string {try{return new URL(raw.startsWith('http')?raw:'http://'+raw).hostname.toLowerCase();}catch{return '';}}
+  async checkUrl(value:string,analysisId:string,userId:string,type:IndicatorType='url'):Promise<ThreatIntelRecord[]> {
+    const normalized=type==='url'?this.normalizeUrl(value):value.toLowerCase();
+    const results=await Promise.all([this.queryVirusTotal(normalized,type,analysisId,userId),type==='url'?this.queryUrlhaus(normalized,analysisId,userId):Promise.resolve(null)]);
+    return results.filter((r):r is ThreatIntelRecord=>r!==null);
   }
-
-  public extractDomain(rawUrl: string): string {
-    try {
-      const parsed = new URL(rawUrl.startsWith('http') ? rawUrl : `http://${rawUrl}`);
-      return parsed.hostname.toLowerCase();
-    } catch {
-      return '';
-    }
+  private async request(url:string,init:RequestInit):Promise<Response>{return this.fetcher(url,{...init,signal:AbortSignal.timeout(timeoutMs())});}
+  private record(userId:string,analysisId:string,value:string,provider:string,status:ThreatIntelRecord['status'],extra:Partial<ThreatIntelRecord>={}):ThreatIntelRecord{return{id:uuidv4(),userId,analysisId,url:value,provider,status,malicious:false,suspicious:false,checkedAt:new Date().toISOString(),...extra};}
+  private async queryVirusTotal(value:string,type:IndicatorType,analysisId:string,userId:string):Promise<ThreatIntelRecord>{
+    const key=process.env.VIRUSTOTAL_API_KEY;if(!key)return this.record(userId,analysisId,value,'VirusTotal','not_configured',{reputation:'Unavailable: VIRUSTOTAL_API_KEY is not configured'});
+    const id=type==='url'?Buffer.from(value).toString('base64').replace(/=/g,''):encodeURIComponent(value), collection=type==='url'?'urls':type==='domain'?'domains':'files';
+    try{const res=await this.request(`https://www.virustotal.com/api/v3/${collection}/${id}`,{headers:{'x-apikey':key}});
+      if(res.status===404)return this.record(userId,analysisId,value,'VirusTotal','unavailable',{reputation:'No VirusTotal record found',details:{httpStatus:404}});
+      if(!res.ok)return this.record(userId,analysisId,value,'VirusTotal','failed',{reputation:`VirusTotal returned HTTP ${res.status}`,details:{httpStatus:res.status,rateLimited:res.status===429}});
+      const parsed=parseVirusTotal(await res.json());return this.record(userId,analysisId,value,'VirusTotal','completed',{...parsed,details:parsed.stats});
+    }catch(e){return this.record(userId,analysisId,value,'VirusTotal','failed',{reputation:'VirusTotal request failed or timed out',details:{error:e instanceof Error?e.message:String(e)}});}
   }
-
-  public async checkUrl(
-    url: string,
-    analysisId: string,
-    userId: string
-  ): Promise<ThreatIntelRecord[]> {
-    const normalized = this.normalizeUrl(url);
-    const domain = this.extractDomain(url);
-    const now = new Date().toISOString();
-    const results: ThreatIntelRecord[] = [];
-
-    // Cache check
-    const cacheKeyVt = `vt:${normalized}`;
-    const cachedVt = this.cache.get(cacheKeyVt);
-    if (cachedVt && Date.now() - cachedVt.cachedAt < this.CACHE_TTL_MS) {
-      results.push({
-        ...cachedVt.record,
-        id: uuidv4(),
-        analysisId,
-        userId,
-        checkedAt: now,
-      });
-    } else {
-      const vtRecord = await this.queryVirusTotal(normalized, analysisId, userId);
-      results.push(vtRecord);
-      this.cache.set(cacheKeyVt, { record: vtRecord, cachedAt: Date.now() });
-    }
-
-    const cacheKeyUrlscan = `urlscan:${domain || normalized}`;
-    const cachedUrlscan = this.cache.get(cacheKeyUrlscan);
-    if (cachedUrlscan && Date.now() - cachedUrlscan.cachedAt < this.CACHE_TTL_MS) {
-      results.push({
-        ...cachedUrlscan.record,
-        id: uuidv4(),
-        analysisId,
-        userId,
-        checkedAt: now,
-      });
-    } else {
-      const urlscanRecord = await this.queryUrlscan(domain, normalized, analysisId, userId);
-      results.push(urlscanRecord);
-      this.cache.set(cacheKeyUrlscan, { record: urlscanRecord, cachedAt: Date.now() });
-    }
-
-    return results;
-  }
-
-  private async queryVirusTotal(
-    url: string,
-    analysisId: string,
-    userId: string
-  ): Promise<ThreatIntelRecord> {
-    const apiKey = process.env.VIRUSTOTAL_API_KEY;
-    const now = new Date().toISOString();
-
-    if (!apiKey) {
-      return {
-        id: uuidv4(),
-        userId,
-        analysisId,
-        url,
-        provider: 'VirusTotal',
-        status: 'not_configured',
-        malicious: false,
-        suspicious: false,
-        reputation: 'NOT_CONFIGURED: Set VIRUSTOTAL_API_KEY in environment/secrets',
-        details: { note: 'API key not configured in environment' },
-        checkedAt: now,
-      };
-    }
-
-    try {
-      // VirusTotal v3 URL identifier is base64 without padding '='
-      const urlId = Buffer.from(url).toString('base64').replace(/=/g, '');
-      const response = await fetch(`https://www.virustotal.com/api/v3/urls/${urlId}`, {
-        headers: { 'x-apikey': apiKey },
-      });
-
-      if (response.status === 404) {
-        return {
-          id: uuidv4(),
-          userId,
-          analysisId,
-          url,
-          provider: 'VirusTotal',
-          status: 'unavailable',
-          malicious: false,
-          suspicious: false,
-          reputation: 'NO_RESULT: URL has not yet been scanned by VirusTotal engines',
-          details: { code: 404, status: 'Not Found in VT Dataset' },
-          checkedAt: now,
-        };
-      }
-
-      if (!response.ok) {
-        return {
-          id: uuidv4(),
-          userId,
-          analysisId,
-          url,
-          provider: 'VirusTotal',
-          status: 'failed',
-          malicious: false,
-          suspicious: false,
-          reputation: `UNAVAILABLE: HTTP ${response.status} from VirusTotal API`,
-          details: { status: response.status, statusText: response.statusText },
-          checkedAt: now,
-        };
-      }
-
-      const data = await response.json();
-      const stats = data?.data?.attributes?.last_analysis_stats || {};
-      const maliciousCount = Number(stats.malicious || 0);
-      const suspiciousCount = Number(stats.suspicious || 0);
-      const harmlessCount = Number(stats.harmless || 0);
-      const undetectedCount = Number(stats.undetected || 0);
-
-      const isMalicious = maliciousCount > 0;
-      const isSuspicious = suspiciousCount > 0;
-
-      return {
-        id: uuidv4(),
-        userId,
-        analysisId,
-        url,
-        provider: 'VirusTotal',
-        status: 'completed',
-        malicious: isMalicious,
-        suspicious: isSuspicious,
-        reputation: isMalicious
-          ? `MALICIOUS: ${maliciousCount} security vendors flagged this URL`
-          : isSuspicious
-          ? `SUSPICIOUS: ${suspiciousCount} vendors flagged anomalies`
-          : `CLEAN: 0/${maliciousCount + harmlessCount + undetectedCount} detections`,
-        details: {
-          malicious: maliciousCount,
-          suspicious: suspiciousCount,
-          harmless: harmlessCount,
-          undetected: undetectedCount,
-        },
-        checkedAt: now,
-      };
-    } catch (err: any) {
-      return {
-        id: uuidv4(),
-        userId,
-        analysisId,
-        url,
-        provider: 'VirusTotal',
-        status: 'failed',
-        malicious: false,
-        suspicious: false,
-        reputation: `FAILED: Network error querying VirusTotal (${err.message})`,
-        details: { error: err.message },
-        checkedAt: now,
-      };
-    }
-  }
-
-  private async queryUrlscan(
-    domain: string,
-    url: string,
-    analysisId: string,
-    userId: string
-  ): Promise<ThreatIntelRecord> {
-    const apiKey = process.env.URLSCAN_API_KEY;
-    const now = new Date().toISOString();
-
-    if (!apiKey) {
-      return {
-        id: uuidv4(),
-        userId,
-        analysisId,
-        url,
-        provider: 'urlscan.io',
-        status: 'not_configured',
-        malicious: false,
-        suspicious: false,
-        reputation: 'NOT_CONFIGURED: Set URLSCAN_API_KEY in environment/secrets',
-        details: { note: 'API key not configured in environment' },
-        checkedAt: now,
-      };
-    }
-
-    try {
-      const query = domain ? `page.domain:${domain}` : `page.url:"${url}"`;
-      const response = await fetch(`https://urlscan.io/api/v1/search/?q=${encodeURIComponent(query)}&size=3`, {
-        headers: { 'API-Key': apiKey },
-      });
-
-      if (!response.ok) {
-        return {
-          id: uuidv4(),
-          userId,
-          analysisId,
-          url,
-          provider: 'urlscan.io',
-          status: 'failed',
-          malicious: false,
-          suspicious: false,
-          reputation: `UNAVAILABLE: HTTP ${response.status} from urlscan.io`,
-          details: { status: response.status },
-          checkedAt: now,
-        };
-      }
-
-      const data = await response.json();
-      const results = data?.results || [];
-
-      if (results.length === 0) {
-        return {
-          id: uuidv4(),
-          userId,
-          analysisId,
-          url,
-          provider: 'urlscan.io',
-          status: 'unavailable',
-          malicious: false,
-          suspicious: false,
-          reputation: 'NO_RESULT: Domain not previously indexed in urlscan public scans',
-          details: { totalScans: 0 },
-          checkedAt: now,
-        };
-      }
-
-      const topResult = results[0];
-      const verdicts = topResult?.verdicts || {};
-      const isMalicious = Boolean(verdicts.overall?.malicious || verdicts.community?.malicious);
-      const categories = verdicts.overall?.categories || [];
-
-      return {
-        id: uuidv4(),
-        userId,
-        analysisId,
-        url,
-        provider: 'urlscan.io',
-        status: 'completed',
-        malicious: isMalicious,
-        suspicious: isMalicious || categories.length > 0,
-        reputation: isMalicious
-          ? `MALICIOUS: Flagged by urlscan verdicts (${categories.join(', ') || 'malicious score'})`
-          : `INDEXED: ${results.length} historical scans on record`,
-        details: {
-          scanId: topResult?._id,
-          ip: topResult?.page?.ip,
-          server: topResult?.page?.server,
-          country: topResult?.page?.country,
-        },
-        checkedAt: now,
-      };
-    } catch (err: any) {
-      return {
-        id: uuidv4(),
-        userId,
-        analysisId,
-        url,
-        provider: 'urlscan.io',
-        status: 'failed',
-        malicious: false,
-        suspicious: false,
-        reputation: `FAILED: Error querying urlscan (${err.message})`,
-        details: { error: err.message },
-        checkedAt: now,
-      };
-    }
+  private async queryUrlhaus(value:string,analysisId:string,userId:string):Promise<ThreatIntelRecord>{
+    const key=process.env.URLHAUS_AUTH_KEY;if(!key)return this.record(userId,analysisId,value,'URLhaus','not_configured',{reputation:'Unavailable: URLHAUS_AUTH_KEY is not configured'});
+    try{const res=await this.request('https://urlhaus-api.abuse.ch/v1/url/',{method:'POST',headers:{'Auth-Key':key,'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({url:value})});
+      if(!res.ok)return this.record(userId,analysisId,value,'URLhaus','failed',{reputation:res.status===429?'URLhaus rate limit reached':`URLhaus returned HTTP ${res.status}`,details:{httpStatus:res.status}});
+      const data=await res.json(), parsed=parseUrlhaus(data);return this.record(userId,analysisId,value,'URLhaus',parsed.found?'completed':'unavailable',{malicious:parsed.malicious,reputation:parsed.found?'Listed by URLhaus as a malware URL':`URLhaus query status: ${data?.query_status||'unknown'}`,details:parsed.found?{urlStatus:data.url_status,threat:data.threat,tags:data.tags,dateAdded:data.date_added,reference:data.urlhaus_reference}:{queryStatus:data?.query_status}});
+    }catch(e){return this.record(userId,analysisId,value,'URLhaus','failed',{reputation:'URLhaus request failed or timed out',details:{error:e instanceof Error?e.message:String(e)}});}
   }
 }
-
-export const threatIntelService = new ThreatIntelligenceService();
+export const threatIntelService=new ThreatIntelligenceService();

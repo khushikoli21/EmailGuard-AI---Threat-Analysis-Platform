@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import DOMPurify from 'dompurify';
+import { AnalysisReport } from './AnalysisReport';
+import { EmailBodyEvidence } from './EmailBodyEvidence';
 import {
   ArrowLeft,
   Star,
@@ -100,9 +101,9 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 bg-white overflow-hidden">
+    <div className="flex-1 min-h-0 flex flex-col min-w-0 bg-white overflow-hidden">
       {/* Gmail Email Reading Action Bar */}
-      <div className="h-12 border-b border-slate-200/90 px-3 sm:px-4 flex items-center justify-between text-xs bg-white select-none shrink-0">
+      <div className="min-h-14 border-b border-slate-200/90 px-3 sm:px-5 py-2 flex items-center justify-between gap-3 text-xs bg-white/95 backdrop-blur shrink-0">
         <div className="flex items-center gap-2">
           <button
             onClick={onBack}
@@ -156,7 +157,7 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
       </div>
 
       {/* Main Email Reading Body & Security Panel */}
-      <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6 bg-slate-50/50">
         {/* Email Header */}
         <div className="space-y-4 pb-4 border-b border-slate-200">
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
@@ -228,7 +229,7 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
                 ) : (
                   <Clock className="w-3.5 h-3.5 text-slate-400" />
                 )}
-                <span>Threat Intelligence lookup (VirusTotal & urlscan status)</span>
+                <span>Threat Intelligence lookup (VirusTotal & URLhaus status)</span>
               </div>
               <div className="flex items-center gap-2 text-slate-700">
                 {analysisStep >= 4 ? (
@@ -242,285 +243,15 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
           </div>
         )}
 
-        {/* Security Analysis Panel (Prominently rendered if analyzed) */}
-        {reportData && (
-          <div className="rounded-xl border-2 border-slate-200 bg-white overflow-hidden shadow-xs space-y-4 p-5 sm:p-6">
-            {/* Header: Classification & Risk Score */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-              <div>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-                  Security Analysis Dossier
-                </div>
-                <div className="flex items-center gap-3">
-                  <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                    {reportData.analysis.classification.toUpperCase()}
-                  </h3>
-                  <span
-                    className={`px-2.5 py-1 rounded-md text-xs font-mono font-bold uppercase border ${getRiskColor(
-                      reportData.analysis.riskScore
-                    )}`}
-                  >
-                    Risk {reportData.analysis.riskScore} / 100 ({reportData.analysis.riskLevel})
-                  </span>
-                </div>
-              </div>
+        {reportData && <AnalysisReport data={reportData} />}
 
-              <div className="text-right">
-                <span className="text-[11px] font-mono text-slate-400">
-                  Confidence: {reportData.analysis.confidence}%
-                </span>
-              </div>
-            </div>
-
-            {/* Prompt Injection Warning Alert if detected */}
-            {reportData.analysis.promptInjectionSuspected && (
-              <div className="p-4 rounded-xl bg-rose-950 text-rose-100 border-2 border-rose-500 flex items-start gap-3">
-                <Terminal className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
-                <div className="space-y-1 text-xs">
-                  <h4 className="font-bold text-white text-sm">
-                    ⚠ Prompt Injection Attempt Detected (OWASP LLM01)
-                  </h4>
-                  <p className="text-rose-200 leading-relaxed font-sans">
-                    This email contains text that appears to be attempting to manipulate the AI analysis system.
-                    Email content is treated as untrusted data and isolated from system directives.
-                  </p>
-                  {reportData.analysis.promptInjectionDetails && (
-                    <div className="mt-1 font-mono text-[11px] text-rose-300 bg-black/40 p-1.5 rounded">
-                      {reportData.analysis.promptInjectionDetails}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Recommended Action Box */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 flex items-start gap-3">
-              <div className="p-2 rounded-lg bg-white border border-slate-200 shadow-2xs text-slate-700 shrink-0">
-                <ShieldAlert className="w-4 h-4 text-blue-600" />
-              </div>
-              <div className="space-y-0.5">
-                <span className="text-xs font-bold text-slate-900 uppercase tracking-wider block">
-                  Recommended Action
-                </span>
-                <p className="text-xs font-semibold text-slate-800 leading-relaxed">
-                  {reportData.analysis.recommendedAction}
-                </p>
-              </div>
-            </div>
-
-            {/* Explanation: "Why was this email flagged?" */}
-            <div className="p-4 rounded-xl bg-blue-50/50 border border-blue-200/80 space-y-1">
-              <span className="text-xs font-bold text-blue-900 block">
-                Why was this email flagged?
-              </span>
-              <p className="text-xs text-blue-950 leading-relaxed font-sans">
-                {reportData.analysis.explanation}
-              </p>
-            </div>
-
-            {/* Threat Indicators List */}
-            {reportData.indicators && reportData.indicators.length > 0 && (
-              <div className="space-y-2 pt-1">
-                <div className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  Threat Indicators Detected ({reportData.indicators.length})
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {reportData.indicators.map((ind) => (
-                    <div
-                      key={ind.id}
-                      className="p-2.5 rounded-lg border border-slate-200 bg-white space-y-1 text-xs"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-800">{ind.title}</span>
-                        <span
-                          className={`text-[10px] font-mono font-bold uppercase px-1.5 py-0.2 rounded ${
-                            ind.severity === 'Critical'
-                              ? 'bg-rose-100 text-rose-800'
-                              : ind.severity === 'High'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-blue-100 text-blue-800'
-                          }`}
-                        >
-                          {ind.severity}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-600 leading-relaxed">{ind.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Threat Intelligence (VirusTotal & urlscan.io) */}
-            {reportData.threatIntel && reportData.threatIntel.length > 0 && (
-              <div className="space-y-2 pt-1">
-                <div className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <Globe2 className="w-4 h-4 text-blue-600" />
-                    <span>External Threat Intelligence ({reportData.threatIntel.length})</span>
-                  </span>
-                  <span className="text-[11px] font-mono text-slate-400">VirusTotal · urlscan.io</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {reportData.threatIntel.map((ti) => (
-                    <div
-                      key={ti.id}
-                      className="p-3 rounded-lg border border-slate-200 bg-white space-y-1.5 text-xs"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-800">{ti.provider}</span>
-                        <span
-                          className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 rounded border ${
-                            ti.malicious
-                              ? 'bg-rose-50 text-rose-700 border-rose-300'
-                              : ti.suspicious
-                              ? 'bg-amber-50 text-amber-700 border-amber-300'
-                              : ti.status === 'completed'
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-300'
-                              : 'bg-slate-100 text-slate-600 border-slate-200'
-                          }`}
-                        >
-                          {ti.malicious ? 'MALICIOUS' : ti.status.toUpperCase()}
-                        </span>
-                      </div>
-                      <div className="font-mono text-[11px] text-slate-500 truncate" title={ti.url}>
-                        {ti.url}
-                      </div>
-                      <p className="text-[11px] text-slate-700 leading-normal">
-                        {ti.reputation || 'No reputation data'}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Evidence & Grounding List */}
-            {reportData.evidence && reportData.evidence.length > 0 && (
-              <div className="space-y-2 pt-1">
-                <div className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <Database className="w-4 h-4 text-purple-600" />
-                    <span>Traceable Knowledge Base Grounding ({reportData.evidence.length})</span>
-                  </span>
-                  <span className="text-[11px] font-mono text-purple-600">MITRE ATT&CK · OWASP</span>
-                </div>
-                <div className="space-y-1.5">
-                  {reportData.evidence.map((ev) => (
-                    <div
-                      key={ev.id}
-                      className="p-3 rounded-lg border border-slate-200 bg-slate-50 text-xs flex items-start justify-between gap-3"
-                    >
-                      <div className="space-y-0.5 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-slate-800">{ev.title}</span>
-                          {ev.relevanceScore !== undefined && (
-                            <span className="text-[10px] font-mono text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200 shrink-0">
-                              {Math.round(ev.relevanceScore * 100)}% match
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-slate-600 leading-relaxed">{ev.description}</p>
-                      </div>
-                      <div className="shrink-0 text-right space-y-1">
-                        <span className="text-[10px] font-mono text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200 block">
-                          {ev.source}
-                        </span>
-                        {ev.sourceUrl && (
-                          <a
-                            href={ev.sourceUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-800 font-semibold"
-                          >
-                            <span>Reference</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Analysis Pipeline Audit Trail (Collapsible) */}
-            {reportData.pipelineLogs && reportData.pipelineLogs.length > 0 && (
-              <div className="pt-2 border-t border-slate-100 space-y-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAuditTrail(!showAuditTrail)}
-                  className="w-full flex items-center justify-between text-xs font-bold text-slate-700 hover:text-slate-900 cursor-pointer py-1"
-                >
-                  <span className="flex items-center gap-1.5">
-                    <Activity className="w-4 h-4 text-blue-600" />
-                    <span>Analysis Pipeline Audit Trail ({reportData.pipelineLogs.length} stages)</span>
-                  </span>
-                  <span className="flex items-center gap-1 text-slate-500 text-[11px]">
-                    <span>{showAuditTrail ? 'Hide Log' : 'Show Execution Log'}</span>
-                    {showAuditTrail ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                  </span>
-                </button>
-
-                {showAuditTrail && (
-                  <div className="border border-slate-200 rounded-lg overflow-hidden divide-y divide-slate-100 text-xs bg-slate-50">
-                    {reportData.pipelineLogs.map((log) => (
-                      <div key={log.id} className="p-2.5 flex items-start justify-between gap-2">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono font-bold text-slate-800 text-[11px]">
-                              {log.component}
-                            </span>
-                            <span
-                              className={`text-[9px] font-mono font-bold uppercase px-1.5 py-0.2 rounded ${
-                                log.status === 'completed'
-                                  ? 'bg-emerald-100 text-emerald-800'
-                                  : log.status === 'unavailable'
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-rose-100 text-rose-800'
-                              }`}
-                            >
-                              {log.status}
-                            </span>
-                          </div>
-                          <p className="text-[11px] text-slate-600">{log.message || log.error || 'Done'}</p>
-                        </div>
-                        <span className="font-mono text-[10px] text-slate-400 shrink-0">
-                          {log.durationMs} ms
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Email Body Content (Sanitized Viewport) */}
         <div className="space-y-2 pt-2">
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span className="font-bold uppercase tracking-wider text-slate-400">Message Body</span>
-            <span className="font-mono text-[11px] text-emerald-600 flex items-center gap-1">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>Sanitized HTML & Plaintext Viewport (DOMPurify XSS-Protected)</span>
-            </span>
+            <span className="font-bold uppercase tracking-wider text-slate-400">Original message body</span>
+            {reportData?.indicators.some((finding) => finding.textSpans?.length) && <span className="text-[11px] text-slate-500">Highlighted passages link to findings</span>}
           </div>
-
-          <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-sans text-slate-800 select-text leading-relaxed">
-            {/<[a-z][\s\S]*>/i.test(email.body) ? (
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(email.body, {
-                    FORBID_TAGS: ['script', 'iframe', 'object', 'embed'],
-                    FORBID_ATTR: ['onerror', 'onload', 'onclick', 'onmouseover'],
-                  }),
-                }}
-                className="prose prose-sm max-w-none text-slate-800 font-sans"
-              />
-            ) : (
-              <div className="whitespace-pre-wrap">{email.body}</div>
-            )}
+          <div className="p-4 sm:p-5 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm font-sans text-slate-800 select-text">
+            <EmailBodyEvidence body={email.body} indicators={reportData?.indicators || []} />
           </div>
         </div>
 

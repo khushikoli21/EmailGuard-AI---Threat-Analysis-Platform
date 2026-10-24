@@ -17,6 +17,7 @@ export interface EmailAttachment {
   mimeType?: string;
   isSuspicious?: boolean;
   notes?: string;
+  hash?: string;
 }
 
 export interface EmailRecord {
@@ -38,7 +39,7 @@ export interface EmailRecord {
   createdAt: string;
   isStarred: boolean;
   isRead: boolean;
-  folder: 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash';
+  folder: 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash' | 'analysis';
   latestAnalysisId?: string;
   classification?: 'Safe' | 'Suspicious' | 'Phishing' | 'Spam' | 'Unanalyzed';
   riskScore?: number | null;
@@ -76,7 +77,7 @@ export interface AnalysisRecord {
   classification: 'Safe' | 'Suspicious' | 'Phishing' | 'Spam';
   riskScore: number;
   riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
-  confidence: number;
+  confidence: number | null;
   explanation: string;
   recommendedAction: string;
   promptInjectionSuspected: boolean;
@@ -84,6 +85,9 @@ export interface AnalysisRecord {
   status: 'pending' | 'completed' | 'failed';
   createdAt: string;
   completedAt: string;
+  riskBreakdown?: Array<{factor:string;weight:number;applied:boolean;source:string}>;
+  llmStatus?: 'completed'|'not_configured'|'unavailable';
+  recommendedActions?: string[];
 }
 
 export interface IndicatorRecord {
@@ -95,6 +99,7 @@ export interface IndicatorRecord {
   description: string;
   severity: 'Low' | 'Medium' | 'High' | 'Critical';
   evidence?: string;
+  textSpans?: Array<{start:number;end:number;findingId:string;category:string;title:string;reason:string;severity?:'Low'|'Medium'|'High'|'Critical';matchedText?:string;evidence?:string}>;
   source: string;
   createdAt: string;
 }
