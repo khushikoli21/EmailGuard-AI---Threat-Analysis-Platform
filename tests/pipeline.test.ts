@@ -32,3 +32,28 @@ test('executive wire-transfer findings map exact evidence to the original body',
  }
  assert.equal(db.getEmail(email.id,userId)?.body,body);
 });
+
+test('stored report records are persisted, isolated, and retrievable', () => {
+ const userId = 'stored-rep-test-' + Date.now();
+ const report = db.saveStoredReport({
+  id: 'RPT-TEST-' + Date.now(),
+  userId,
+  title: 'Audit Report',
+  type: 'email_investigation',
+  targetId: 'analysis-123',
+  generatedAt: new Date().toISOString(),
+  summary: 'Executive threat summary',
+  riskScore: 85,
+  riskLevel: 'High',
+  classification: 'Phishing',
+  sender: 'attacker@evil.com',
+  subject: 'Urgent Wire',
+  indicatorsCount: 3,
+  data: {},
+ });
+ const retrieved = db.getStoredReport(report.id, userId);
+ assert.equal(retrieved?.id, report.id);
+ const list = db.getStoredReports(userId);
+ assert.equal(list.length, 1);
+ assert.equal(list[0].id, report.id);
+});

@@ -366,48 +366,9 @@ app.post('/api/analyze', requireAuth, async (req: AuthenticatedRequest, res: Res
   }
 });
 
-// Get detailed Threat Report
-app.get('/api/reports/:id', requireAuth, (req: AuthenticatedRequest, res: Response) => {
-  const analysis = db.getAnalysis(req.params.id, req.userId!);
-  if (!analysis) {
-    // Check if caller passed email ID
-    const byEmail = db.getAnalysisByEmailId(req.params.id, req.userId!);
-    if (!byEmail) {
-      return res.status(404).json({ error: 'Threat analysis report not found.' });
-    }
-    const indicators = db.getIndicatorsByAnalysis(byEmail.id, req.userId!);
-    const threatIntel = db.getThreatIntelByAnalysis(byEmail.id, req.userId!);
-    const evidence = db.getEvidenceByAnalysis(byEmail.id, req.userId!);
-    const pipelineLogs = db.getPipelineLogsByAnalysis(byEmail.id, req.userId!);
-    const email = db.getEmail(byEmail.emailId, req.userId!);
-    if (email) attachTextSpans(email.body, indicators);
-
-    return res.json({
-      analysis: byEmail,
-      email,
-      indicators,
-      threatIntel,
-      evidence,
-      pipelineLogs,
-    });
-  }
-
-  const indicators = db.getIndicatorsByAnalysis(analysis.id, req.userId!);
-  const threatIntel = db.getThreatIntelByAnalysis(analysis.id, req.userId!);
-  const evidence = db.getEvidenceByAnalysis(analysis.id, req.userId!);
-  const pipelineLogs = db.getPipelineLogsByAnalysis(analysis.id, req.userId!);
-  const email = db.getEmail(analysis.emailId, req.userId!);
-  if (email) attachTextSpans(email.body, indicators);
-
-  return res.json({
-    analysis,
-    email,
-    indicators,
-    threatIntel,
-    evidence,
-    pipelineLogs,
-  });
-});
+// ==========================================
+// THREAT REPORT ROUTES
+// ==========================================
 
 // List all reports for the user
 app.get('/api/reports', requireAuth, (req: AuthenticatedRequest, res: Response) => {
@@ -424,7 +385,7 @@ app.get('/api/reports', requireAuth, (req: AuthenticatedRequest, res: Response) 
   return res.json(fullReports);
 });
 
-// Stored generated reports list
+// Stored generated reports list (MUST come before /api/reports/:id)
 app.get('/api/reports/stored', requireAuth, (req: AuthenticatedRequest, res: Response) => {
   const stored = db.getStoredReports(req.userId!);
   return res.json({ items: stored });
@@ -466,6 +427,63 @@ app.delete('/api/reports/stored/:id', requireAuth, (req: AuthenticatedRequest, r
     return res.status(404).json({ error: 'Report not found.' });
   }
   return res.json({ success: true, message: 'Report removed.' });
+});
+
+// Get single stored report by ID
+app.get('/api/reports/stored/:id', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const report = db.getStoredReport(req.params.id, req.userId!);
+  if (!report) {
+    return res.status(404).json({ error: 'Stored report not found.' });
+  }
+  return res.json(report);
+});
+
+// Get detailed Threat Report (parameterized route - comes after static routes)
+app.get('/api/reports/:id', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  const analysis = db.getAnalysis(req.params.id, req.userId!);
+  if (!analysis) {
+    // Check if caller passed email ID
+    const byEmail = db.getAnalysisByEmailId(req.params.id, req.userId!);
+    if (!byEmail) {
+      // Check if caller passed stored report ID
+      const stored = db.getStoredReport(req.params.id, req.userId!);
+      if (stored) {
+        return res.json(stored.data || stored);
+      }
+      return res.status(404).json({ error: 'Threat analysis report not found.' });
+    }
+    const indicators = db.getIndicatorsByAnalysis(byEmail.id, req.userId!);
+    const threatIntel = db.getThreatIntelByAnalysis(byEmail.id, req.userId!);
+    const evidence = db.getEvidenceByAnalysis(byEmail.id, req.userId!);
+    const pipelineLogs = db.getPipelineLogsByAnalysis(byEmail.id, req.userId!);
+    const email = db.getEmail(byEmail.emailId, req.userId!);
+    if (email) attachTextSpans(email.body, indicators);
+
+    return res.json({
+      analysis: byEmail,
+      email,
+      indicators,
+      threatIntel,
+      evidence,
+      pipelineLogs,
+    });
+  }
+
+  const indicators = db.getIndicatorsByAnalysis(analysis.id, req.userId!);
+  const threatIntel = db.getThreatIntelByAnalysis(analysis.id, req.userId!);
+  const evidence = db.getEvidenceByAnalysis(analysis.id, req.userId!);
+  const pipelineLogs = db.getPipelineLogsByAnalysis(analysis.id, req.userId!);
+  const email = db.getEmail(analysis.emailId, req.userId!);
+  if (email) attachTextSpans(email.body, indicators);
+
+  return res.json({
+    analysis,
+    email,
+    indicators,
+    threatIntel,
+    evidence,
+    pipelineLogs,
+  });
 });
 
 // ==========================================
