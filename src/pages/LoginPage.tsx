@@ -1,34 +1,36 @@
-import React, { useState } from 'react';
-import { Shield, Lock, ShieldCheck, Mail, ArrowRight, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import React, { useEffect, useState } from 'react';
+import { Shield, Lock, ShieldCheck, Loader2 } from 'lucide-react';
 
 export const LoginPage: React.FC = () => {
-  const { loginWithGoogle, isLoading } = useAuth();
-  const [customEmail, setCustomEmail] = useState('');
-  const [customName, setCustomName] = useState('');
-  const [showCustomFields, setShowCustomFields] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDefaultGoogleLogin = async () => {
-    setError(null);
-    const success = await loginWithGoogle('nareshkarothia@gmail.com', 'Naresh Karothia');
-    if (!success) {
-      setError('Google Sign-In failed. Please check server connection.');
-    }
-  };
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('auth') !== 'error') return;
+    const reason = params.get('reason');
+    setError(reason === 'authorization_denied'
+      ? 'Google sign-in was cancelled. Please try again.'
+      : reason === 'gmail_not_configured'
+        ? 'Google sign-in is not configured on the server.'
+        : 'Google sign-in could not be completed. Please try again.');
+    params.delete('auth');
+    params.delete('reason');
+    const query = params.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`);
+  }, []);
 
-  const handleCustomGoogleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customEmail.trim() || !customEmail.includes('@')) {
-      setError('Please enter a valid Google email address.');
+  const handleGoogleLogin = () => {
+    setError(null);
+    // Clear the old demo bearer token so it cannot override the OAuth session cookie.
+    try { localStorage.removeItem('emailguard_token'); } catch { /* storage may be unavailable */ }
+    const signInWindow = window.open('/api/auth/google', '_blank');
+    if (!signInWindow) {
+      setError('Google sign-in tab was blocked. Allow pop-ups for localhost, then try again.');
       return;
     }
-    setError(null);
-    const name = customName.trim() || customEmail.split('@')[0];
-    const success = await loginWithGoogle(customEmail.trim(), name);
-    if (!success) {
-      setError('Google Sign-In failed. Please try again.');
-    }
+    signInWindow.opener = null;
+    setIsRedirecting(true);
   };
 
   return (
@@ -68,11 +70,11 @@ export const LoginPage: React.FC = () => {
         <div className="space-y-3">
           <button
             type="button"
-            onClick={handleDefaultGoogleLogin}
-            disabled={isLoading}
+            onClick={handleGoogleLogin}
+            disabled={isRedirecting}
             className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-white hover:bg-blue-50/50 text-slate-800 border border-slate-200 hover:border-blue-300 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group active:scale-[0.99]"
           >
-            {isLoading ? (
+            {isRedirecting ? (
               <Loader2 className="w-5 h-5 text-blue-600 animate-spin" />
             ) : (
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
@@ -100,67 +102,8 @@ export const LoginPage: React.FC = () => {
           </button>
 
           <p className="text-[11px] text-center text-slate-400 font-sans">
-            Quick sign-in connects your isolated account profile: <span className="font-mono text-slate-600">nareshkarothia@gmail.com</span>
+            Choose the Google account you want to use for EmailGuard.
           </p>
-        </div>
-
-        {/* Custom Google Account Alternative */}
-        <div className="pt-2 border-t border-slate-100">
-          {!showCustomFields ? (
-            <button
-              type="button"
-              onClick={() => setShowCustomFields(true)}
-              className="w-full text-center text-xs font-semibold text-blue-600 hover:text-blue-700 transition-colors py-1 cursor-pointer"
-            >
-              Sign in with a different Google account →
-            </button>
-          ) : (
-            <form onSubmit={handleCustomGoogleLogin} className="space-y-3 pt-1">
-              <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-600 block">
-                  Google Email Address
-                </label>
-                <input
-                  type="email"
-                  required
-                  placeholder="analyst@gmail.com"
-                  value={customEmail}
-                  onChange={(e) => setCustomEmail(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 focus:bg-white text-slate-900 rounded-lg border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 font-mono"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-600 block">
-                  Full Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Dr. Alex Vance"
-                  value={customName}
-                  onChange={(e) => setCustomName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 focus:bg-white text-slate-900 rounded-lg border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20 font-sans"
-                />
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCustomFields(false)}
-                  className="px-3 py-2 text-xs font-medium text-slate-500 hover:text-slate-700"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="flex-1 py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors cursor-pointer"
-                >
-                  Sign In with Google
-                </button>
-              </div>
-            </form>
-          )}
         </div>
 
         {/* Security & Privacy Guarantees */}

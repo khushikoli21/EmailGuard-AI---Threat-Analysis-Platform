@@ -141,23 +141,9 @@ export interface AnalyticsSummary {
   riskScoreBuckets: { range: string; count: number; label: string }[];
 }
 
-function getStoredToken(): string {
-  try {
-    return localStorage.getItem('emailguard_token') || '';
-  } catch {
-    return '';
-  }
-}
-
 export async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
-  const token = getStoredToken();
-  const headers = new Headers(init.headers || {});
-  if (token && !headers.has('Authorization')) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
   return fetch(input, {
     ...init,
-    headers,
     credentials: 'include',
   });
 }
@@ -175,6 +161,29 @@ export async function fetchEmails(
   const res = await apiFetch(`/api/emails?${params.toString()}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch emails`);
   return res.json();
+}
+
+export async function startGmailOAuth(): Promise<{ authUrl: string }> {
+  const res = await apiFetch('/api/gmail/connect');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.authUrl) {
+    throw new Error(data.error || 'Could not start Gmail authorization.');
+  }
+  return data;
+}
+
+export async function fetchGmailStatus(): Promise<{ connected: boolean; emailAddress: string | null }> {
+  const res = await apiFetch('/api/gmail/status');
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not check Gmail connection.');
+  return data;
+}
+
+export async function syncGmailInbox(maxResults = 25): Promise<{ total: number; items: EmailRecord[] }> {
+  const res = await apiFetch(`/api/gmail/emails?maxResults=${encodeURIComponent(maxResults)}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not sync Gmail messages.');
+  return data;
 }
 
 export async function fetchEmail(id: string): Promise<EmailRecord> {

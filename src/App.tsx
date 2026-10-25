@@ -13,8 +13,8 @@ import { EvaluationView } from './components/gmail/EvaluationView';
 import { SettingsView } from './components/gmail/SettingsView';
 import { ThreatTriageView } from './components/gmail/ThreatTriageView';
 import { SecurityAnalystsView } from './components/gmail/SecurityAnalystsView';
-import { EmailRecord, fetchEmails, updateEmail, deleteEmail } from './services/api';
-import { Shield, Loader2 } from 'lucide-react';
+import { EmailRecord, fetchEmails, updateEmail, deleteEmail, fetchGmailStatus, startGmailOAuth, syncGmailInbox } from './services/api';
+import { Shield, Loader2, AlertCircle, X } from 'lucide-react';
 
 function MainGmailApplication() {
   const { user } = useAuth();
@@ -28,6 +28,9 @@ function MainGmailApplication() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
   const [isComposeOpen, setIsComposeOpen] = useState<boolean>(false);
   const [analystTargetEmailId, setAnalystTargetEmailId] = useState<string | undefined>(undefined);
+  const [connectedGmailEmail, setConnectedGmailEmail] = useState<string | null>(null);
+  const [gmailBusy, setGmailBusy] = useState<boolean>(false);
+  const [gmailNotice, setGmailNotice] = useState<string | null>(null);
 
   // Load emails whenever folder tab, search, or filter changes
   const loadEmails = async () => {
@@ -48,6 +51,78 @@ function MainGmailApplication() {
   useEffect(() => {
     loadEmails();
   }, [currentTab, searchQuery, activeFilter]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const callbackStatus = params.get('gmail');
+    const callbackReason = params.get('reason');
+    if (callbackStatus) {
+      params.delete('gmail');
+      params.delete('reason');
+      const query = params.toString();
+      window.history.replaceState({}, '', `${window.location.pathname}${query ? `?${query}` : ''}${window.location.hash}`);
+    }
+
+    const initializeGmail = async () => {
+      try {
+        const status = await fetchGmailStatus();
+        setConnectedGmailEmail(status.connected ? status.emailAddress : null);
+        if (callbackStatus === 'connected' && status.connected) {
+          setGmailBusy(true);
+          await syncGmailInbox();
+          await loadEmails();
+          setGmailNotice(`Gmail connected as ${status.emailAddress}. Recent inbox messages are ready.`);
+        } else if (callbackStatus === 'error') {
+          const message = callbackReason === 'authorization_denied'
+            ? 'Gmail authorization was cancelled. You can connect again any time.'
+            : callbackReason === 'gmail_not_configured'
+              ? 'Gmail OAuth is not configured. Add the Google OAuth credentials to the server environment.'
+              : callbackReason === 'gmail_encryption_not_configured'
+                ? 'Gmail token encryption is not configured on the server.'
+                : callbackReason === 'google_refresh_token_missing'
+                  ? 'Google did not return a refresh token. Remove EmailGuard from your Google account permissions, then connect again.'
+                  : 'Gmail authorization did not complete. Please try connecting again.';
+          setGmailNotice(message);
+        }
+      } catch (error: any) {
+        if (callbackStatus === 'connected') {
+          setGmailNotice(error?.message || 'Gmail connected, but Inbox sync failed. Use Sync Gmail to retry.');
+        }
+      }
+    };
+    void initializeGmail().finally(() => setGmailBusy(false));
+  }, []);
+
+  const handleConnectGmail = async () => {
+    setGmailBusy(true);
+    setGmailNotice(null);
+    let authorizationWindow: Window | null = null;
+    try {
+      if (connectedGmailEmail) {
+        await syncGmailInbox();
+        await loadEmails();
+        setGmailNotice(`Inbox synced from ${connectedGmailEmail}.`);
+      } else {
+        // Open synchronously from the click gesture so embedded browsers and
+        // popup blockers do not silently swallow the Google consent page.
+        authorizationWindow = window.open('about:blank', '_blank');
+        if (authorizationWindow) authorizationWindow.opener = null;
+        const { authUrl } = await startGmailOAuth();
+        if (authorizationWindow && !authorizationWindow.closed) {
+          authorizationWindow.location.replace(authUrl);
+        } else {
+          window.location.assign(authUrl);
+        }
+        return;
+      }
+    } catch (error: any) {
+      if (authorizationWindow && !authorizationWindow.closed) authorizationWindow.close();
+      setGmailNotice(error?.message || 'Gmail could not be connected. Please try again.');
+      if (error?.message?.toLowerCase().includes('reconnect')) setConnectedGmailEmail(null);
+    } finally {
+      setGmailBusy(false);
+    }
+  };
 
   const handleToggleStar = async (emailId: string, isStarred: boolean) => {
     try {
@@ -123,11 +198,23 @@ function MainGmailApplication() {
         }}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
+        onConnectGmail={handleConnectGmail}
+        connectedGmailEmail={connectedGmailEmail}
+        gmailBusy={gmailBusy}
         onNavigateTab={(tab) => {
           setSelectedEmail(null);
           setCurrentTab(tab);
         }}
       />
+      {gmailNotice && (
+        <div role="status" className="shrink-0 px-4 py-2 bg-blue-50 border-b border-blue-100 text-xs text-blue-900 flex items-center gap-2">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span className="flex-1">{gmailNotice}</span>
+          <button type="button" onClick={() => setGmailNotice(null)} className="p-1 rounded hover:bg-blue-100" aria-label="Dismiss Gmail message">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Main App Container */}
       <div className="flex-1 flex min-w-0 overflow-hidden">

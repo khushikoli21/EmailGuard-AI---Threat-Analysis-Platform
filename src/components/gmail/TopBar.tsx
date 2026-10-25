@@ -9,6 +9,9 @@ import {
   ShieldCheck,
   Sparkles,
   Command,
+  MailPlus,
+  RefreshCw,
+  Loader2,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -17,6 +20,9 @@ interface TopBarProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onNavigateTab: (tab: string) => void;
+  onConnectGmail: () => void;
+  connectedGmailEmail: string | null;
+  gmailBusy: boolean;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -24,6 +30,9 @@ export const TopBar: React.FC<TopBarProps> = ({
   searchQuery,
   onSearchChange,
   onNavigateTab,
+  onConnectGmail,
+  connectedGmailEmail,
+  gmailBusy,
 }) => {
   const { user, logout } = useAuth();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -100,6 +109,17 @@ export const TopBar: React.FC<TopBarProps> = ({
 
       {/* Right: Security Status, Settings, Profile Avatar */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        <button
+          type="button"
+          onClick={onConnectGmail}
+          disabled={gmailBusy}
+          title={connectedGmailEmail ? `Connected: ${connectedGmailEmail}. Click to sync Gmail.` : 'Connect a Gmail account'}
+          className="flex items-center gap-1.5 px-2.5 py-2 rounded-full text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 disabled:opacity-60 transition-colors cursor-pointer"
+        >
+          {gmailBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : connectedGmailEmail ? <RefreshCw className="w-4 h-4" /> : <MailPlus className="w-4 h-4" />}
+          <span className="hidden sm:inline">{gmailBusy ? 'Syncing…' : connectedGmailEmail ? 'Sync Gmail' : 'Connect Gmail'}</span>
+        </button>
+
         <button
           onClick={() => onNavigateTab('threat_triage')}
           className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-800 bg-emerald-50/90 border border-emerald-200/90 hover:bg-emerald-100 transition-all cursor-pointer shadow-2xs"

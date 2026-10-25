@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 export interface UserRecord {
   uid: string;
+  googleSubject?: string;
   name: string;
   email: string;
   photoURL?: string;
@@ -32,6 +33,7 @@ export interface EmailRecord {
   receivedAt: string;
   source: string; // 'manual' | 'gmail' | 'incoming'
   messageId?: string;
+  gmailAccountEmail?: string;
   hasUrls: boolean;
   hasAttachments: boolean;
   attachmentInfo: EmailAttachment[];
@@ -198,6 +200,21 @@ export interface StoredReportRecord {
   data: any;
 }
 
+export interface GmailConnectionRecord {
+  userId: string;
+  emailAddress: string;
+  accessTokenEncrypted: string;
+  refreshTokenEncrypted: string;
+  tokenExpiry: number;
+  updatedAt: string;
+}
+
+export interface GmailOAuthStateRecord {
+  userId: string;
+  createdAt: number;
+  intent?: 'gmail' | 'signin';
+}
+
 export interface DatabaseSchema {
   users: Record<string, UserRecord>;
   emails: Record<string, EmailRecord>;
@@ -209,6 +226,8 @@ export interface DatabaseSchema {
   pipelineLogs: Record<string, PipelineLogRecord>;
   triage: Record<string, TriageRecord>;
   reports: Record<string, StoredReportRecord>;
+  gmailConnections: Record<string, GmailConnectionRecord>;
+  gmailOAuthStates: Record<string, GmailOAuthStateRecord>;
 }
 
 const DATA_DIR = path.resolve(process.cwd(), 'data');
@@ -226,6 +245,8 @@ class DatabaseManager {
     pipelineLogs: {},
     triage: {},
     reports: {},
+    gmailConnections: {},
+    gmailOAuthStates: {},
   };
   private isSaving = false;
   private pendingSave = false;
@@ -254,6 +275,8 @@ class DatabaseManager {
         this.db.pipelineLogs = this.db.pipelineLogs || {};
         this.db.triage = this.db.triage || {};
         this.db.reports = this.db.reports || {};
+        this.db.gmailConnections = this.db.gmailConnections || {};
+        this.db.gmailOAuthStates = this.db.gmailOAuthStates || {};
       } else {
         this.persistSync();
       }
@@ -554,6 +577,43 @@ class DatabaseManager {
     this.db.reports[report.id] = report;
     this.save();
     return report;
+  }
+
+  public getGmailConnection(userId: string): GmailConnectionRecord | null {
+    return this.db.gmailConnections?.[userId] || null;
+  }
+
+  public saveGmailConnection(connection: GmailConnectionRecord): GmailConnectionRecord {
+    if (!this.db.gmailConnections) this.db.gmailConnections = {};
+    this.db.gmailConnections[connection.userId] = connection;
+    this.save();
+    return connection;
+  }
+
+  public deleteGmailConnection(userId: string): void {
+    if (this.db.gmailConnections?.[userId]) {
+      delete this.db.gmailConnections[userId];
+      this.save();
+    }
+  }
+
+  public saveGmailOAuthState(state: string, record: GmailOAuthStateRecord): void {
+    if (!this.db.gmailOAuthStates) this.db.gmailOAuthStates = {};
+    this.db.gmailOAuthStates[state] = record;
+    this.save();
+  }
+
+  public consumeGmailOAuthState(state: string): GmailOAuthStateRecord | null {
+    const record = this.db.gmailOAuthStates?.[state] || null;
+    if (record) {
+      delete this.db.gmailOAuthStates[state];
+      this.save();
+    }
+    return record;
+  }
+
+  public getGmailOAuthState(state: string): GmailOAuthStateRecord | null {
+    return this.db.gmailOAuthStates?.[state] || null;
   }
 
   public deleteStoredReport(id: string, userId: string): boolean {

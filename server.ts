@@ -8,6 +8,7 @@ import { db, UserRecord, EmailRecord, AnalysisRecord, TriageRecord, StoredReport
 import { attachTextSpans, executeThreatAnalysisPipeline } from './server/aiService.js';
 import { chatbotService } from './server/chatbotService.js';
 import { ragEngine } from './server/ragService.js';
+import { completeAuthorization, completeGoogleSignIn, createAuthorizationUrl, createGoogleSignInUrl, getConnectionStatus, GmailServiceError, syncInboxMessages } from './server/gmailService.js';
 
 dotenv.config();
 
@@ -37,23 +38,9 @@ function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunctio
 
   let user = token ? db.getUser(token) || db.getUserByEmail(token) : null;
 
-  // Fallback to primary workspace user if session cookie is blocked in cross-origin iframe
-  if (!user) {
-    const defaultEmail = 'nareshkarothia@gmail.com';
-    let defaultUser = db.getUserByEmail(defaultEmail);
-    if (!defaultUser) {
-      defaultUser = {
-        uid: 'user_naresh_karothia',
-        name: 'Naresh Karothia',
-        email: defaultEmail,
-        photoURL: `https://api.dicebear.com/7.x/initials/svg?seed=Naresh%20Karothia&backgroundColor=0284c7`,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-      };
-      db.saveUser(defaultUser);
-      db.seedUserStarterEmails(defaultUser);
-    }
-    user = defaultUser;
+  if (!user?.googleSubject) {
+    res.clearCookie('emailguard_session', { httpOnly: true, secure: true, sameSite: 'none' });
+    return res.status(401).json({ error: 'Sign in with Google to continue.' });
   }
 
   req.userId = user.uid;
@@ -65,58 +52,17 @@ function requireAuth(req: AuthenticatedRequest, res: Response, next: NextFunctio
 // AUTHENTICATION ROUTES (Google Sign-In)
 // ==========================================
 
-// Google Login endpoint
-app.post('/api/auth/google', (req: Request, res: Response) => {
+// Begin a real Google OpenID Connect sign-in. The callback is shared with the
+// Gmail consent flow and distinguished by its one-time server-side state.
+app.get('/api/auth/google', (req: Request, res: Response) => {
   try {
-    const { email, name, photoURL, googleId } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required for Google Sign-In.' });
-    }
-
-    const cleanEmail = email.trim().toLowerCase();
-    const cleanName = name?.trim() || cleanEmail.split('@')[0] || 'Google User';
-    const cleanPhoto = photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(cleanName)}`;
-
-    let existingUser = db.getUserByEmail(cleanEmail);
-    const now = new Date().toISOString();
-
-    if (!existingUser) {
-      const newUid = googleId || uuidv4();
-      existingUser = {
-        uid: newUid,
-        name: cleanName,
-        email: cleanEmail,
-        photoURL: cleanPhoto,
-        createdAt: now,
-        lastLogin: now,
-      };
-      db.saveUser(existingUser);
-      // Seed default initial emails specifically for this new user
-      db.seedUserStarterEmails(existingUser);
-    } else {
-      existingUser.name = cleanName;
-      existingUser.photoURL = cleanPhoto || existingUser.photoURL;
-      existingUser.lastLogin = now;
-      db.saveUser(existingUser);
-    }
-
-    // Set secure session cookie (SameSite=None for iframe support)
-    res.cookie('emailguard_session', existingUser.uid, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
-    });
-
-    return res.json({
-      success: true,
-      user: existingUser,
-      token: existingUser.uid,
-    });
+    return res.redirect(createGoogleSignInUrl());
   } catch (err: any) {
-    console.error('[AUTH] Google Sign-In error:', err);
-    return res.status(500).json({ error: 'Internal authentication failure.' });
+    if (err instanceof GmailServiceError) {
+      return res.redirect(`/login?auth=error&reason=${encodeURIComponent(err.code || 'google_signin_failed')}`);
+    }
+    console.error('[AUTH] Could not start Google sign-in.');
+    return res.redirect('/login?auth=error&reason=google_signin_failed');
   }
 });
 
@@ -128,24 +74,10 @@ app.get('/api/auth/me', (req: AuthenticatedRequest, res: Response) => {
     (req.headers['x-user-id'] as string) ||
     (req.query.token as string);
 
-  let user = token ? db.getUser(token) || db.getUserByEmail(token) : null;
-
-  if (!user) {
-    const defaultEmail = 'nareshkarothia@gmail.com';
-    let defaultUser = db.getUserByEmail(defaultEmail);
-    if (!defaultUser) {
-      defaultUser = {
-        uid: 'user_naresh_karothia',
-        name: 'Naresh Karothia',
-        email: defaultEmail,
-        photoURL: `https://api.dicebear.com/7.x/initials/svg?seed=Naresh%20Karothia&backgroundColor=0284c7`,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString(),
-      };
-      db.saveUser(defaultUser);
-      db.seedUserStarterEmails(defaultUser);
-    }
-    user = defaultUser;
+  const user = token ? db.getUser(token) || db.getUserByEmail(token) : null;
+  if (!user?.googleSubject) {
+    res.clearCookie('emailguard_session', { httpOnly: true, secure: true, sameSite: 'none' });
+    return res.status(401).json({ authenticated: false, error: 'Sign in with Google to continue.' });
   }
 
   return res.json({
@@ -157,8 +89,80 @@ app.get('/api/auth/me', (req: AuthenticatedRequest, res: Response) => {
 
 // Logout endpoint
 app.post('/api/auth/logout', (req: Request, res: Response) => {
-  res.clearCookie('emailguard_session');
+  res.clearCookie('emailguard_session', { httpOnly: true, secure: true, sameSite: 'none' });
   return res.json({ success: true, message: 'Logged out successfully.' });
+});
+
+// Gmail OAuth uses the active Express app session so connections and imported
+// messages are scoped to the EmailGuard user who initiated the flow.
+app.get('/api/gmail/connect', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  try {
+    return res.json({ authUrl: createAuthorizationUrl(req.userId!) });
+  } catch (error) {
+    if (error instanceof GmailServiceError) {
+      return res.status(error.statusCode).json({ error: error.message, code: error.code });
+    }
+    console.error('[GMAIL] Could not start OAuth flow.');
+    return res.status(500).json({ error: 'Could not start Gmail authorization.' });
+  }
+});
+
+app.get('/api/gmail/callback', async (req: Request, res: Response) => {
+  const state = typeof req.query.state === 'string' ? req.query.state : '';
+  const code = typeof req.query.code === 'string' ? req.query.code : '';
+  const providerError = typeof req.query.error === 'string' ? req.query.error : '';
+  const stateRecord = state ? db.getGmailOAuthState(state) : null;
+  if (providerError) {
+    if (state) db.consumeGmailOAuthState(state);
+    if (stateRecord?.intent === 'signin') return res.redirect('/login?auth=error&reason=authorization_denied');
+    return res.redirect('/?gmail=error&reason=authorization_denied');
+  }
+  if (!state || !code) {
+    return stateRecord?.intent === 'signin'
+      ? res.redirect('/login?auth=error&reason=invalid_callback')
+      : res.redirect('/?gmail=error&reason=invalid_callback');
+  }
+
+  try {
+    if (!stateRecord) throw new GmailServiceError('OAuth state expired. Start again.', 400, 'oauth_state_invalid');
+    if (stateRecord.intent === 'signin') {
+      const user = await completeGoogleSignIn(code, state);
+      res.cookie('emailguard_session', user.uid, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: 1000 * 60 * 60 * 24 * 30,
+      });
+      return res.redirect('/');
+    }
+    await completeAuthorization(code, state);
+    return res.redirect('/?gmail=connected');
+  } catch (error) {
+    const reason = error instanceof GmailServiceError ? error.code || 'authorization_failed' : 'authorization_failed';
+    if (!(error instanceof GmailServiceError)) console.error('[GMAIL] OAuth callback failed.');
+    if (stateRecord?.intent === 'signin') {
+      return res.redirect(`/login?auth=error&reason=${encodeURIComponent(reason)}`);
+    }
+    return res.redirect(`/?gmail=error&reason=${encodeURIComponent(reason)}`);
+  }
+});
+
+app.get('/api/gmail/status', requireAuth, (req: AuthenticatedRequest, res: Response) => {
+  return res.json(getConnectionStatus(req.userId!));
+});
+
+app.get('/api/gmail/emails', requireAuth, async (req: AuthenticatedRequest, res: Response) => {
+  const maxResults = Number(req.query.maxResults || 25);
+  try {
+    return res.json(await syncInboxMessages(req.userId!, maxResults));
+  } catch (error) {
+    if (error instanceof GmailServiceError) {
+      if (error.code === 'gmail_reconnect_required') db.deleteGmailConnection(req.userId!);
+      return res.status(error.statusCode).json({ error: error.message, code: error.code });
+    }
+    console.error('[GMAIL] Inbox sync failed.');
+    return res.status(500).json({ error: 'Could not sync Gmail messages.' });
+  }
 });
 
 // ==========================================

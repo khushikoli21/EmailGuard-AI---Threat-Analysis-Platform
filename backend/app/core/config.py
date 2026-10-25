@@ -46,7 +46,7 @@ class Settings(BaseSettings):
     # Google Workspace OAuth 2.0 (Gmail API)
     GOOGLE_CLIENT_ID: str = ""
     GOOGLE_CLIENT_SECRET: str = ""
-    GOOGLE_REDIRECT_URI: str = "http://localhost:8000/api/gmail/callback"
+    GOOGLE_REDIRECT_URI: str = "http://localhost:3000/api/gmail/callback"
 
     # Deterministic Risk Engine Weights (Configurable 0-100 scale)
     WEIGHT_MALICIOUS_URL: float = 45.0
