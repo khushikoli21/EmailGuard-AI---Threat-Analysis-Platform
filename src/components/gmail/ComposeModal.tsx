@@ -299,12 +299,14 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, onS
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/40 backdrop-blur-xs">
       <div className="w-full max-w-4xl h-[min(820px,94vh)] bg-white border border-slate-300 rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
-        {/* Header */}
-        <div className="bg-slate-900 text-white px-5 py-3 flex items-center justify-between text-xs font-bold shrink-0">
-          <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-blue-400" />
-            <span>Compose, Review & Analyze Email</span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+        {/* Header (Cybersecurity SOC Command Bar) */}
+        <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white px-5 py-3.5 flex items-center justify-between text-xs font-bold shrink-0 border-b border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-blue-600/30 text-sky-300 flex items-center justify-center border border-blue-400/40 shadow-[0_0_10px_rgba(37,99,235,0.3)]">
+              <Shield className="w-4 h-4 text-sky-300 drop-shadow-xs" />
+            </div>
+            <span className="text-sm font-extrabold tracking-tight">Compose, Review & Analyze Email</span>
+            <span className="text-[9px] font-mono font-bold uppercase bg-blue-500/20 text-sky-200 border border-blue-400/30 px-2 py-0.5 rounded-full">
               Triage Workspace
             </span>
           </div>
@@ -312,7 +314,7 @@ export const ComposeModal: React.FC<ComposeModalProps> = ({ isOpen, onClose, onS
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="p-1 hover:text-white hover:bg-slate-800 rounded transition-colors cursor-pointer disabled:opacity-50"
+            className="p-1 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
             aria-label="Close"
           >
             <X className="w-4 h-4" />

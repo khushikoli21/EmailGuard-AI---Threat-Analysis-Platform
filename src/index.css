@@ -63,6 +63,7 @@
     gap: 1rem;
     padding-bottom: 1.15rem;
     border-bottom: 1px solid #e2e8f0;
+    background: linear-gradient(180deg, rgba(248, 250, 252, 0.8) 0%, rgba(241, 245, 249, 0.4) 100%);
   }
 
   .workspace-title {
@@ -97,7 +98,7 @@
 
   /* Cybersecurity Accent Gradients */
   .soc-gradient-blue {
-    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #0284c7 100%);
+    background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 45%, #0284c7 100%);
   }
 
   .soc-gradient-surface {
@@ -106,6 +107,10 @@
 
   .soc-gradient-card-subtle {
     background: linear-gradient(145deg, #ffffff 0%, #f0f7ff 100%);
+  }
+
+  .soc-gradient-navy-header {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f274a 100%);
   }
 
   .soc-badge {
@@ -121,7 +126,11 @@
   }
 
   .soc-glow-blue {
-    box-shadow: 0 0 16px rgba(37, 99, 235, 0.18);
+    box-shadow: 0 0 18px rgba(37, 99, 235, 0.22);
+  }
+
+  .soc-glow-subtle {
+    box-shadow: 0 2px 12px rgba(37, 99, 235, 0.08);
   }
 
   .workspace-icon {

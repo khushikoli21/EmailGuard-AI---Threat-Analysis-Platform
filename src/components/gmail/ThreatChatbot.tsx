@@ -140,33 +140,33 @@ export const ThreatChatbot: React.FC<ThreatChatbotProps> = ({
 
   return (
     <div className="flex flex-col h-full bg-[#f8fafc] border border-slate-200/90 rounded-2xl overflow-hidden shadow-2xs font-sans">
-      {/* Header */}
-      <div className="px-4 py-3 bg-white border-b border-slate-200/90 flex items-center justify-between shrink-0">
+      {/* Header (Sleek Cybersecurity Command Styling) */}
+      <div className="px-4 py-3 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white border-b border-slate-800 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-700 to-sky-500 text-white flex items-center justify-center shadow-xs border border-blue-400/30">
-            <Sparkles className="w-4 h-4 drop-shadow-xs" />
+          <div className="w-8 h-8 rounded-xl bg-blue-600/30 text-sky-300 flex items-center justify-center shadow-[0_0_10px_rgba(37,99,235,0.3)] border border-blue-400/40">
+            <Sparkles className="w-4 h-4 text-sky-300 drop-shadow-xs" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
-              <h4 className="text-xs font-bold text-slate-900">{title}</h4>
-              <span className="text-[9px] font-mono font-bold bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded border border-blue-200">
+              <h4 className="text-xs font-extrabold text-white tracking-tight">{title}</h4>
+              <span className="text-[9px] font-mono font-bold uppercase bg-blue-500/20 text-sky-200 px-1.5 py-0.2 rounded border border-blue-400/30">
                 SOC AI
               </span>
             </div>
-            <p className="text-[10px] text-slate-400">
+            <p className="text-[10px] text-slate-300">
               Grounded in email context & MITRE ATT&CK RAG
             </p>
           </div>
         </div>
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-500/40 shadow-2xs">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
           Active
         </span>
       </div>
 
       {/* Suggested Starter Questions (when conversation is fresh) */}
       {messages.length === 0 && (
-        <div className="p-3.5 bg-gradient-to-b from-blue-50/70 to-transparent border-b border-blue-100/60 shrink-0">
+        <div className="p-3.5 bg-gradient-to-b from-blue-50/80 via-blue-50/40 to-transparent border-b border-blue-100 shrink-0">
           <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-800 mb-2">
             <HelpCircle className="w-3.5 h-3.5 text-blue-600" />
             <span>Suggested Inquiries:</span>
@@ -178,7 +178,7 @@ export const ThreatChatbot: React.FC<ThreatChatbotProps> = ({
                 type="button"
                 onClick={() => handleSend(q)}
                 disabled={isLoading}
-                className="text-[11px] text-slate-700 bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 border border-slate-200/90 rounded-xl px-2.5 py-1.5 transition-all text-left cursor-pointer shadow-2xs active:scale-95"
+                className="text-[11px] font-medium text-slate-700 bg-white hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 border border-slate-200 rounded-xl px-2.5 py-1.5 transition-all text-left cursor-pointer shadow-2xs active:scale-95"
               >
                 {q}
               </button>

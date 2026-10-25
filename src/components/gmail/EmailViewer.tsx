@@ -126,7 +126,7 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsAskAiOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600 hover:from-blue-800 hover:to-sky-700 text-white rounded-xl font-bold text-xs shadow-xs hover:shadow transition-all cursor-pointer border border-blue-500/30 active:scale-[0.98]"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600 hover:from-blue-800 hover:to-sky-700 text-white rounded-xl font-bold text-xs shadow-[0_2px_10px_rgba(37,99,235,0.25)] hover:shadow-[0_4px_14px_rgba(37,99,235,0.35)] transition-all cursor-pointer border border-blue-400/40 ring-1 ring-blue-500/20 active:scale-[0.98]"
             title="Ask Analyst AI Copilot about this email"
           >
             <Sparkles className="w-3.5 h-3.5 drop-shadow-xs" />
@@ -136,7 +136,7 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
           <button
             onClick={handleRunAnalysis}
             disabled={isAnalyzing}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed border border-slate-700 active:scale-[0.98]"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 hover:from-slate-900 hover:to-blue-900 text-white rounded-xl font-bold text-xs shadow-sm hover:shadow transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed border border-slate-700/80 active:scale-[0.98]"
           >
             {isAnalyzing ? (
               <>
@@ -156,7 +156,8 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
       {/* Main Email Reading Body & Security Panel */}
       <div className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-6 bg-[#f8fafc]">
         {/* Email Header Card */}
-        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs space-y-4">
+        <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-2xs space-y-4 relative overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-blue-600 via-sky-500 to-transparent absolute top-0 left-0 right-0" />
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-slate-100 pb-3">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-snug">
@@ -330,26 +331,26 @@ export const EmailViewer: React.FC<EmailViewerProps> = ({
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex justify-end">
           <div className="w-full max-w-xl h-full bg-white shadow-2xl flex flex-col border-l border-slate-200 animate-in slide-in-from-right duration-200">
             {/* Drawer Header */}
-            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-200 bg-slate-50/90">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-700 to-sky-500 text-white flex items-center justify-center shadow-xs">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-slate-800 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-sky-500 text-white flex items-center justify-center shadow-[0_0_12px_rgba(37,99,235,0.4)] border border-blue-400/40">
                   <Sparkles className="w-4 h-4 drop-shadow-xs" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-bold text-slate-900">Analyst AI Copilot</h3>
-                    <span className="text-[9px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full border border-blue-200">
+                    <h3 className="text-sm font-extrabold text-white tracking-tight">Analyst AI Copilot</h3>
+                    <span className="text-[9px] font-bold uppercase font-mono bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded-full border border-blue-400/30">
                       Email Investigation
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-500 truncate max-w-sm">
-                    Investigating: <span className="font-semibold text-slate-700">{email.subject}</span>
+                  <p className="text-[11px] text-slate-300 truncate max-w-sm mt-0.5">
+                    Target: <span className="font-semibold text-sky-200">{email.subject}</span>
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setIsAskAiOpen(false)}
-                className="p-1.5 rounded-xl hover:bg-slate-200 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                className="p-1.5 rounded-xl hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
                 title="Close AI Assistant"
               >
                 <X className="w-5 h-5" />

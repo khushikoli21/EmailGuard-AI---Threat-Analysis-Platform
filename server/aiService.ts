@@ -77,6 +77,15 @@ function visibleEmailText(value: string): string {
       String.fromCodePoint(parseInt(code[0].toLowerCase() === 'x' ? code.slice(1) : code, code[0].toLowerCase() === 'x' ? 16 : 10))
     );
 }
+
+export function isValidGeminiApiKey(key?: string): boolean {
+  if (!key) return false;
+  const trimmed = key.trim();
+  // Valid Google API keys are alphanumeric, start with AIza, and are >= 30 chars.
+  // Access tokens like "AQ..." or "ya29..." are rejected with ACCESS_TOKEN_TYPE_UNSUPPORTED
+  return trimmed.startsWith('AIza') && trimmed.length >= 30;
+}
+
 export function attachTextSpans(body: string, indicators: IndicatorRecord[]) {
   const normalized = visibleEmailText(body);
   for (const finding of indicators) {
@@ -484,13 +493,21 @@ export async function executeThreatAnalysisPipeline(
   let explanation = '';
   let recommendedAction = '';
   let confidenceScore: number | null = null;
+  const hasValidGeminiKey = isValidGeminiApiKey(process.env.GEMINI_API_KEY);
   let llmStatus: 'completed' | 'not_configured' | 'unavailable' =
-    process.env.GEMINI_API_KEY || process.env.GROQ_API_KEY ? 'completed' : 'not_configured';
+    hasValidGeminiKey || process.env.GROQ_API_KEY ? 'completed' : 'not_configured';
 
-  // Primary: Gemini 3.8 Flash
-  if (process.env.GEMINI_API_KEY) {
+  // Primary: Gemini 3.8 Flash (when a valid Google API key starting with AIza is available)
+  if (hasValidGeminiKey) {
     try {
-      const ai = new GoogleGenAI();
+      const ai = new GoogleGenAI({
+        apiKey: process.env.GEMINI_API_KEY!.trim(),
+        httpOptions: {
+          headers: {
+            'User-Agent': 'aistudio-build',
+          },
+        },
+      });
       const systemPrompt = `You are an expert cybersecurity analyst specializing in email threat detection.
 Provide clear, accurate, and actionable explanations for email security verdicts.
 Always respond with valid JSON in this exact format:
@@ -539,8 +556,8 @@ Provide a detailed yet concise explanation based on the evidence.`;
       } catch (parseErr) {
         console.warn('[AI] Failed to parse Gemini response JSON:', parseErr);
       }
-    } catch (err: any) {
-      console.warn('[AI] Gemini generation error, attempting fallback:', err?.message || err);
+    } catch {
+      // Seamlessly fall through to secondary Groq reasoning engine
     }
   }
 
@@ -574,6 +591,11 @@ Classification: ${classification}
 
 Provide a detailed yet concise explanation based on the evidence.`;
 
+      const groqModel =
+        process.env.GROQ_MODEL && process.env.GROQ_MODEL !== 'llama-3.3-70b-versatile'
+          ? process.env.GROQ_MODEL
+          : 'openai/gpt-oss-120b';
+
       const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -582,13 +604,14 @@ Provide a detailed yet concise explanation based on the evidence.`;
         },
         signal: AbortSignal.timeout(Number(process.env.GROQ_TIMEOUT_MS || 20000)),
         body: JSON.stringify({
-          model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+          model: groqModel,
           messages: [
             { role: 'system', content: systemPrompt },
             { role: 'user', content: userPrompt },
           ],
+          response_format: { type: 'json_object' },
           temperature: 0.3,
-          max_tokens: 500,
+          max_tokens: 600,
         }),
       });
 

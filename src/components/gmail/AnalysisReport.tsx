@@ -185,34 +185,34 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({ data }) => {
       aria-labelledby="threat-analysis-dashboard-title"
       className="overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-xs font-sans text-slate-800"
     >
-      {/* Dashboard Sub-Header */}
-      <div className="bg-slate-50/80 border-b border-slate-200/90 px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-200 shadow-2xs">
-            <Shield className="w-4 h-4 text-blue-600" />
+      {/* Dashboard Sub-Header (Deep Navy Cybersecurity SOC Bar) */}
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white border-b border-slate-800 px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-blue-600/30 text-sky-300 flex items-center justify-center border border-blue-400/40 shadow-[0_0_12px_rgba(37,99,235,0.3)]">
+            <Shield className="w-4 h-4 text-sky-300 drop-shadow-xs" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 id="threat-analysis-dashboard-title" className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+              <h2 id="threat-analysis-dashboard-title" className="text-xs font-extrabold text-white uppercase tracking-wider">
                 Threat Analysis Report
               </h2>
-              <span className="px-2 py-0.5 text-[9px] font-bold bg-blue-100/70 text-blue-800 border border-blue-200 rounded-md uppercase">
+              <span className="px-2 py-0.5 text-[9px] font-bold uppercase font-mono bg-blue-500/20 text-sky-200 border border-blue-400/30 rounded-md">
                 SOC Forensic Dashboard
               </span>
             </div>
-            <p className="text-[11px] text-slate-500">
+            <p className="text-[11px] text-slate-300 mt-0.5">
               Heuristic extraction, grounded taxonomy evidence & deterministic scoring
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-[10px] font-semibold text-slate-500">
-          <span className="flex items-center gap-1 bg-white border border-slate-200 px-2.5 py-1 rounded-lg shadow-2xs">
-            <Clock className="w-3 h-3 text-slate-400" />
+        <div className="flex items-center gap-2 text-[10px] font-semibold">
+          <span className="flex items-center gap-1.5 bg-slate-800/80 text-slate-300 border border-slate-700/80 px-2.5 py-1 rounded-lg shadow-2xs font-mono">
+            <Clock className="w-3 h-3 text-sky-400" />
             <span>{a.completedAt ? new Date(a.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Verified'}</span>
           </span>
-          <span className="flex items-center gap-1 bg-white border border-slate-200 px-2.5 py-1 rounded-lg shadow-2xs">
-            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+          <span className="flex items-center gap-1.5 bg-emerald-950/60 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-lg shadow-2xs">
+            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
             <span>Deterministic Engine</span>
           </span>
         </div>
@@ -222,9 +222,9 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({ data }) => {
         {/* A. TOP SUMMARY METRIC CARDS (4-Column Compact Grid) */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Card 1: Threat Classification */}
-          <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col justify-between shadow-2xs">
+          <div className="p-3.5 rounded-xl border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/20 flex flex-col justify-between shadow-2xs hover:border-blue-300 transition-all">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Classification</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Classification</span>
               {a.classification === 'Phishing' || a.classification === 'Suspicious' ? (
                 <ShieldAlert className="w-4 h-4 text-rose-600" />
               ) : (
@@ -232,7 +232,7 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({ data }) => {
               )}
             </div>
             <div className="flex items-baseline gap-1.5">
-              <span className="text-lg font-black text-slate-900 truncate">{a.classification}</span>
+              <span className="text-xl font-black text-slate-900 truncate tracking-tight">{a.classification}</span>
             </div>
             <div className="mt-2 flex items-center gap-1">
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border ${severityTheme.lightBadge}`}>
@@ -242,9 +242,9 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({ data }) => {
           </div>
 
           {/* Card 2: Risk Score Circular Gauge */}
-          <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 flex items-center justify-between shadow-2xs">
+          <div className="p-3.5 rounded-xl border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/20 flex items-center justify-between shadow-2xs hover:border-blue-300 transition-all">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">Risk Score</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-0.5">Risk Score</span>
               <div className="flex items-baseline gap-1">
                 <span className={`text-2xl font-black ${severityTheme.text}`}>{clampedScore}</span>
                 <span className="text-[11px] font-bold text-slate-400">/100</span>
@@ -277,20 +277,20 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({ data }) => {
                   fill="transparent"
                 />
               </svg>
-              <div className="absolute text-[11px] font-black text-slate-700">
+              <div className="absolute text-[11px] font-black text-slate-800 font-mono">
                 {clampedScore}%
               </div>
             </div>
           </div>
 
           {/* Card 3: Severity Level */}
-          <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col justify-between shadow-2xs">
+          <div className="p-3.5 rounded-xl border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/50 to-blue-50/20 flex flex-col justify-between shadow-2xs hover:border-blue-300 transition-all">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Severity</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Severity</span>
               <AlertTriangle className={`w-4 h-4 ${severityTheme.text}`} />
             </div>
             <div className="flex items-baseline gap-2">
-              <span className={`text-lg font-black ${severityTheme.text}`}>{a.riskLevel}</span>
+              <span className={`text-xl font-black ${severityTheme.text} tracking-tight`}>{a.riskLevel}</span>
             </div>
             {/* Visual 4-segment severity bar */}
             <div className="mt-2 flex items-center gap-1 w-full">
@@ -302,9 +302,9 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({ data }) => {
           </div>
 
           {/* Card 4: Model Confidence */}
-          <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col justify-between shadow-2xs">
+          <div className="p-3.5 rounded-xl border border-slate-200/90 bg-gradient-to-br from-white via-slate-50/50 to-purple-50/20 flex flex-col justify-between shadow-2xs hover:border-purple-300 transition-all">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Confidence</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Confidence</span>
               <Cpu className="w-4 h-4 text-purple-600" />
             </div>
             <div className="flex items-baseline gap-1">
@@ -312,7 +312,7 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({ data }) => {
                 {a.confidence === null || a.confidence === undefined ? '—' : `${a.confidence}%`}
               </span>
             </div>
-            <div className="mt-2 flex items-center gap-1.5 text-[10px] text-slate-500">
+            <div className="mt-2 flex items-center gap-1.5 text-[10px] text-slate-600 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-500" />
               <span>Multi-Agent Consensus</span>
             </div>

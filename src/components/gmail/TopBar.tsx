@@ -55,19 +55,19 @@ export const TopBar: React.FC<TopBarProps> = ({
           className="flex items-center gap-2.5 cursor-pointer group text-left"
           aria-label="EmailGuard Mail, go to Inbox"
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-sky-500 text-white flex items-center justify-center shadow-xs border border-blue-400/30 group-hover:shadow-blue-500/20 group-hover:scale-102 transition-all">
-            <Shield className="w-5 h-5 drop-shadow-xs" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-slate-950 via-blue-900 to-blue-600 text-white flex items-center justify-center shadow-[0_2px_8px_rgba(30,58,138,0.3)] border border-blue-400/40 ring-1 ring-blue-500/20 group-hover:shadow-[0_0_14px_rgba(37,99,235,0.35)] group-hover:scale-102 transition-all">
+            <Shield className="w-5 h-5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)] text-blue-100" />
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
               <span className="text-base font-extrabold text-slate-900 tracking-tight font-sans">
                 EmailGuard
               </span>
-              <span className="px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 border border-blue-200 rounded">
+              <span className="px-1.5 py-0.2 text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-blue-600 to-sky-600 text-white rounded shadow-2xs">
                 AI
               </span>
             </div>
-            <span className="text-[10px] font-semibold text-slate-400 -mt-0.5 tracking-tight font-sans hidden sm:block">
+            <span className="text-[10px] font-semibold text-blue-600/80 -mt-0.5 tracking-tight font-sans hidden sm:block">
               Intelligent Threat Defense
             </span>
           </div>
@@ -86,7 +86,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             placeholder="Search threats, senders, IOCs, indicators..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-12 py-2 bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-xs sm:text-sm text-slate-800 placeholder-slate-400 rounded-xl border border-slate-200/90 focus:border-blue-500 focus:outline-hidden focus:ring-3 focus:ring-blue-500/15 shadow-2xs transition-all font-sans"
+            className="w-full pl-10 pr-12 py-2 bg-slate-50/90 hover:bg-slate-100/90 focus:bg-white text-xs sm:text-sm text-slate-800 placeholder-slate-400 rounded-xl border border-slate-200/90 focus:border-blue-500 focus:outline-hidden focus:ring-3 focus:ring-blue-500/20 shadow-2xs group-hover:border-blue-300/70 transition-all font-sans"
             aria-label="Search email"
           />
 
@@ -99,7 +99,7 @@ export const TopBar: React.FC<TopBarProps> = ({
                 <X className="w-3.5 h-3.5" />
               </button>
             ) : (
-              <span className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white border border-slate-200 rounded shadow-2xs">
+              <span className="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono font-medium text-slate-500 bg-white border border-slate-200 rounded shadow-2xs">
                 <Command className="w-2.5 h-2.5" /> K
               </span>
             )}
@@ -114,22 +114,22 @@ export const TopBar: React.FC<TopBarProps> = ({
           onClick={onConnectGmail}
           disabled={gmailBusy}
           title={connectedGmailEmail ? `Connected: ${connectedGmailEmail}. Click to sync Gmail.` : 'Connect a Gmail account'}
-          className="flex items-center gap-1.5 px-2.5 py-2 rounded-full text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 disabled:opacity-60 transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-blue-700 bg-gradient-to-r from-blue-50 to-indigo-50/60 border border-blue-200 hover:border-blue-300 hover:bg-blue-100/70 disabled:opacity-60 transition-all cursor-pointer shadow-2xs"
         >
-          {gmailBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : connectedGmailEmail ? <RefreshCw className="w-4 h-4" /> : <MailPlus className="w-4 h-4" />}
+          {gmailBusy ? <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-600" /> : connectedGmailEmail ? <RefreshCw className="w-3.5 h-3.5 text-blue-600" /> : <MailPlus className="w-3.5 h-3.5 text-blue-600" />}
           <span className="hidden sm:inline">{gmailBusy ? 'Syncing…' : connectedGmailEmail ? 'Sync Gmail' : 'Connect Gmail'}</span>
         </button>
 
         <button
           onClick={() => onNavigateTab('threat_triage')}
-          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-800 bg-emerald-50/90 border border-emerald-200/90 hover:bg-emerald-100 transition-all cursor-pointer shadow-2xs"
+          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-800 bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-emerald-50 border border-emerald-200/90 hover:bg-emerald-100 transition-all cursor-pointer shadow-2xs"
           title="Threat Defense Engine Active"
         >
           <span className="relative flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
           </span>
-          <span className="text-[11px] font-semibold tracking-tight">Shield Active</span>
+          <span className="text-[11px] font-bold tracking-tight">Shield Active</span>
         </button>
 
         <button

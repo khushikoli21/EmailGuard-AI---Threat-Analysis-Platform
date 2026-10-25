@@ -280,6 +280,39 @@ class DatabaseManager {
       } else {
         this.persistSync();
       }
+
+      // Ensure primary SOC users exist and have seeded threat triage data
+      const defaultUsers = [
+        {
+          uid: 'google_khushikoli214_gmail_com',
+          googleSubject: 'google_khushikoli214_gmail_com',
+          name: 'Khushi Koli',
+          email: 'khushikoli214@gmail.com',
+          photoURL: 'https://api.dicebear.com/7.x/initials/svg?seed=Khushi%20Koli&backgroundColor=7c3aed',
+          createdAt: '2026-10-06T21:35:33.376Z',
+          lastLogin: new Date().toISOString(),
+        },
+        {
+          uid: 'google_nareshkarothia_gmail_com',
+          googleSubject: 'google_nareshkarothia_gmail_com',
+          name: 'Naresh Karothia',
+          email: 'nareshkarothia@gmail.com',
+          photoURL: 'https://api.dicebear.com/7.x/initials/svg?seed=Naresh%20Karothia&backgroundColor=0284c7',
+          createdAt: '2026-10-06T21:33:55.903Z',
+          lastLogin: new Date().toISOString(),
+        },
+      ];
+
+      for (const u of defaultUsers) {
+        if (!this.db.users[u.uid]) {
+          this.db.users[u.uid] = u;
+        } else {
+          this.db.users[u.uid].name = u.name;
+          this.db.users[u.uid].googleSubject = u.uid;
+        }
+        this.seedUserStarterEmails(this.db.users[u.uid]);
+      }
+      this.persistSync();
     } catch (err) {
       console.error('[DB] Failed to load database file, initializing fresh memory state:', err);
       this.persistSync();

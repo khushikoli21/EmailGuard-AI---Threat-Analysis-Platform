@@ -482,21 +482,21 @@ export const SecurityAnalystsView: React.FC<SecurityAnalystsViewProps> = ({
 
   return (
     <div className="flex-1 min-h-0 flex flex-col min-w-0 bg-[#f8fafc] overflow-y-auto font-sans text-slate-800">
-      {/* 1. Dashboard Sub-Header */}
-      <div className="px-6 py-4 bg-white border-b border-slate-200/90 shrink-0 sticky top-0 z-20 shadow-2xs">
+      {/* 1. Dashboard Sub-Header (Cybersecurity SOC Command Bar) */}
+      <div className="px-6 py-4 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white border-b border-slate-800 shrink-0 sticky top-0 z-20 shadow-md">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200 shadow-2xs">
-              <Shield className="w-5 h-5 text-blue-600" />
+          <div className="flex items-center gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-blue-600/30 text-sky-300 flex items-center justify-center border border-blue-400/40 shadow-[0_0_14px_rgba(37,99,235,0.35)]">
+              <Shield className="w-5 h-5 text-sky-300 drop-shadow-xs" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-slate-900 tracking-tight">Security Analysis Dashboard</h1>
-                <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 rounded-md">
+                <h1 className="text-lg font-extrabold text-white tracking-tight">Security Analysis Dashboard</h1>
+                <span className="px-2 py-0.5 text-[9px] font-bold uppercase font-mono bg-blue-500/20 text-sky-200 border border-blue-400/30 rounded-md">
                   SOC Tier 1 & 2
                 </span>
               </div>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-300 mt-0.5">
                 AI-Powered Heuristic Pipeline, Live Threat Intelligence & SOC Telemetry.
               </p>
             </div>
@@ -506,7 +506,7 @@ export const SecurityAnalystsView: React.FC<SecurityAnalystsViewProps> = ({
             {/* Prominent ASK AI Button */}
             <button
               onClick={() => setIsAskAiOpen(true)}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600 hover:from-blue-800 hover:to-sky-700 text-white rounded-xl shadow-xs hover:shadow transition-all cursor-pointer border border-blue-500/30 active:scale-[0.98]"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600 hover:from-blue-800 hover:to-sky-700 text-white rounded-xl shadow-[0_2px_10px_rgba(37,99,235,0.25)] hover:shadow-[0_4px_14px_rgba(37,99,235,0.35)] transition-all cursor-pointer border border-blue-400/40 ring-1 ring-blue-500/20 active:scale-[0.98]"
               title="Open Analyst AI Copilot"
             >
               <Sparkles className="w-3.5 h-3.5 drop-shadow-xs" />
@@ -519,17 +519,17 @@ export const SecurityAnalystsView: React.FC<SecurityAnalystsViewProps> = ({
                 if (selectedEmailId) loadEmailAnalysis(selectedEmailId);
               }}
               disabled={isAnalyzing}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white text-slate-700 border border-slate-200 rounded-xl hover:bg-slate-50 transition-all cursor-pointer shadow-2xs"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-slate-800/90 hover:bg-slate-800 text-slate-200 border border-slate-700 rounded-xl transition-all cursor-pointer shadow-2xs"
               title="Refresh Analytics & Re-run Detection Pipeline"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${isAnalyzing ? 'animate-spin text-blue-600' : 'text-slate-500'}`} />
+              <RefreshCw className={`w-3.5 h-3.5 ${isAnalyzing ? 'animate-spin text-sky-400' : 'text-slate-400'}`} />
               <span>Refresh Pipeline</span>
             </button>
 
             {onNavigateToReport && (
               <button
                 onClick={() => onNavigateToReport(analysis?.id || selectedEmail?.id || '')}
-                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold bg-[#0284c7] hover:bg-[#0369a1] text-white rounded-xl transition-all cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-700 hover:to-blue-700 text-white rounded-xl transition-all cursor-pointer shadow-xs border border-sky-400/30"
               >
                 <FileText className="w-3.5 h-3.5" />
                 <span>Export Threat Report</span>
@@ -540,82 +540,82 @@ export const SecurityAnalystsView: React.FC<SecurityAnalystsViewProps> = ({
       </div>
 
       <div className="p-6 max-w-7xl mx-auto w-full space-y-6">
-        {/* 2. Top Summary KPI Cards (5 Cards from Inbox Dashboard) */}
+        {/* 2. Top Summary KPI Cards (5 Cards with Cyber Depth) */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
           {/* Card 1: Total Emails */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="bg-gradient-to-br from-white via-slate-50/50 to-blue-50/30 border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:border-blue-300 hover:shadow-xs transition-all">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Total Emails</span>
-              <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+              <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-200 shadow-2xs">
                 <Mail className="w-3.5 h-3.5" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-2xl font-black text-slate-900">{stats.total}</span>
+              <span className="text-2xl font-black text-slate-900 tracking-tight">{stats.total}</span>
               <span className="text-[10px] text-slate-400">inbox</span>
             </div>
             <span className="text-[10px] text-slate-500 mt-1 block">Live synchronized</span>
           </div>
 
           {/* Card 2: Unread Emails */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="bg-gradient-to-br from-white via-slate-50/50 to-indigo-50/30 border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:border-indigo-300 hover:shadow-xs transition-all">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Unread</span>
-              <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+              <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-200 shadow-2xs">
                 <MailCheck className="w-3.5 h-3.5" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-2xl font-black text-indigo-600">{stats.unread}</span>
+              <span className="text-2xl font-black text-indigo-600 tracking-tight">{stats.unread}</span>
               <span className="text-[10px] text-slate-400">pending</span>
             </div>
-            <span className="text-[10px] text-indigo-600 font-medium mt-1 block">
+            <span className="text-[10px] text-indigo-600 font-semibold mt-1 block">
               {stats.unread > 0 ? 'Requires reading' : 'All caught up'}
             </span>
           </div>
 
           {/* Card 3: Starred Emails */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="bg-gradient-to-br from-white via-slate-50/50 to-amber-50/30 border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:border-amber-300 hover:shadow-xs transition-all">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Starred</span>
-              <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-100">
+              <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-200 shadow-2xs">
                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-2xl font-black text-amber-600">{stats.starred}</span>
+              <span className="text-2xl font-black text-amber-600 tracking-tight">{stats.starred}</span>
               <span className="text-[10px] text-slate-400">flagged</span>
             </div>
             <span className="text-[10px] text-slate-500 mt-1 block">High priority items</span>
           </div>
 
           {/* Card 4: Emails Requiring Attention */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-xs transition-shadow">
+          <div className="bg-gradient-to-br from-white via-slate-50/50 to-orange-50/30 border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:border-orange-300 hover:shadow-xs transition-all">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Attention</span>
-              <div className="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-100">
+              <div className="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center border border-orange-200 shadow-2xs">
                 <AlertTriangle className="w-3.5 h-3.5" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-2xl font-black text-orange-600">{stats.requiringAttention}</span>
+              <span className="text-2xl font-black text-orange-600 tracking-tight">{stats.requiringAttention}</span>
               <span className="text-[10px] text-slate-400">flagged</span>
             </div>
-            <span className="text-[10px] text-orange-600 font-medium mt-1 block">
+            <span className="text-[10px] text-orange-600 font-semibold mt-1 block">
               Phishing & Suspicious
             </span>
           </div>
 
           {/* Card 5: High/Critical Threats */}
-          <div className="bg-white border border-slate-200/90 rounded-2xl p-4 shadow-2xs hover:shadow-xs transition-shadow col-span-2 sm:col-span-1">
+          <div className="bg-gradient-to-br from-white via-slate-50/50 to-rose-50/30 border border-rose-200 rounded-2xl p-4 shadow-2xs hover:border-rose-300 hover:shadow-xs transition-all col-span-2 sm:col-span-1">
             <div className="flex items-center justify-between">
               <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Critical Threats</span>
-              <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
+              <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-200 shadow-2xs">
                 <ShieldAlert className="w-3.5 h-3.5" />
               </div>
             </div>
             <div className="mt-2 flex items-baseline gap-1.5">
-              <span className="text-2xl font-black text-rose-600">{stats.highCritical}</span>
+              <span className="text-2xl font-black text-rose-600 tracking-tight">{stats.highCritical}</span>
               <span className="text-[10px] text-slate-400">&gt; 80 Risk</span>
             </div>
             <span className="text-[10px] text-rose-600 font-bold mt-1 block">
@@ -923,20 +923,20 @@ export const SecurityAnalystsView: React.FC<SecurityAnalystsViewProps> = ({
               return (
                 <div
                   key={stage.id}
-                  className="relative p-2.5 rounded-xl border border-slate-200 bg-slate-50/70 flex flex-col items-center text-center justify-between group hover:bg-white hover:border-blue-300 transition-all shadow-2xs"
+                  className="relative p-2.5 rounded-xl border border-slate-200/90 bg-gradient-to-b from-white to-slate-50/70 flex flex-col items-center text-center justify-between group hover:border-blue-400 hover:shadow-xs hover:scale-[1.02] transition-all shadow-2xs"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-700 mb-1.5 shadow-2xs group-hover:text-blue-600 group-hover:border-blue-200">
-                    <StageIcon className="w-3.5 h-3.5" />
+                  <div className="w-8 h-8 rounded-lg bg-blue-50/70 border border-blue-200/80 flex items-center justify-center text-blue-700 mb-1.5 shadow-2xs group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-all">
+                    <StageIcon className="w-4 h-4" />
                   </div>
-                  <span className="text-[11px] font-bold text-slate-800 leading-tight mb-1 truncate w-full">
+                  <span className="text-[11px] font-bold text-slate-900 leading-tight mb-1 truncate w-full tracking-tight">
                     {stage.name}
                   </span>
-                  <span className={`text-[10px] font-semibold ${statusInfo.color}`}>
+                  <span className={`text-[10px] font-bold font-mono ${statusInfo.color}`}>
                     {statusInfo.text}
                   </span>
 
                   {/* Step index badge */}
-                  <span className="absolute top-1 right-1 text-[8px] font-mono text-slate-400">
+                  <span className="absolute top-1 right-1 text-[8px] font-mono font-bold text-slate-400 group-hover:text-blue-600 transition-colors">
                     0{idx + 1}
                   </span>
                 </div>

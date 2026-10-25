@@ -13,7 +13,8 @@ import { EvaluationView } from './components/gmail/EvaluationView';
 import { SettingsView } from './components/gmail/SettingsView';
 import { ThreatTriageView } from './components/gmail/ThreatTriageView';
 import { SecurityAnalystsView } from './components/gmail/SecurityAnalystsView';
-import { EmailRecord, fetchEmails, updateEmail, deleteEmail, fetchGmailStatus, startGmailOAuth, syncGmailInbox } from './services/api';
+import { EmailRecord, fetchEmails, updateEmail, deleteEmail, fetchGmailStatus, startGmailOAuth, syncGmailInbox, connectGmailDirect } from './services/api';
+import { signInWithGooglePopup, getCachedAccessToken } from './services/firebaseAuth';
 import { Shield, Loader2, AlertCircle, X } from 'lucide-react';
 
 function MainGmailApplication() {
@@ -96,28 +97,63 @@ function MainGmailApplication() {
   const handleConnectGmail = async () => {
     setGmailBusy(true);
     setGmailNotice(null);
-    let authorizationWindow: Window | null = null;
     try {
       if (connectedGmailEmail) {
         await syncGmailInbox();
         await loadEmails();
         setGmailNotice(`Inbox synced from ${connectedGmailEmail}.`);
-      } else {
-        // Open synchronously from the click gesture so embedded browsers and
-        // popup blockers do not silently swallow the Google consent page.
-        authorizationWindow = window.open('about:blank', '_blank');
-        if (authorizationWindow) authorizationWindow.opener = null;
-        const { authUrl } = await startGmailOAuth();
-        if (authorizationWindow && !authorizationWindow.closed) {
-          authorizationWindow.location.replace(authUrl);
+        return;
+      }
+
+      // Check for in-memory Google OAuth token first
+      let token = getCachedAccessToken();
+      let emailToConnect = user?.email;
+
+      if (!token) {
+        // Trigger Google Workspace OAuth popup
+        const authResult = await signInWithGooglePopup();
+        if (authResult?.accessToken) {
+          token = authResult.accessToken;
+          emailToConnect = authResult.user.email || user?.email;
         } else {
-          window.location.assign(authUrl);
+          // User closed popup or cancelled prompt
+          setGmailNotice('Google connection window was closed. Click Connect Gmail to try again.');
+          return;
+        }
+      }
+
+      if (token) {
+        const result = await connectGmailDirect(token, emailToConnect || undefined);
+        setConnectedGmailEmail(result.emailAddress);
+        try {
+          await syncGmailInbox();
+          await loadEmails();
+          setGmailNotice(`Gmail successfully linked as ${result.emailAddress}. Recent messages synced.`);
+        } catch {
+          setGmailNotice(`Gmail linked as ${result.emailAddress}. Ready for inbox synchronization.`);
         }
         return;
       }
+
+      // Fallback to server OAuth flow if token wasn't obtained from popup
+      const { authUrl } = await startGmailOAuth();
+      window.location.assign(authUrl);
     } catch (error: any) {
-      if (authorizationWindow && !authorizationWindow.closed) authorizationWindow.close();
-      setGmailNotice(error?.message || 'Gmail could not be connected. Please try again.');
+      const isCancelled =
+        error?.code === 'auth/popup-closed-by-user' ||
+        error?.code === 'auth/cancelled-popup-request' ||
+        error?.message?.includes('popup-closed-by-user');
+      const isBlocked =
+        error?.code === 'auth/popup-blocked' || error?.message?.includes('popup-blocked');
+
+      if (isCancelled) {
+        setGmailNotice('Google connection window was closed. Click Connect Gmail to try again.');
+      } else if (isBlocked) {
+        setGmailNotice('Google connection popup was blocked by your browser. Please allow popups and try again.');
+      } else {
+        console.error('[GMAIL] Connection error:', error);
+        setGmailNotice(error?.message || 'Gmail could not be connected. Please try again.');
+      }
       if (error?.message?.toLowerCase().includes('reconnect')) setConnectedGmailEmail(null);
     } finally {
       setGmailBusy(false);

@@ -116,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-3">
           <button
             onClick={onOpenCompose}
-            className={`flex items-center gap-2.5 bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600 hover:from-blue-800 hover:to-sky-700 text-white font-bold rounded-2xl shadow-sm hover:shadow-md transition-all duration-150 cursor-pointer active:scale-[0.98] border border-blue-500/30 ${
+            className={`flex items-center gap-2.5 bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600 hover:from-blue-800 hover:to-sky-700 text-white font-bold rounded-2xl shadow-[0_2px_10px_rgba(37,99,235,0.25)] hover:shadow-[0_4px_16px_rgba(37,99,235,0.35)] transition-all duration-150 cursor-pointer active:scale-[0.98] border border-blue-400/40 ring-1 ring-blue-500/20 ${
               isCollapsed ? 'p-3 justify-center w-11 h-11 rounded-xl mx-auto' : 'px-4 py-3 w-full'
             }`}
           >
@@ -142,12 +142,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 onClick={() => handleItemClick('inbox')}
                 title="Inbox"
-                className={`flex-1 flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer text-left ${
+                className={`flex-1 flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all cursor-pointer text-left ${
                   currentTab === 'inbox'
-                    ? 'bg-blue-50/90 text-blue-800 font-bold border-l-3 border-blue-600 shadow-2xs'
+                    ? 'bg-gradient-to-r from-blue-100/90 via-blue-50/70 to-transparent text-blue-950 font-extrabold border-l-[3.5px] border-blue-600 shadow-[0_1px_3px_rgba(37,99,235,0.06)]'
                     : isMailFolderActive
-                    ? 'text-slate-800 hover:bg-slate-50'
-                    : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                    ? 'text-slate-800 hover:bg-slate-50 font-semibold'
+                    : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-medium'
                 }`}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
@@ -159,7 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {!isCollapsed && <span className="truncate">Inbox</span>}
                 </div>
                 {!isCollapsed && unreadCount > 0 && (
-                  <span className="ml-2 font-mono text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
+                  <span className="ml-2 font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-sky-600 text-white shadow-2xs">
                     {unreadCount}
                   </span>
                 )}
@@ -191,10 +191,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <button
                       key={folder.id}
                       onClick={() => handleItemClick(folder.id)}
-                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer text-left ${
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] transition-all cursor-pointer text-left ${
                         isActive
-                          ? 'bg-blue-50 text-blue-700 font-bold border-l-2 border-blue-500'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                          ? 'bg-gradient-to-r from-blue-100/90 via-blue-50/70 to-transparent text-blue-900 font-bold border-l-2 border-blue-600'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50 font-medium'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
@@ -212,8 +212,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="space-y-0.5 pt-3 border-t border-slate-100">
             {!isCollapsed && (
               <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                <span>SOC Workspace</span>
-                <span className="text-[9px] text-blue-600 font-bold">ACTIVE</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                  <span>SOC Workspace</span>
+                </span>
+                <span className="text-[9px] text-blue-600 font-extrabold font-mono">ACTIVE</span>
               </div>
             )}
             {coreWorkspaces.map((ws) => {
@@ -224,10 +227,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   key={ws.id}
                   onClick={() => handleItemClick(ws.id)}
                   title={ws.label}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-left ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs transition-all cursor-pointer text-left ${
                     isActive
-                      ? 'bg-blue-50/90 text-blue-900 font-bold border-l-3 border-blue-600 shadow-2xs'
-                      : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'bg-gradient-to-r from-blue-100/90 via-blue-50/70 to-transparent text-blue-950 font-extrabold border-l-[3.5px] border-blue-600 shadow-[0_1px_3px_rgba(37,99,235,0.06)]'
+                      : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900 font-semibold'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 truncate">
@@ -247,18 +250,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Footer Zero-Trust Security Indicator */}
         {!isCollapsed && (
-          <div className="p-3 border-t border-slate-100 text-xs text-slate-500 space-y-1.5 shrink-0 bg-slate-50/50">
+          <div className="p-3 border-t border-slate-200/80 text-xs text-slate-500 space-y-1.5 shrink-0 bg-gradient-to-b from-white to-blue-50/50">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="flex items-center gap-1.5 text-slate-700 font-bold">
+              <span className="flex items-center gap-1.5 text-slate-800 font-bold">
                 <Shield className="w-3.5 h-3.5 text-blue-600" />
                 <span>Zero-Trust Mailbox</span>
               </span>
-              <span className="font-mono text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+              <span className="font-mono text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200 shadow-2xs">
                 SOC ACTIVE
               </span>
             </div>
             <div className="w-full bg-slate-200/80 h-1.5 rounded-full overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-600 to-sky-500 h-full w-[38%]" />
+              <div className="bg-gradient-to-r from-blue-700 via-blue-500 to-sky-400 h-full w-[45%]" />
             </div>
             <span className="text-[10px] text-slate-400 block -mt-0.5">
               Partitioned User Isolation Enforced

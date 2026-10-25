@@ -142,8 +142,14 @@ export interface AnalyticsSummary {
 }
 
 export async function apiFetch(input: string, init: RequestInit = {}): Promise<Response> {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('emailguard_token') : null;
+  const headers = new Headers(init.headers || {});
+  if (token && !headers.has('Authorization')) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
   return fetch(input, {
     ...init,
+    headers,
     credentials: 'include',
   });
 }
@@ -169,6 +175,17 @@ export async function startGmailOAuth(): Promise<{ authUrl: string }> {
   if (!res.ok || !data.authUrl) {
     throw new Error(data.error || 'Could not start Gmail authorization.');
   }
+  return data;
+}
+
+export async function connectGmailDirect(accessToken: string, email?: string): Promise<{ success: boolean; connected: boolean; emailAddress: string }> {
+  const res = await apiFetch('/api/gmail/connect-direct', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ accessToken, email }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not connect Gmail with Google token.');
   return data;
 }
 

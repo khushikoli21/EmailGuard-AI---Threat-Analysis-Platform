@@ -265,20 +265,20 @@ export const ThreatTriageView: React.FC<ThreatTriageViewProps> = ({
         </div>
       )}
 
-      {/* Top Header */}
-      <div className="px-6 py-4 bg-white border-b border-slate-200/90 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-2xs">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 to-sky-500 text-white flex items-center justify-center shadow-xs border border-blue-400/30">
-            <ShieldAlert className="w-5 h-5 drop-shadow-xs" />
+      {/* Top Header (Cybersecurity Command Bar) */}
+      <div className="px-6 py-4 bg-gradient-to-r from-slate-950 via-slate-900 to-blue-950 text-white border-b border-slate-800 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-md">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-blue-600/30 text-sky-300 flex items-center justify-center shadow-[0_0_14px_rgba(37,99,235,0.35)] border border-blue-400/40">
+            <ShieldAlert className="w-5 h-5 text-sky-300 drop-shadow-xs" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-slate-900 tracking-tight">Threat Triage Workspace</h1>
-              <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 rounded-md">
+              <h1 className="text-base font-extrabold text-white tracking-tight">Threat Triage Workspace</h1>
+              <span className="px-2 py-0.5 text-[9px] font-bold uppercase font-mono bg-blue-500/20 text-sky-200 border border-blue-400/30 rounded-md">
                 Central SOC Queue
               </span>
             </div>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-300 mt-0.5">
               Manage suspicious emails, security investigations, and isolated draft sessions.
             </p>
           </div>
@@ -290,9 +290,9 @@ export const ThreatTriageView: React.FC<ThreatTriageViewProps> = ({
               setCreateType('compose');
               setIsCreateModalOpen(true);
             }}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-white text-slate-700 border border-slate-300 rounded-xl hover:bg-slate-50 hover:border-slate-400 transition-all cursor-pointer shadow-2xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold bg-slate-800/90 text-slate-200 hover:bg-slate-800 hover:text-white border border-slate-700 rounded-xl transition-all cursor-pointer shadow-2xs"
           >
-            <PenSquare className="w-3.5 h-3.5 text-blue-600" />
+            <PenSquare className="w-3.5 h-3.5 text-sky-400" />
             <span>New Compose Draft</span>
           </button>
           <button
@@ -300,7 +300,7 @@ export const ThreatTriageView: React.FC<ThreatTriageViewProps> = ({
               setCreateType('analyst');
               setIsCreateModalOpen(true);
             }}
-            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600 hover:from-blue-800 hover:to-sky-700 text-white rounded-xl transition-all cursor-pointer shadow-xs active:scale-95 border border-blue-500/30"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600 hover:from-blue-800 hover:to-sky-700 text-white rounded-xl transition-all cursor-pointer shadow-[0_2px_10px_rgba(37,99,235,0.25)] active:scale-95 border border-blue-400/40 ring-1 ring-blue-500/20"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>New Investigation</span>
@@ -308,10 +308,10 @@ export const ThreatTriageView: React.FC<ThreatTriageViewProps> = ({
           <button
             onClick={loadTriageItems}
             disabled={isLoading}
-            className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition-all cursor-pointer border border-slate-200 bg-white shadow-2xs"
+            className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-all cursor-pointer border border-slate-700 bg-slate-800/90 shadow-2xs"
             title="Refresh Triage"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-blue-600' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-sky-400' : ''}`} />
           </button>
         </div>
       </div>

@@ -11,6 +11,7 @@ import {
   EmailAttachment,
 } from './db.js';
 import { ragEngine } from './ragService.js';
+import { isValidGeminiApiKey } from './aiService.js';
 
 const INJECTION_PATTERNS = [
   /ignore\s+(?:all\s+)?(?:previous|prior|above|system)\s+(?:instructions|directions|rules|prompts|protocols)/i,
@@ -61,11 +62,19 @@ class ChatbotService {
 
   private initGemini() {
     try {
-      if (process.env.GEMINI_API_KEY) {
-        this.aiClient = new GoogleGenAI();
+      if (isValidGeminiApiKey(process.env.GEMINI_API_KEY)) {
+        this.aiClient = new GoogleGenAI({
+          apiKey: process.env.GEMINI_API_KEY!.trim(),
+          httpOptions: {
+            headers: {
+              'User-Agent': 'aistudio-build',
+            },
+          },
+        });
+      } else {
+        this.aiClient = null;
       }
-    } catch (err) {
-      console.warn('[CHATBOT] Could not initialize GoogleGenAI client:', err);
+    } catch {
       this.aiClient = null;
     }
   }
@@ -174,14 +183,7 @@ ${combinedEvidence.slice(0, 4).map((e) => `- ${e.title}: ${e.description}`).join
 `;
     }
 
-    // 4. Try Gemini 3.8 Flash Generation
-    if (!this.aiClient && process.env.GEMINI_API_KEY) {
-      this.initGemini();
-    }
-
-    if (this.aiClient) {
-      try {
-        const systemPrompt = `You are EmailGuard AI's senior SOC security analyst and email defense assistant.
+    const systemPrompt = `You are EmailGuard AI's senior SOC security analyst and email defense assistant.
 Your answers MUST be strictly grounded in the provided email facts, threat indicators, threat intelligence scan results, and knowledge base evidence.
 
 CRITICAL RULES:
@@ -191,9 +193,9 @@ CRITICAL RULES:
 4. Keep answers short, direct, factual, and actionable (2 to 4 sentences).
 5. If evidence is insufficient to answer with certainty, state clearly that evidence is inconclusive or insufficient.`;
 
-        const recentHistory = history.slice(-4).map((h) => `${h.role === 'user' ? 'User' : 'Analyst'}: ${h.text}`).join('\n');
+    const recentHistory = history.slice(-4).map((h) => `${h.role === 'user' ? 'User' : 'Analyst'}: ${h.text}`).join('\n');
 
-        const prompt = `Context:
+    const prompt = `Context:
 ${contextDescription}
 
 Recent conversation:
@@ -204,6 +206,13 @@ User Question:
 
 Provide a concise, grounded answer:`;
 
+    // 4. Try Gemini 3.8 Flash Generation
+    if (!this.aiClient && process.env.GEMINI_API_KEY) {
+      this.initGemini();
+    }
+
+    if (this.aiClient) {
+      try {
         const response = await this.aiClient.models.generateContent({
           model: 'gemini-3.8-flash',
           contents: prompt,
@@ -238,8 +247,66 @@ Provide a concise, grounded answer:`;
           this.recordChatHistory(contextId, userId, trimmedQuestion, result);
           return result;
         }
-      } catch (err: any) {
-        console.warn('[CHATBOT] Gemini generation fallback to deterministic response:', err?.message || err);
+      } catch {
+        // Fall through to secondary Groq LLM or deterministic engine
+      }
+    }
+
+    // 4b. Secondary LLM: Groq (openai/gpt-oss-120b)
+    if (process.env.GROQ_API_KEY) {
+      try {
+        const groqModel =
+          process.env.GROQ_MODEL && process.env.GROQ_MODEL !== 'llama-3.3-70b-versatile'
+            ? process.env.GROQ_MODEL
+            : 'openai/gpt-oss-120b';
+
+        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.GROQ_API_KEY.trim()}`,
+          },
+          signal: AbortSignal.timeout(12000),
+          body: JSON.stringify({
+            model: groqModel,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: prompt },
+            ],
+            temperature: 0.2,
+            max_tokens: 600,
+          }),
+        });
+
+        if (groqRes.ok) {
+          const groqData = await groqRes.json();
+          const groqAnswer = groqData.choices?.[0]?.message?.content?.trim();
+          if (groqAnswer) {
+            for (const ind of indicators) {
+              if (groqAnswer.toLowerCase().includes(ind.title.toLowerCase()) || groqAnswer.toLowerCase().includes(ind.type.toLowerCase())) {
+                evidenceUsed.push(ind.title);
+              }
+            }
+            for (const ev of combinedEvidence) {
+              if (groqAnswer.toLowerCase().includes(ev.title.toLowerCase())) {
+                evidenceUsed.push(ev.title);
+              }
+            }
+
+            const result: ChatResponseResult = {
+              answer: groqAnswer,
+              evidenceUsed: Array.from(new Set(evidenceUsed)),
+              confidence: 92,
+              mode: 'gemini',
+              timestamp: new Date().toISOString(),
+            };
+
+            this.recordChatHistory(contextId, userId, trimmedQuestion, result);
+            return result;
+          }
+        }
+      } catch {
+        // Fall through to deterministic response
       }
     }
 
