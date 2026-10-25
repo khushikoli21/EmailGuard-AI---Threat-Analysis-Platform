@@ -16,6 +16,9 @@ import {
   RefreshCw,
   Layers,
   Database,
+  Activity,
+  ShieldCheck,
+  Zap,
 } from 'lucide-react';
 import { fetchEvaluation, runEvaluation, EvaluationBenchmarkData } from '../../services/api';
 
@@ -139,12 +142,12 @@ export const EvaluationView: React.FC = () => {
       {/* Page Header */}
       <div className="workspace-header flex-col md:flex-row md:items-center">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-purple-700 bg-purple-50 px-2 py-0.5 rounded border border-purple-200 flex items-center gap-1">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 flex items-center gap-1.5">
               <FlaskConical className="w-3.5 h-3.5" />
               Academic Research Harness
             </span>
-            <span className="text-xs text-slate-500 font-medium">Offline Dataset Evaluation</span>
+            <span className="text-xs text-slate-400 font-medium">Offline Dataset Evaluation</span>
           </div>
           <h2 className="workspace-title">
             Threat Detection Benchmark & Performance Metrics
@@ -154,11 +157,11 @@ export const EvaluationView: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {latestRun && (
             <button
               onClick={handleExportEvaluationCsv}
-              className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
+              className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
               title="Download tabular evaluation results as CSV"
             >
               <Download className="w-3.5 h-3.5 text-emerald-600" />
@@ -168,7 +171,7 @@ export const EvaluationView: React.FC = () => {
 
           <button
             onClick={() => setShowUploadModal(!showUploadModal)}
-            className="px-3 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg shadow-2xs transition-colors flex items-center gap-1.5 cursor-pointer"
+            className="px-3.5 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold rounded-xl shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
           >
             <Upload className="w-3.5 h-3.5 text-blue-600" />
             <span>Upload Dataset CSV</span>
@@ -177,16 +180,16 @@ export const EvaluationView: React.FC = () => {
           <button
             onClick={handleExecuteBenchmark}
             disabled={isRunning}
-            className="px-4 py-2 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600 hover:from-blue-800 hover:to-sky-700 disabled:opacity-60 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed border border-blue-500/30 active:scale-95"
           >
             {isRunning ? (
               <>
-                <RefreshCw className="w-3.5 h-3.5 animate-spin text-purple-400" />
+                <RefreshCw className="w-3.5 h-3.5 animate-spin text-sky-200" />
                 <span>Evaluating Samples...</span>
               </>
             ) : (
               <>
-                <Play className="w-3.5 h-3.5 text-emerald-400 fill-emerald-400" />
+                <Play className="w-3.5 h-3.5 text-white fill-white drop-shadow-xs" />
                 <span>Execute Benchmark Run</span>
               </>
             )}
@@ -196,40 +199,40 @@ export const EvaluationView: React.FC = () => {
 
       {/* Upload Modal Drawer */}
       {showUploadModal && (
-        <div className="bg-white rounded-xl border border-blue-200 p-5 shadow-md space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+        <div className="bg-white rounded-2xl border border-blue-200 p-5 shadow-lg space-y-3 animate-in fade-in zoom-in-98 duration-150">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-2">
               <FileSpreadsheet className="w-4 h-4 text-blue-600" />
               Custom CSV Dataset Ingestion
             </h4>
             <button
               onClick={() => setShowUploadModal(false)}
-              className="text-slate-400 hover:text-slate-600 text-xs font-bold"
+              className="text-slate-400 hover:text-slate-600 text-sm font-bold cursor-pointer"
             >
               ✕
             </button>
           </div>
           <p className="text-xs text-slate-500 font-sans">
-            Paste test email samples in comma-separated format: <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono">subject,senderEmail,body,groundTruth</code>
+            Paste test email samples in comma-separated format: <code className="bg-slate-100 px-1 py-0.5 rounded text-[11px] font-mono text-slate-800">subject,senderEmail,body,groundTruth</code>
           </p>
           <textarea
             rows={4}
             value={customCsvInput}
             onChange={(e) => setCustomCsvInput(e.target.value)}
             placeholder="Security Alert: Urgent Action,security@bank-verify.com,Please reset password immediately at http://verify-portal.co,Phishing&#10;Team Sync Tomorrow,colleague@company.com,Hi team lets meet tomorrow at 10am in room 2B,Safe"
-            className="w-full text-xs font-mono p-3 bg-slate-50 rounded-lg border border-slate-200 focus:outline-hidden focus:ring-2 focus:ring-blue-500/20"
+            className="w-full text-xs font-mono p-3 bg-slate-50 rounded-xl border border-slate-200 focus:outline-hidden focus:bg-white focus:ring-2 focus:ring-blue-500/20"
           />
-          <div className="flex justify-end gap-2">
+          <div className="flex justify-end gap-2 pt-1">
             <button
               onClick={() => setShowUploadModal(false)}
-              className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700"
+              className="px-3.5 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-700 cursor-pointer"
             >
               Cancel
             </button>
             <button
               onClick={handleCustomUpload}
               disabled={isRunning || !customCsvInput.trim()}
-              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50"
             >
               Parse & Run Benchmark
             </button>
@@ -237,15 +240,15 @@ export const EvaluationView: React.FC = () => {
         </div>
       )}
 
-      {/* Dataset Selection Bar */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <Database className="w-4 h-4 text-slate-400 shrink-0" />
-          <span className="text-xs font-bold text-slate-700">Target Corpus:</span>
+      {/* Target Corpus Selection Bar */}
+      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <Database className="w-4 h-4 text-blue-600 shrink-0" />
+          <span className="text-xs font-bold text-slate-800">Target Corpus:</span>
           <select
             value={selectedDatasetId}
             onChange={(e) => setSelectedDatasetId(e.target.value)}
-            className="text-xs font-medium bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-800 focus:outline-hidden"
+            className="text-xs font-semibold bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-slate-800 focus:outline-hidden focus:border-blue-500 cursor-pointer"
           >
             {data?.datasets.map((d) => (
               <option key={d.id} value={d.id}>
@@ -255,19 +258,19 @@ export const EvaluationView: React.FC = () => {
           </select>
         </div>
 
-        <div className="text-[11px] text-slate-500 font-mono flex items-center gap-1.5">
-          <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+        <div className="text-[11px] text-slate-500 font-mono flex items-center gap-1.5 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-200">
+          <Info className="w-3.5 h-3.5 text-blue-600 shrink-0" />
           <span>Evaluation protocol: Ground truth comparison against pipeline classification</span>
         </div>
       </div>
 
       {/* Academic Truth Notice */}
-      <div className="p-4 rounded-xl bg-purple-50/70 border border-purple-200 text-purple-900 text-xs space-y-1">
-        <div className="font-bold flex items-center gap-1.5 text-purple-800">
-          <Info className="w-4 h-4 text-purple-600 shrink-0" />
+      <div className="p-4 rounded-2xl bg-blue-50/70 border border-blue-200/80 text-blue-950 text-xs space-y-1 shadow-2xs">
+        <div className="font-bold flex items-center gap-1.5 text-blue-900">
+          <ShieldCheck className="w-4 h-4 text-blue-600 shrink-0" />
           <span>Research Integrity & Reproducibility Notice</span>
         </div>
-        <p className="text-purple-700 leading-relaxed text-[11px]">
+        <p className="text-blue-800/90 leading-relaxed text-[11px]">
           In accordance with academic standards, no hardcoded or fabricated scores (accuracy, recall, precision, F1) are displayed. The cards below reflect only real, executed test pipeline results against verified ground-truth test items.
         </p>
       </div>
@@ -275,65 +278,65 @@ export const EvaluationView: React.FC = () => {
       {/* 4 Main Benchmark Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Accuracy */}
-        <div className="workspace-card p-5 space-y-2">
+        <div className="workspace-card p-5 space-y-2 bg-gradient-to-br from-white to-blue-50/40">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Accuracy
             </span>
-            <span className="text-[10px] font-mono text-slate-400">(TP + TN) / Total</span>
+            <span className="text-[10px] font-mono text-slate-400 bg-white border border-slate-200 px-1.5 py-0.2 rounded">(TP + TN) / Total</span>
           </div>
-          <div className="text-3xl font-extrabold font-mono text-slate-900">
+          <div className="text-3xl font-black font-mono text-slate-900">
             {latestRun ? `${latestRun.metrics.accuracy}%` : '—'}
           </div>
-          <div className="text-[11px] text-slate-500">
+          <div className="text-[11px] text-slate-500 font-medium">
             {latestRun ? `Computed over ${latestRun.totalEvaluated} emails` : 'Awaiting benchmark run'}
           </div>
         </div>
 
         {/* Precision */}
-        <div className="workspace-card p-5 space-y-2">
+        <div className="workspace-card p-5 space-y-2 bg-gradient-to-br from-white to-blue-50/40">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Precision
             </span>
-            <span className="text-[10px] font-mono text-slate-400">TP / (TP + FP)</span>
+            <span className="text-[10px] font-mono text-slate-400 bg-white border border-slate-200 px-1.5 py-0.2 rounded">TP / (TP + FP)</span>
           </div>
-          <div className="text-3xl font-extrabold font-mono text-blue-600">
+          <div className="text-3xl font-black font-mono text-blue-600">
             {latestRun ? `${latestRun.metrics.precision}%` : '—'}
           </div>
-          <div className="text-[11px] text-slate-500">
+          <div className="text-[11px] text-slate-500 font-medium">
             {latestRun ? 'True positive threat fraction' : 'Awaiting benchmark run'}
           </div>
         </div>
 
         {/* Recall */}
-        <div className="workspace-card p-5 space-y-2">
+        <div className="workspace-card p-5 space-y-2 bg-gradient-to-br from-white to-blue-50/40">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Recall
             </span>
-            <span className="text-[10px] font-mono text-slate-400">TP / (TP + FN)</span>
+            <span className="text-[10px] font-mono text-slate-400 bg-white border border-slate-200 px-1.5 py-0.2 rounded">TP / (TP + FN)</span>
           </div>
-          <div className="text-3xl font-extrabold font-mono text-emerald-600">
+          <div className="text-3xl font-black font-mono text-emerald-600">
             {latestRun ? `${latestRun.metrics.recall}%` : '—'}
           </div>
-          <div className="text-[11px] text-slate-500">
+          <div className="text-[11px] text-slate-500 font-medium">
             {latestRun ? 'Threat sensitivity rate' : 'Awaiting benchmark run'}
           </div>
         </div>
 
         {/* F1 Score */}
-        <div className="workspace-card p-5 space-y-2">
+        <div className="workspace-card p-5 space-y-2 bg-gradient-to-br from-white to-blue-50/40">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
               Macro F1-Score
             </span>
-            <span className="text-[10px] font-mono text-slate-400">2·(P·R)/(P+R)</span>
+            <span className="text-[10px] font-mono text-slate-400 bg-white border border-slate-200 px-1.5 py-0.2 rounded">2·(P·R)/(P+R)</span>
           </div>
-          <div className="text-3xl font-extrabold font-mono text-purple-600">
+          <div className="text-3xl font-black font-mono text-purple-600">
             {latestRun ? `${latestRun.metrics.f1Score}%` : '—'}
           </div>
-          <div className="text-[11px] text-slate-500">
+          <div className="text-[11px] text-slate-500 font-medium">
             {latestRun ? 'Harmonic balance index' : 'Awaiting benchmark run'}
           </div>
         </div>
@@ -343,39 +346,39 @@ export const EvaluationView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Confusion Matrix Card */}
         <div className="workspace-card p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 flex items-center gap-2">
               <Layers className="w-4 h-4 text-blue-600" />
               <span>Confusion Matrix</span>
             </h3>
-            <span className="text-[11px] font-mono text-slate-400">
+            <span className="text-[10px] font-mono font-bold text-slate-400 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
               Binary Threat vs Safe
             </span>
           </div>
 
-          <div className="border border-slate-200 rounded-lg overflow-hidden text-xs">
-            <div className="grid grid-cols-3 bg-slate-100 text-slate-600 font-bold p-2 text-center text-[11px]">
+          <div className="border border-slate-200 rounded-xl overflow-hidden text-xs">
+            <div className="grid grid-cols-3 bg-slate-50 text-slate-600 font-bold p-2.5 text-center text-[11px] border-b border-slate-200">
               <div>Ground Truth \ Prediction</div>
               <div>Predicted Threat</div>
               <div>Predicted Safe</div>
             </div>
 
-            <div className="grid grid-cols-3 p-3 border-t border-slate-100 items-center text-center">
-              <div className="font-bold text-slate-700 text-left pl-2">Actual Threat</div>
-              <div className="p-2 rounded bg-emerald-50 text-emerald-800 font-mono font-bold text-sm">
+            <div className="grid grid-cols-3 p-3 border-b border-slate-100 items-center text-center">
+              <div className="font-bold text-slate-800 text-left pl-2">Actual Threat</div>
+              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 font-mono font-bold text-sm border border-emerald-200">
                 TP: {latestRun?.confusionMatrix.truePositives ?? '—'}
               </div>
-              <div className="p-2 rounded bg-rose-50 text-rose-800 font-mono font-bold text-sm">
+              <div className="p-2 rounded-lg bg-rose-50 text-rose-800 font-mono font-bold text-sm border border-rose-200">
                 FN: {latestRun?.confusionMatrix.falseNegatives ?? '—'}
               </div>
             </div>
 
-            <div className="grid grid-cols-3 p-3 border-t border-slate-100 items-center text-center">
-              <div className="font-bold text-slate-700 text-left pl-2">Actual Safe</div>
-              <div className="p-2 rounded bg-rose-50 text-rose-800 font-mono font-bold text-sm">
+            <div className="grid grid-cols-3 p-3 items-center text-center">
+              <div className="font-bold text-slate-800 text-left pl-2">Actual Safe</div>
+              <div className="p-2 rounded-lg bg-rose-50 text-rose-800 font-mono font-bold text-sm border border-rose-200">
                 FP: {latestRun?.confusionMatrix.falsePositives ?? '—'}
               </div>
-              <div className="p-2 rounded bg-emerald-50 text-emerald-800 font-mono font-bold text-sm">
+              <div className="p-2 rounded-lg bg-emerald-50 text-emerald-800 font-mono font-bold text-sm border border-emerald-200">
                 TN: {latestRun?.confusionMatrix.trueNegatives ?? '—'}
               </div>
             </div>
@@ -388,35 +391,38 @@ export const EvaluationView: React.FC = () => {
 
         {/* Benchmark Execution Telemetry */}
         <div className="workspace-card p-5 sm:p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 flex items-center gap-2">
               <Clock className="w-4 h-4 text-purple-600" />
               <span>Execution Telemetry & Benchmark Spec</span>
             </h3>
+            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              Real Runtime
+            </span>
           </div>
 
-          <div className="space-y-2.5 text-xs">
-            <div className="flex justify-between py-1.5 border-b border-slate-100">
+          <div className="space-y-2 text-xs">
+            <div className="flex justify-between py-1.5 border-b border-slate-50">
               <span className="text-slate-500">Corpus Evaluated:</span>
-              <span className="font-semibold text-slate-800 font-mono">
+              <span className="font-semibold text-slate-800 font-mono text-[11px]">
                 {latestRun?.datasetName || 'None yet'}
               </span>
             </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-100">
+            <div className="flex justify-between py-1.5 border-b border-slate-50">
               <span className="text-slate-500">Timestamp:</span>
-              <span className="font-mono text-slate-800">
+              <span className="font-mono text-slate-800 text-[11px]">
                 {latestRun?.executedAt ? new Date(latestRun.executedAt).toLocaleString() : '—'}
               </span>
             </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-100">
+            <div className="flex justify-between py-1.5 border-b border-slate-50">
               <span className="text-slate-500">Total Run Duration:</span>
-              <span className="font-mono text-slate-800">
+              <span className="font-mono font-bold text-blue-700 text-[11px]">
                 {latestRun ? `${latestRun.durationMs} ms` : '—'}
               </span>
             </div>
-            <div className="flex justify-between py-1.5 border-b border-slate-100">
+            <div className="flex justify-between py-1.5 border-b border-slate-50">
               <span className="text-slate-500">Average Latency per Email:</span>
-              <span className="font-mono text-slate-800">
+              <span className="font-mono font-bold text-purple-700 text-[11px]">
                 {latestRun && latestRun.totalEvaluated > 0
                   ? `${Math.round(latestRun.durationMs / latestRun.totalEvaluated)} ms / item`
                   : '—'}
@@ -424,7 +430,7 @@ export const EvaluationView: React.FC = () => {
             </div>
             <div className="flex justify-between py-1.5">
               <span className="text-slate-500">Pipeline Stages Checked:</span>
-              <span className="font-mono text-emerald-600 font-semibold">
+              <span className="font-mono text-emerald-600 font-semibold text-[11px]">
                 Email NLP · OWASP LLM01 · Deterministic Risk
               </span>
             </div>
@@ -435,11 +441,12 @@ export const EvaluationView: React.FC = () => {
       {/* Per-Sample Audit Trail Table */}
       {latestRun && latestRun.samples && (
         <div className="workspace-card p-5 sm:p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="font-bold text-sm text-slate-900 flex items-center gap-2">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 className="font-bold text-xs uppercase tracking-wider text-slate-800 flex items-center gap-2">
               <FileSpreadsheet className="w-4 h-4 text-blue-600" />
               <span>Per-Sample Benchmark Audit Trail ({latestRun.samples.length} items)</span>
             </h3>
+            <span className="text-[10px] font-mono text-slate-400">Forensic Trace</span>
           </div>
 
           <div className="overflow-x-auto">
@@ -463,13 +470,13 @@ export const EvaluationView: React.FC = () => {
                       <tr className="hover:bg-slate-50/70 transition-colors">
                         <td className="py-2.5 px-3">
                           {s.isCorrect ? (
-                            <span className="inline-flex items-center gap-1 text-emerald-700 font-bold text-[11px]">
-                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                            <span className="inline-flex items-center gap-1 text-emerald-700 font-bold text-[11px] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
                               Match
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-rose-700 font-bold text-[11px]">
-                              <XCircle className="w-3.5 h-3.5 text-rose-500" />
+                            <span className="inline-flex items-center gap-1 text-rose-700 font-bold text-[11px] bg-rose-50 px-2 py-0.5 rounded border border-rose-200">
+                              <XCircle className="w-3.5 h-3.5 text-rose-600" />
                               Mismatch
                             </span>
                           )}
@@ -481,7 +488,7 @@ export const EvaluationView: React.FC = () => {
                           {s.senderEmail}
                         </td>
                         <td className="py-2.5 px-3">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200">
                             {s.groundTruth}
                           </span>
                         </td>
@@ -498,13 +505,13 @@ export const EvaluationView: React.FC = () => {
                             {s.predictedClass}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 font-mono font-semibold text-slate-700">
+                        <td className="py-2.5 px-3 font-mono font-bold text-slate-700">
                           {s.riskScore}/100
                         </td>
                         <td className="py-2.5 px-3">
                           <button
                             onClick={() => setExpandedSampleId(isExpanded ? null : s.id)}
-                            className="text-[11px] text-blue-600 hover:text-blue-800 font-medium flex items-center gap-0.5 cursor-pointer"
+                            className="text-[11px] text-blue-600 hover:text-blue-800 font-bold flex items-center gap-0.5 cursor-pointer"
                           >
                             <span>Details</span>
                             {isExpanded ? (
@@ -518,10 +525,10 @@ export const EvaluationView: React.FC = () => {
                       {isExpanded && (
                         <tr className="bg-slate-50">
                           <td colSpan={7} className="p-3 text-xs text-slate-600 font-sans space-y-1">
-                            <div className="font-semibold text-slate-800 text-[11px]">
+                            <div className="font-bold text-slate-800 text-[11px]">
                               Detection Rationale:
                             </div>
-                            <p className="text-[11px] leading-relaxed">{s.explanation}</p>
+                            <p className="text-[11px] leading-relaxed text-slate-600">{s.explanation}</p>
                             <div className="text-[10px] font-mono text-slate-400">
                               Indicators Detected: {s.indicatorsCount}
                             </div>

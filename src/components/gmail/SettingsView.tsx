@@ -3,7 +3,6 @@ import {
   Settings,
   Shield,
   User,
-  Bell,
   Server,
   CheckCircle2,
   AlertCircle,
@@ -15,6 +14,8 @@ import {
   Terminal,
   Database,
   Lock,
+  Globe,
+  Radio,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { fetchSettings, updateSettings, fetchHealth, fetchKnowledgeBase } from '../../services/api';
@@ -75,18 +76,18 @@ export const SettingsView: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-slate-50 overflow-y-auto font-sans">
+    <div className="flex-1 flex flex-col min-h-0 bg-[#f8fafc] overflow-y-auto font-sans text-slate-800">
       {/* Top Header */}
-      <div className="px-6 py-4 bg-white border-b border-slate-200/90 flex flex-wrap items-center justify-between gap-3 shrink-0">
+      <div className="px-6 py-4 bg-white border-b border-slate-200/90 flex flex-wrap items-center justify-between gap-3 shrink-0 shadow-2xs">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center border border-slate-200 shadow-2xs">
-            <Settings className="w-5 h-5 text-slate-600" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-700 via-blue-600 to-sky-500 text-white flex items-center justify-center shadow-xs border border-blue-400/30">
+            <Settings className="w-5 h-5 drop-shadow-xs" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-base font-bold text-slate-900">Platform Settings & Knowledge</h1>
+              <h1 className="text-base font-bold text-slate-900 tracking-tight">Platform Settings & Knowledge</h1>
               {isSaved && (
-                <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 font-bold">
+                <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 font-bold animate-in fade-in">
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                   Saved
                 </span>
@@ -97,15 +98,21 @@ export const SettingsView: React.FC = () => {
             </p>
           </div>
         </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] font-mono font-bold text-slate-500 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-lg">
+            Tenant Isolated Environment
+          </span>
+        </div>
       </div>
 
       {/* Settings Navigation Tabs */}
-      <div className="bg-white border-b border-slate-200 px-6 flex items-center gap-2 text-xs font-bold">
+      <div className="bg-white border-b border-slate-200 px-6 flex items-center gap-2 text-xs font-bold shrink-0">
         <button
           onClick={() => setActiveTab('preferences')}
           className={`px-4 py-3 border-b-2 cursor-pointer transition-all flex items-center gap-2 ${
             activeTab === 'preferences'
-              ? 'border-blue-600 text-blue-700 bg-blue-50/30'
+              ? 'border-blue-600 text-blue-700 bg-blue-50/40'
               : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -117,7 +124,7 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveTab('knowledge')}
           className={`px-4 py-3 border-b-2 cursor-pointer transition-all flex items-center gap-2 ${
             activeTab === 'knowledge'
-              ? 'border-blue-600 text-blue-700 bg-blue-50/30'
+              ? 'border-blue-600 text-blue-700 bg-blue-50/40'
               : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -129,7 +136,7 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveTab('integrations')}
           className={`px-4 py-3 border-b-2 cursor-pointer transition-all flex items-center gap-2 ${
             activeTab === 'integrations'
-              ? 'border-blue-600 text-blue-700 bg-blue-50/30'
+              ? 'border-blue-600 text-blue-700 bg-blue-50/40'
               : 'border-transparent text-slate-600 hover:text-slate-900'
           }`}
         >
@@ -144,8 +151,8 @@ export const SettingsView: React.FC = () => {
         {activeTab === 'preferences' && (
           <div className="space-y-6 animate-in fade-in duration-150">
             {/* Account Profile Card */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2">
                 <User className="w-4 h-4 text-blue-600" />
                 <span>Authenticated Identity Profile</span>
               </div>
@@ -155,33 +162,33 @@ export const SettingsView: React.FC = () => {
                   <img
                     src={user.photoURL}
                     alt={user.name}
-                    className="w-14 h-14 rounded-full ring-2 ring-blue-100 object-cover"
+                    className="w-14 h-14 rounded-2xl ring-2 ring-blue-100 object-cover shadow-xs"
                   />
                 ) : (
-                  <div className="w-14 h-14 rounded-full bg-blue-600 text-white font-bold text-lg flex items-center justify-center">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-700 to-sky-500 text-white font-extrabold text-xl flex items-center justify-center shadow-xs">
                     {user?.name?.charAt(0) || 'U'}
                   </div>
                 )}
 
-                <div className="space-y-0.5">
-                  <h3 className="font-bold text-sm text-slate-900">{user?.name}</h3>
+                <div className="space-y-1">
+                  <h3 className="font-extrabold text-sm text-slate-900">{user?.name}</h3>
                   <p className="text-xs text-slate-600 font-mono">{user?.email}</p>
                   <div className="text-[11px] text-slate-400 font-mono">
-                    User Session ID: <span className="text-slate-600">{user?.uid}</span>
+                    User Session ID: <span className="text-slate-700 font-semibold">{user?.uid}</span>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Security Safeguards */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-4">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400 border-b border-slate-100 pb-2">
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-4">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100 pb-2">
                 <Shield className="w-4 h-4 text-blue-600" />
                 <span>Security Engine Policies</span>
               </div>
 
               <div className="space-y-3 text-xs">
-                <label className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100/60 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-blue-50/40 hover:border-blue-300 transition-all">
                   <input
                     type="checkbox"
                     checked={settings.promptInjectionGuard}
@@ -189,16 +196,19 @@ export const SettingsView: React.FC = () => {
                     className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <div>
-                    <div className="font-bold text-slate-800">
-                      OWASP LLM01 Prompt Injection Active Defense
+                    <div className="font-bold text-slate-900 flex items-center gap-2">
+                      <span>OWASP LLM01 Prompt Injection Active Defense</span>
+                      <span className="text-[9px] font-mono font-bold bg-blue-50 text-blue-700 px-1.5 py-0.2 rounded border border-blue-200">
+                        RECOMMENDED
+                      </span>
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
                       Scans incoming email bodies for adversarial override keywords (e.g. system instructions, DAN mode bypass) and blocks attempts to manipulate the risk scoring engine.
                     </p>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100/60 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-blue-50/40 hover:border-blue-300 transition-all">
                   <input
                     type="checkbox"
                     checked={settings.threatIntelEnabled}
@@ -206,16 +216,16 @@ export const SettingsView: React.FC = () => {
                     className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <div>
-                    <div className="font-bold text-slate-800">
+                    <div className="font-bold text-slate-900">
                       External Multi-Engine Threat Intelligence Lookups
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
                       Enables real queries to VirusTotal v3 and URLhaus for links and attachment SHA256 hashes detected in triaged messages.
                     </p>
                   </div>
                 </label>
 
-                <label className="flex items-start gap-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-slate-100/60 transition-colors">
+                <label className="flex items-start gap-3.5 p-4 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer hover:bg-blue-50/40 hover:border-blue-300 transition-all">
                   <input
                     type="checkbox"
                     checked={settings.notifications}
@@ -223,10 +233,10 @@ export const SettingsView: React.FC = () => {
                     className="mt-0.5 rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
                   />
                   <div>
-                    <div className="font-bold text-slate-800">
+                    <div className="font-bold text-slate-900">
                       High-Risk Phishing Real-Time Alerts
                     </div>
-                    <p className="text-[11px] text-slate-500 mt-0.5">
+                    <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
                       Receive immediate visual banners when an email scores Critical (&gt;80/100 risk points) in the triage stream.
                     </p>
                   </div>
@@ -264,7 +274,7 @@ export const SettingsView: React.FC = () => {
                 {articles.map((art) => (
                   <div
                     key={art.id}
-                    className="bg-white border border-slate-200 rounded-2xl p-5 shadow-xs space-y-3 hover:border-purple-300 transition-all"
+                    className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs space-y-3 hover:border-blue-300 transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-[10px] font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200">
@@ -285,7 +295,7 @@ export const SettingsView: React.FC = () => {
                         href={art.url || 'https://attack.mitre.org/'}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[11px] font-bold text-purple-600 hover:text-purple-800 flex items-center gap-1 cursor-pointer"
+                        className="text-[11px] font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1 cursor-pointer"
                       >
                         <span>Open MITRE reference</span>
                         <ExternalLink className="w-3 h-3" />
@@ -315,21 +325,22 @@ export const SettingsView: React.FC = () => {
                   return (
                     <div
                       key={key}
-                      className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs space-y-2"
+                      className="bg-white border border-slate-200/90 rounded-2xl p-4.5 shadow-2xs space-y-2 hover:border-blue-300 transition-all"
                     >
                       <div className="flex items-center justify-between">
-                        <strong className="text-slate-800">{svc.label || key}</strong>
+                        <strong className="text-slate-900 font-bold">{svc.label || key}</strong>
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-md flex items-center gap-1 border ${
                             isConnected
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                              : 'bg-slate-100 text-slate-700 border border-slate-200'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                              : 'bg-slate-100 text-slate-700 border-slate-200'
                           }`}
                         >
+                          {isConnected && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />}
                           {svc.status}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-500">{svc.detail}</p>
+                      <p className="text-[11px] text-slate-500 leading-relaxed">{svc.detail}</p>
                       {svc.provider && (
                         <div className="text-[10px] text-slate-400 font-mono">
                           Provider: {svc.provider}

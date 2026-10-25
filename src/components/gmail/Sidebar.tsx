@@ -15,7 +15,8 @@ import {
   ChevronDown,
   ChevronRight,
   PenSquare,
-  Cloud,
+  Shield,
+  Layers,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -57,30 +58,35 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Threat Triage',
       icon: ShieldAlert,
       tag: 'Queue',
+      tagColor: 'bg-amber-50 text-amber-700 border-amber-200',
     },
     {
       id: 'analysts',
       label: 'Security Analysts',
       icon: Sparkles,
       tag: 'AI Copilot',
+      tagColor: 'bg-purple-50 text-purple-700 border-purple-200',
     },
     {
       id: 'reports',
       label: 'Threat Report',
       icon: FileSearch,
       tag: 'Export',
+      tagColor: 'bg-blue-50 text-blue-700 border-blue-200',
     },
     {
       id: 'evaluation',
       label: 'Dataset Evaluation',
       icon: FlaskConical,
       tag: 'Benchmark',
+      tagColor: 'bg-sky-50 text-sky-700 border-sky-200',
     },
     {
       id: 'settings',
       label: 'Settings',
       icon: Settings,
       tag: 'Config',
+      tagColor: 'bg-slate-100 text-slate-600 border-slate-200',
     },
   ];
 
@@ -102,20 +108,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <aside
-        className={`fixed md:static top-16 bottom-0 left-0 z-40 bg-white md:bg-transparent border-r border-slate-200/90 flex flex-col transition-all duration-200 ease-in-out ${
+        className={`fixed md:static top-16 bottom-0 left-0 z-40 bg-white border-r border-slate-200/90 flex flex-col transition-all duration-200 ease-in-out select-none ${
           isOpenMobile ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0'
         } ${isCollapsed ? 'md:w-16' : 'md:w-60'}`}
       >
-        {/* Compose Button (Gmail-style Pill) */}
+        {/* Compose Button (Rich Royal-Blue Action) */}
         <div className="p-3">
           <button
             onClick={onOpenCompose}
-            className={`flex items-center gap-3 bg-blue-100 hover:bg-blue-200/90 text-blue-900 font-bold rounded-2xl shadow-xs hover:shadow transition-all duration-150 cursor-pointer active:scale-[0.98] ${
-              isCollapsed ? 'p-3 justify-center w-12 h-12 rounded-full' : 'px-4 py-3 w-full'
+            className={`flex items-center gap-2.5 bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600 hover:from-blue-800 hover:to-sky-700 text-white font-bold rounded-2xl shadow-sm hover:shadow-md transition-all duration-150 cursor-pointer active:scale-[0.98] border border-blue-500/30 ${
+              isCollapsed ? 'p-3 justify-center w-11 h-11 rounded-xl mx-auto' : 'px-4 py-3 w-full'
             }`}
           >
-            <PenSquare className="w-4 h-4 text-blue-700 shrink-0" />
-            {!isCollapsed && <span className="text-xs font-bold">Compose & Review</span>}
+            <PenSquare className="w-4 h-4 shrink-0 drop-shadow-xs" />
+            {!isCollapsed && (
+              <span className="text-xs font-bold tracking-tight">Compose & Review</span>
+            )}
           </button>
         </div>
 
@@ -136,13 +144,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 title="Inbox"
                 className={`flex-1 flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer text-left ${
                   currentTab === 'inbox'
-                    ? 'bg-blue-50 text-blue-800 font-bold border-l-4 border-blue-600'
+                    ? 'bg-blue-50/90 text-blue-800 font-bold border-l-3 border-blue-600 shadow-2xs'
                     : isMailFolderActive
-                    ? 'text-slate-800 hover:bg-slate-100'
-                    : 'text-slate-700 hover:bg-slate-100'
+                    ? 'text-slate-800 hover:bg-slate-50'
+                    : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <Inbox
                     className={`w-4 h-4 shrink-0 ${
                       currentTab === 'inbox' ? 'text-blue-600' : 'text-slate-500'
@@ -151,7 +159,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   {!isCollapsed && <span className="truncate">Inbox</span>}
                 </div>
                 {!isCollapsed && unreadCount > 0 && (
-                  <span className="ml-2 font-mono text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-700">
+                  <span className="ml-2 font-mono text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
                     {unreadCount}
                   </span>
                 )}
@@ -175,7 +183,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Dropdown Folder Items */}
             {isInboxDropdownOpen && !isCollapsed && (
-              <div className="pl-4 space-y-0.5 pt-0.5 border-l-2 border-slate-100 ml-4 animate-in fade-in duration-150">
+              <div className="pl-3.5 space-y-0.5 pt-0.5 border-l-2 border-slate-100 ml-4 animate-in fade-in duration-150">
                 {mailFolders.slice(1).map((folder) => {
                   const Icon = folder.icon;
                   const isActive = currentTab === folder.id;
@@ -185,8 +193,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onClick={() => handleItemClick(folder.id)}
                       className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all cursor-pointer text-left ${
                         isActive
-                          ? 'bg-blue-50 text-blue-700 font-bold'
-                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                          ? 'bg-blue-50 text-blue-700 font-bold border-l-2 border-blue-500'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                       }`}
                     >
                       <div className="flex items-center gap-2.5 truncate">
@@ -201,10 +209,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           {/* Section 2 to 6: Core Cybersecurity Workspaces */}
-          <div className="space-y-0.5 pt-3 border-t border-slate-200/70">
+          <div className="space-y-0.5 pt-3 border-t border-slate-100">
             {!isCollapsed && (
-              <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                Cybersecurity Suite
+              <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                <span>SOC Workspace</span>
+                <span className="text-[9px] text-blue-600 font-bold">ACTIVE</span>
               </div>
             )}
             {coreWorkspaces.map((ws) => {
@@ -217,16 +226,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   title={ws.label}
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer text-left ${
                     isActive
-                      ? 'bg-blue-50 text-blue-800 font-bold border-l-4 border-blue-600 shadow-2xs'
-                      : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                      ? 'bg-blue-50/90 text-blue-900 font-bold border-l-3 border-blue-600 shadow-2xs'
+                      : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
-                  <div className="flex items-center gap-3 truncate">
+                  <div className="flex items-center gap-2.5 truncate">
                     <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
                     {!isCollapsed && <span className="truncate">{ws.label}</span>}
                   </div>
                   {!isCollapsed && ws.tag && (
-                    <span className="text-[9px] font-semibold text-slate-400 uppercase font-mono px-1 rounded-sm bg-slate-100">
+                    <span className={`text-[9px] font-bold uppercase font-mono px-1.5 py-0.2 rounded border ${ws.tagColor}`}>
                       {ws.tag}
                     </span>
                   )}
@@ -236,19 +245,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        {/* Footer Storage Indicator */}
+        {/* Footer Zero-Trust Security Indicator */}
         {!isCollapsed && (
-          <div className="p-3 border-t border-slate-200/80 text-xs text-slate-500 space-y-1.5 shrink-0 bg-white/50">
+          <div className="p-3 border-t border-slate-100 text-xs text-slate-500 space-y-1.5 shrink-0 bg-slate-50/50">
             <div className="flex items-center justify-between text-[11px]">
-              <span className="flex items-center gap-1.5 text-slate-600 font-medium">
-                <Cloud className="w-3.5 h-3.5 text-blue-500" />
+              <span className="flex items-center gap-1.5 text-slate-700 font-bold">
+                <Shield className="w-3.5 h-3.5 text-blue-600" />
                 <span>Zero-Trust Mailbox</span>
               </span>
-              <span className="font-mono text-[10px] text-slate-400">SOC Protected</span>
+              <span className="font-mono text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                SOC ACTIVE
+              </span>
             </div>
-            <div className="w-full bg-slate-100 h-1 rounded-full overflow-hidden">
-              <div className="bg-blue-600 h-full w-[12%]" />
+            <div className="w-full bg-slate-200/80 h-1.5 rounded-full overflow-hidden">
+              <div className="bg-gradient-to-r from-blue-600 to-sky-500 h-full w-[38%]" />
             </div>
+            <span className="text-[10px] text-slate-400 block -mt-0.5">
+              Partitioned User Isolation Enforced
+            </span>
           </div>
         )}
       </aside>

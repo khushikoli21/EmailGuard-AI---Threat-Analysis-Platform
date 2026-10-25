@@ -207,7 +207,17 @@ app.get('/api/emails', requireAuth, (req: AuthenticatedRequest, res: Response) =
   }
 
   if (classificationFilter && classificationFilter !== 'all') {
-    emails = emails.filter((e) => e.classification?.toLowerCase() === classificationFilter);
+    if (classificationFilter === 'unread') {
+      emails = emails.filter((e) => !e.isRead);
+    } else if (classificationFilter === 'starred') {
+      emails = emails.filter((e) => e.isStarred);
+    } else if (classificationFilter === 'high_risk' || classificationFilter === 'critical') {
+      emails = emails.filter(
+        (e) => (e.riskScore != null && e.riskScore >= 70) || e.riskLevel === 'High' || e.riskLevel === 'Critical'
+      );
+    } else {
+      emails = emails.filter((e) => e.classification?.toLowerCase() === classificationFilter);
+    }
   }
 
   return res.json({
